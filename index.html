@@ -126,6 +126,17 @@
   .panel-top{ display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin:18px 0 0; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; }
   .filters{ display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
   .filters .field select{ padding:8px 12px; font-size:13px; min-width:190px; }
+  .multi{ position:relative; }
+  .multi-btn{ font-size:13px; padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:#FBFDFE; color:var(--text); min-width:220px; text-align:left; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .multi-btn:hover{ border-color:#C3D2DB; }
+  .multi.open .multi-btn{ border-color:var(--water); box-shadow:0 0 0 3px var(--water-soft); }
+  .multi-btn .car{ font-size:10px; color:var(--text-faint); }
+  .multi-pop{ display:none; position:absolute; top:calc(100% + 6px); left:0; z-index:50; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-md); padding:8px; min-width:240px; }
+  .multi.open .multi-pop{ display:block; }
+  .multi-pop label{ display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; font-size:13px; font-weight:500; color:var(--text); cursor:pointer; }
+  .multi-pop label:hover{ background:var(--water-soft); }
+  .multi-pop input{ accent-color:var(--water); width:15px; height:15px; }
+  .multi-pop .todos{ border-bottom:1px solid var(--border); margin-bottom:4px; padding-bottom:10px; font-weight:700; }
   .filter-note{ font-size:12px; color:var(--text-mut); max-width:360px; line-height:1.5; }
 
   .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
@@ -258,10 +269,10 @@
 
     <div class="panel-top" id="filtros-globais">
       <div class="filters">
-        <div class="field"><label>Perfil do cliente</label><select id="f-perfil"><option value="">Todos os perfis</option></select></div>
+        <div class="field"><label>Perfil do cliente</label><div class="multi" id="f-perfil"><button type="button" class="multi-btn"><span id="f-perfil-txt">Todos os perfis</span><span class="car">▼</span></button><div class="multi-pop" id="f-perfil-pop"></div></div></div>
         <div class="field"><label id="lbl-pagou">Pagou algo no mês?</label><select id="f-pagou"><option value="">Todos</option><option value="Sim">Sim — já pagou algo</option><option value="Não">Não — não pagou nada</option></select></div>
       </div>
-      <div class="filter-note">Os filtros valem para todas as abas (exceto Comparativo e Importar). Consideradas só as matrículas com status <b>Vencido</b> na base mais recente.</div>
+      <div class="filter-note">Os filtros valem para todas as abas (exceto Comparativo e Importar). As análises consideram as matrículas <b>Vencidas</b> da base mais recente; os cards Pagou e A vencer usam as demais.</div>
     </div>
 
     <div id="loading" class="loading">Carregando dados…</div>
@@ -505,7 +516,8 @@ let IMPORTS = [];        // importações (mais recente primeiro)
 let VENC = [];           // linhas status=Vencido da base atual
 let ACOMP = {};          // matricula -> {status_cobranca, data_pagamento_agendado}
 let CUMPRIDOS = [];      // agendados que não estão mais vencidos
-let F = { perfil:'', pagou:'', exec:'', topN:20, tmpSel:'Crítico' };
+let OUTROS = [];      // linhas Pagou / A vencer (colunas resumidas)
+let F = { perfis:new Set(), pagou:'', exec:'', topN:20, tmpSel:'Crítico' };
 const CHARTS = {};
 
 /* ---------- utilidades ---------- */
@@ -601,10 +613,12 @@ async function carregarTudo(){
   $('loading').style.display='block'; $('sem-base').style.display='none';
   try{
     IMPORTS = await api('/importacoes?select=id,data_base,arquivo,importado_em,importado_por,total_linhas,qtd_novos,qtd_alterados,qtd_removidos,resumo,status&order=id.desc');
-    const [venc, acomp] = await Promise.all([
+    const [venc, acomp, outros] = await Promise.all([
       apiAll('/vencidos_atual?select=*&status=eq.Vencido&order=matricula'),
-      apiAll('/acompanhamento?select=matricula,status_cobranca,data_pagamento_agendado&order=matricula')
+      apiAll('/acompanhamento?select=matricula,status_cobranca,data_pagamento_agendado&order=matricula'),
+      apiAll('/vencidos_atual?select=matricula,status,faturamento,perfil_cliente,valor_pago_setembro&status=in.(Pagou,"A vencer")&order=matricula')
     ]);
+    OUTROS = outros.map(r=>({ ...r, faturamento:+r.faturamento||0, valor_pago_setembro: r.valor_pago_setembro==null?null:+r.valor_pago_setembro }));
     VENC = venc.map(r=>({ ...r, faturamento:+r.faturamento||0, valor_pago_setembro: r.valor_pago_setembro==null?null:+r.valor_pago_setembro }));
     ACOMP = Object.fromEntries(acomp.map(a=>[a.matricula, a]));
     // agendamentos de matrículas que já saíram do vencido
@@ -629,8 +643,17 @@ async function carregarTudo(){
 function ultimaBase(){ return IMPORTS.find(i=>i.status==='ok'); }
 
 function montarFiltros(){
-  const perfis = [...new Set(VENC.map(r=>r.perfil_cliente).filter(Boolean))].sort();
-  $('f-perfil').innerHTML = '<option value="">Todos os perfis</option>' + perfis.map(p=>`<option ${p===F.perfil?'selected':''}>${esc(p)}</option>`).join('');
+  const perfis = [...new Set([...VENC, ...OUTROS].map(r=>r.perfil_cliente).filter(Boolean))].sort();
+  F.perfis = new Set([...F.perfis].filter(p=>perfis.includes(p)));
+  $('f-perfil-pop').innerHTML = `<label class="todos"><input type="checkbox" data-todos="1" ${F.perfis.size?'':'checked'}>Todos os perfis</label>`
+    + perfis.map(p=>`<label><input type="checkbox" value="${esc(p)}" ${F.perfis.has(p)?'checked':''}>${esc(p)}</label>`).join('');
+  $('f-perfil-pop').querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
+    if(cb.dataset.todos){ F.perfis.clear(); }
+    else { cb.checked ? F.perfis.add(cb.value) : F.perfis.delete(cb.value); if(F.perfis.size===perfis.length) F.perfis.clear(); }
+    $('f-perfil-pop').querySelectorAll('input').forEach(x=>x.checked = x.dataset.todos ? !F.perfis.size : F.perfis.has(x.value));
+    atualizarTextoPerfil(); renderTudo();
+  });
+  atualizarTextoPerfil();
   const execs = [...new Set(VENC.map(r=>r.executivo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
   document.querySelectorAll('.sel-exec').forEach(s=>{ s.innerHTML='<option value="">Todos os executivos</option>' + execs.map(e=>`<option ${e===F.exec?'selected':''}>${esc(e)}</option>`).join(''); });
   const base = ultimaBase();
@@ -644,13 +667,17 @@ function montarFiltros(){
   $('rodape').innerHTML = base ? `Fonte: base de vencidos GC · ${esc(base.arquivo||'')} · referência ${dBR(base.data_base)}` : '';
 }
 
-$('f-perfil').onchange = e=>{ F.perfil=e.target.value; renderTudo(); };
+function atualizarTextoPerfil(){ const n=F.perfis.size; $('f-perfil-txt').textContent = !n ? 'Todos os perfis' : n===1 ? [...F.perfis][0] : n + ' perfis selecionados'; }
+document.querySelector('#f-perfil .multi-btn').onclick = e=>{ e.stopPropagation(); $('f-perfil').classList.toggle('open'); };
+$('f-perfil-pop').onclick = e=>e.stopPropagation();
+document.addEventListener('click', ()=>$('f-perfil').classList.remove('open'));
+const filtroOk = r => (!F.perfis.size || F.perfis.has(r.perfil_cliente)) && (!F.pagou || (F.pagou==='Sim') === pagouAlgo(r));
 $('f-pagou').onchange  = e=>{ F.pagou=e.target.value; renderTudo(); };
 document.querySelectorAll('.sel-exec').forEach(s=>s.onchange=e=>{ F.exec=e.target.value; document.querySelectorAll('.sel-exec').forEach(x=>x.value=F.exec); renderTop(); renderFin(); });
 $('top-n').onchange = e=>{ F.topN=+e.target.value; renderTop(); };
 
 function dados(){ // aplica filtros globais
-  return VENC.filter(r => (!F.perfil || r.perfil_cliente===F.perfil) && (!F.pagou || (F.pagou==='Sim') === pagouAlgo(r)));
+  return VENC.filter(filtroOk);
 }
 function renderTudo(){ renderGeral(); renderTMP(); renderCorte(); renderTop(); renderFin(); renderPlano(); }
 
@@ -663,14 +690,16 @@ function grupo(arr, key){ const m={}; arr.forEach(r=>{ const k=(typeof key==='fu
 /* ---------- 1. VISÃO GERAL ---------- */
 function renderGeral(){
   const d = dados(), tot = soma(d);
-  const pag = d.filter(pagouAlgo), nao = d.filter(r=>!pagouAlgo(r)), ag = d.filter(r=>dataAg(r));
+  const outros = OUTROS.filter(filtroOk), ag = d.filter(r=>dataAg(r));
+  const pag = outros.filter(r=>r.status==='Pagou'), aven = outros.filter(r=>r.status==='A vencer');
+  const cart = tot + soma(pag) + soma(aven), qCart = d.length + pag.length + aven.length;
   const base = ultimaBase(); const mes = base ? MESES[+base.data_base.slice(5,7)-1] : 'no mês';
-  $('geral-sub').textContent = `${nf0.format(d.length)} matrículas vencidas${F.perfil?' · perfil '+F.perfil:''}${F.pagou?' · pagou algo: '+F.pagou:''}.`;
+  $('geral-sub').textContent = `Faturamento do mês: ${brlC(cart)} em ${nf0.format(qCart)} matrículas${F.perfis.size?' · perfil: '+[...F.perfis].join(', '):''}${F.pagou?' · pagou algo: '+F.pagou:''}.`;
   $('geral-kpis').innerHTML = `
-    <div class="kpi navy"><div class="label">Saldo total vencido</div><div class="value">${brlC(tot)}</div><div class="hint">${nf0.format(d.length)} matrículas em aberto</div></div>
-    <div class="kpi leaf"><div class="label">Já pagou algo em ${mes}</div><div class="value leaf">${brlC(soma(pag))}</div><div class="hint">${nf0.format(pag.length)} matrículas · ${pct(soma(pag),tot)} do saldo — maior chance de recuperação</div></div>
-    <div class="kpi rose"><div class="label">Não pagou nada</div><div class="value rose">${brlC(soma(nao))}</div><div class="hint">${nf0.format(nao.length)} matrículas · ${pct(soma(nao),tot)} do saldo — foco de atuação</div></div>
-    <div class="kpi"><div class="label">Com pagamento agendado</div><div class="value water">${brlC(soma(ag))}</div><div class="hint">${nf0.format(ag.length)} matrículas · ${pct(soma(ag),tot)} do saldo</div></div>`;
+    <div class="kpi rose"><div class="label">Saldo total vencido</div><div class="value rose">${brlC(tot)}</div><div class="hint">${nf0.format(d.length)} matrículas · ${pct(tot,cart)} do faturamento do mês</div></div>
+    <div class="kpi leaf"><div class="label">Pagou</div><div class="value leaf">${brlC(soma(pag))}</div><div class="hint">${nf0.format(pag.length)} matrículas com status "Pagou" · ${pct(soma(pag),cart)} do faturamento do mês</div></div>
+    <div class="kpi amber"><div class="label">A vencer</div><div class="value amber">${brlC(soma(aven))}</div><div class="hint">${nf0.format(aven.length)} matrículas com status "A vencer" · ${pct(soma(aven),cart)} do faturamento do mês</div></div>
+    <div class="kpi"><div class="label">Com pagamento agendado</div><div class="value water">${brlC(soma(ag))}</div><div class="hint">${nf0.format(ag.length)} matrículas · ${pct(soma(ag),tot)} do saldo vencido</div></div>`;
   const gt = grupo(d,'tmp_status');
   distBars($('geral-tmp'), TMP_STATUS.map(s=>({ nome:s.k, qtd:(gt[s.k]||[]).length, valor:soma(gt[s.k]||[]), cor:s.cor })), tot);
   const gp = grupo(d,'perfil_cliente');
