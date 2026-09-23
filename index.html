@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vencidos GC · Grandes Clientes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0A2A43; --navy-2:#123A5C; --navy-3:#1B4E76;
+    --water:#1C7EBE; --water-soft:#E4F1FA; --water-line:#C9E3F3;
+    --leaf:#2C9A66; --leaf-soft:#E3F5EC; --leaf-line:#BFE6D2;
+    --amber:#B9791A; --amber-soft:#FBF1DE; --amber-line:#EFD9AE;
+    --rose:#C0492E; --rose-soft:#FBE9E5; --rose-line:#F0C7BC;
+    --bg:#EEF3F7; --surface:#FFFFFF; --border:#DEE6EC;
+    --text:#12232F; --text-mut:#5B7285; --text-faint:#8CA0AF;
+    --radius:16px; --radius-sm:10px;
+    --shadow-xs:0 1px 2px rgba(10,42,67,.05);
+    --shadow-sm:0 4px 14px -6px rgba(10,42,67,.14);
+    --shadow-md:0 14px 34px -14px rgba(10,42,67,.28);
+    --shadow-lg:0 24px 60px -20px rgba(10,42,67,.34);
+    --font-display:'Manrope',sans-serif; --font-body:'Inter',sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--water-soft); color:var(--navy); }
+  ::-webkit-scrollbar{ height:8px; width:8px; }
+  ::-webkit-scrollbar-thumb{ background:#C7D6DF; border-radius:100px; }
+  button, input, select, textarea{ font-family:var(--font-body); }
+  :focus-visible{ outline:2px solid var(--water); outline-offset:2px; border-radius:4px; }
+
+  /* ---------- HERO ---------- */
+  .hero-wrap{
+    background:
+      radial-gradient(1100px 420px at 12% -20%, rgba(255,255,255,.08), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(28,126,190,.35), transparent 55%),
+      linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 55%, var(--navy-3) 100%);
+    padding:34px 20px 64px; position:relative; overflow:hidden;
+  }
+  .hero-wrap::after{
+    content:''; position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size:34px 34px; mask-image:linear-gradient(180deg, rgba(0,0,0,.5), transparent 75%); pointer-events:none;
+  }
+  .hero-inner{ max-width:1180px; margin:0 auto; position:relative; z-index:1; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.09em; text-transform:uppercase; color:#BFE0F5; font-weight:700; margin-bottom:14px; }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:#5FC1F0; box-shadow:0 0 0 4px rgba(95,193,240,.22); }
+  .hero-inner h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(24px,3.4vw,33px); color:#fff; margin:0 0 10px; letter-spacing:-.01em; }
+  .hero-inner > p{ margin:0; color:#CBDCE9; font-size:14.5px; max-width:720px; line-height:1.65; }
+  .hero-meta{ display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+  .chip{ display:inline-flex; align-items:center; gap:7px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:#E4EEF4; font-size:12.5px; padding:7px 12px; border-radius:100px; }
+  .chip b{ color:#fff; }
+  .hero-actions{ position:absolute; right:0; top:0; display:flex; gap:8px; }
+  .btn-hero{ background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.25); color:#fff; }
+  .btn-hero:hover{ background:rgba(255,255,255,.18); }
+
+  /* ---------- MAIN ---------- */
+  .app{ max-width:1180px; margin:-36px auto 60px; padding:0 20px; position:relative; z-index:2; }
+  nav.tabs{ display:flex; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:6px; box-shadow:var(--shadow-md); overflow-x:auto; scrollbar-width:none; }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  nav.tabs button{ appearance:none; border:none; background:none; cursor:pointer; font-weight:700; font-size:13px; color:var(--text-mut); padding:11px 14px; border-radius:10px; transition:.18s; display:flex; align-items:center; gap:8px; white-space:nowrap; flex:1; justify-content:center; }
+  nav.tabs button svg{ width:16px; height:16px; flex:none; }
+  nav.tabs button.active{ color:#fff; background:var(--navy); box-shadow:0 6px 16px -6px rgba(10,42,67,.5); }
+  nav.tabs button:not(.active):hover{ color:var(--navy); background:var(--water-soft); }
+  .view{ display:none; }
+  .view.active{ display:block; animation:viewIn .32s cubic-bezier(.2,.8,.2,1); }
+  @keyframes viewIn{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px 24px 26px; box-shadow:var(--shadow-xs); margin-top:20px; transition:box-shadow .2s; }
+  .card:hover{ box-shadow:var(--shadow-sm); }
+  .card-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:4px; flex-wrap:wrap; }
+  .card h2{ font-family:var(--font-display); font-size:16.5px; font-weight:800; color:var(--navy); margin:0 0 4px; letter-spacing:-.01em; }
+  .card h3{ font-family:var(--font-display); font-size:14px; font-weight:800; color:var(--navy); margin:0 0 10px; }
+  .card .sub{ font-size:13px; color:var(--text-mut); margin:0 0 18px; line-height:1.55; max-width:720px; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:12px; font-weight:700; color:var(--text-mut); }
+  .field input, .field select{ font-size:14px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#FBFDFE; color:var(--text); outline:none; transition:.15s; }
+  .field input:focus, .field select:focus{ border-color:var(--water); box-shadow:0 0 0 3px var(--water-soft); }
+
+  .btn{ font-weight:700; font-size:13.5px; cursor:pointer; border:none; border-radius:10px; padding:11px 20px; transition:.15s; display:inline-flex; align-items:center; gap:7px; }
+  .btn svg{ width:15px; height:15px; }
+  .btn-primary{ background:var(--navy); color:#fff; box-shadow:0 6px 16px -6px rgba(10,42,67,.45); }
+  .btn-primary:hover{ background:var(--navy-2); transform:translateY(-1px); }
+  .btn-ghost{ background:none; border:1px solid var(--border); color:var(--navy); }
+  .btn-ghost:hover{ border-color:var(--water); color:var(--water); background:var(--water-soft); }
+  .btn-sm{ padding:7px 13px; font-size:12.5px; }
+  .btn:disabled{ opacity:.5; cursor:default; transform:none !important; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-mut); font-weight:700; padding:9px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  td{ padding:9px 10px; border-bottom:1px solid #EEF3F6; vertical-align:middle; white-space:nowrap; }
+  tbody tr:hover td{ background:#FAFCFD; }
+  tr:last-child td{ border-bottom:none; }
+  td.num, th.num{ text-align:right; white-space:nowrap; }
+  tr.total td{ font-weight:800; color:var(--navy); background:var(--water-soft) !important; border-top:1px solid var(--water-line); }
+  .empty-row td{ text-align:center; color:var(--text-faint); padding:30px 10px; }
+  .tablewrap{ overflow-x:auto; }
+  .tablewrap.scroll{ max-height:520px; overflow-y:auto; }
+  .tablewrap.scroll thead th{ position:sticky; top:0; background:var(--surface); z-index:1; }
+  .cli{ max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .muted{ color:var(--text-mut); } .faint{ color:var(--text-faint); }
+
+  .badge{ display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:100px; font-size:11px; font-weight:700; white-space:nowrap; }
+  .b-rose{ background:var(--rose-soft); color:var(--rose); }
+  .b-amber{ background:var(--amber-soft); color:var(--amber); }
+  .b-leaf{ background:var(--leaf-soft); color:var(--leaf); }
+  .b-water{ background:var(--water-soft); color:var(--water); }
+  .b-gray{ background:#EEF3F6; color:var(--text-mut); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .kpi-row.k3{ grid-template-columns:repeat(3,1fr); }
+  .kpi{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 18px 16px; position:relative; overflow:hidden; transition:.2s; }
+  .kpi:hover{ box-shadow:var(--shadow-sm); transform:translateY(-2px); }
+  .kpi::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--water); opacity:.7; }
+  .kpi.leaf::before{ background:var(--leaf); } .kpi.rose::before{ background:var(--rose); } .kpi.amber::before{ background:var(--amber); } .kpi.navy::before{ background:var(--navy); }
+  .kpi .label{ font-size:11.5px; color:var(--text-mut); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em; }
+  .kpi .value{ font-family:var(--font-display); font-size:26px; font-weight:800; color:var(--navy); letter-spacing:-.01em; }
+  .kpi .value.leaf{ color:var(--leaf); } .kpi .value.rose{ color:var(--rose); } .kpi .value.amber{ color:var(--amber); } .kpi .value.water{ color:var(--water); }
+  .kpi .hint{ font-size:12px; color:var(--text-mut); margin-top:5px; line-height:1.45; }
+
+  .panel-top{ display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin:18px 0 0; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; }
+  .filters{ display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+  .filters .field select{ padding:8px 12px; font-size:13px; min-width:190px; }
+  .filter-note{ font-size:12px; color:var(--text-mut); max-width:360px; line-height:1.5; }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .two-col > .card{ margin-top:20px; }
+
+  .dist-bars{ display:flex; flex-direction:column; gap:10px; }
+  .dist-row{ display:grid; grid-template-columns:150px 1fr 150px; align-items:center; gap:12px; font-size:13px; }
+  .dist-track{ background:#EEF3F6; border-radius:100px; height:10px; overflow:hidden; }
+  .dist-fill{ height:100%; background:var(--water); border-radius:100px; transition:width .5s cubic-bezier(.2,.8,.2,1); }
+  .dist-val{ text-align:right; font-weight:700; color:var(--navy); white-space:nowrap; }
+  .dist-val small{ font-weight:500; color:var(--text-mut); }
+
+  /* status cards */
+  .status-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .status-card{ border:1px solid; border-radius:14px; padding:18px; background:#fff; display:flex; flex-direction:column; gap:8px; cursor:pointer; transition:.18s; }
+  .status-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-sm); }
+  .status-card.sel{ box-shadow:0 0 0 3px var(--water-soft), var(--shadow-sm); }
+  .status-card.rose{ border-color:var(--rose-line); background:linear-gradient(180deg,var(--rose-soft),#fff 70%); }
+  .status-card.amber{ border-color:var(--amber-line); background:linear-gradient(180deg,var(--amber-soft),#fff 70%); }
+  .status-card.leaf{ border-color:var(--leaf-line); background:linear-gradient(180deg,var(--leaf-soft),#fff 70%); }
+  .sc-title{ font-family:var(--font-display); font-weight:800; font-size:13px; letter-spacing:.04em; text-transform:uppercase; }
+  .rose .sc-title{ color:var(--rose); } .amber .sc-title{ color:var(--amber); } .leaf .sc-title{ color:var(--leaf); }
+  .sc-value{ font-family:var(--font-display); font-weight:800; font-size:24px; color:var(--navy); }
+  .sc-sub{ font-size:12.5px; color:var(--text-mut); }
+  .sc-rule{ font-size:12.5px; background:rgba(255,255,255,.7); border:1px dashed var(--border); border-radius:10px; padding:8px 10px; line-height:1.5; }
+  .sc-plan{ font-size:12.5px; line-height:1.5; }
+  .sc-plan b{ color:var(--navy); }
+  .sc-foot{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-mut); border-top:1px solid var(--border); padding-top:8px; margin-top:auto; gap:8px; flex-wrap:wrap; }
+  .donut-wrap{ display:grid; grid-template-columns:260px 1fr; gap:24px; align-items:center; }
+  .legend-list{ display:flex; flex-direction:column; gap:10px; }
+  .legend-list div{ display:flex; align-items:center; gap:10px; font-size:13px; }
+  .legend-list .sw{ width:11px; height:11px; border-radius:3px; flex:none; }
+  .legend-list b{ margin-left:auto; color:var(--navy); }
+
+  .callout{ display:flex; gap:10px; align-items:flex-start; background:var(--water-soft); border:1px solid var(--water-line); border-radius:12px; padding:12px 15px; font-size:12.5px; color:var(--navy-2); line-height:1.6; margin-top:14px; }
+  .callout.amber{ background:var(--amber-soft); border-color:var(--amber-line); color:#6E4A0F; }
+  .callout svg{ flex:none; width:16px; height:16px; margin-top:2px; }
+
+  /* editable cells */
+  .cell-input{ font-size:12.5px; padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:#FBFDFE; color:var(--text); width:100%; min-width:150px; }
+  .cell-input[type=date]{ min-width:130px; }
+  .cell-input:focus{ outline:none; border-color:var(--water); box-shadow:0 0 0 3px var(--water-soft); }
+  .cell-input.saved{ border-color:var(--leaf); background:var(--leaf-soft); }
+  .cell-input.err{ border-color:var(--rose); background:var(--rose-soft); }
+  .base-hint{ font-size:10.5px; color:var(--text-faint); margin-top:3px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .plan-table td{ vertical-align:top; line-height:1.5; white-space:normal; }
+  .plan-table th{ white-space:normal; }
+  .channel{ border-radius:14px; padding:18px 20px; color:#fff; background:linear-gradient(160deg,var(--navy),var(--navy-3)); display:flex; flex-direction:column; gap:10px; }
+  .channel h3{ color:#fff; margin:0; font-size:15px; }
+  .channel .big{ font-family:var(--font-display); font-size:24px; font-weight:800; }
+  .channel ul{ margin:0; padding-left:18px; font-size:12.5px; color:#D6E4EE; line-height:1.7; }
+  .channel .btn-ghost{ color:#fff; border-color:rgba(255,255,255,.35); align-self:flex-start; }
+  .channel .btn-ghost:hover{ background:rgba(255,255,255,.12); color:#fff; }
+  .channel.leafy{ background:linear-gradient(160deg,#1E6B48,var(--leaf)); }
+
+  .upload-box{ border:1.5px dashed var(--border); border-radius:12px; padding:18px; background:#FBFDFE; transition:.15s; }
+  .upload-box.has-file{ border-style:solid; border-color:var(--water-line); background:var(--water-soft); }
+  .form-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-top:14px; }
+  .progress{ height:8px; background:#EEF3F6; border-radius:100px; overflow:hidden; margin-top:14px; display:none; }
+  .progress div{ height:100%; width:0; background:var(--water); transition:width .3s; }
+  .log{ font-size:12.5px; color:var(--text-mut); margin-top:10px; line-height:1.7; white-space:pre-line; }
+  .msg{ font-size:12.5px; margin-top:10px; font-weight:600; }
+
+  .delta-up{ color:var(--rose); font-weight:700; } .delta-down{ color:var(--leaf); font-weight:700; } .delta-zero{ color:var(--text-faint); }
+  .chart-box{ position:relative; height:280px; }
+
+  .login-wrap{ max-width:420px; margin:0 auto; }
+  .login-wrap .field{ margin-bottom:14px; }
+  .loading{ text-align:center; padding:50px 10px; color:var(--text-mut); font-size:14px; }
+  .toast{ position:fixed; bottom:22px; right:22px; background:var(--navy); color:#fff; padding:12px 18px; border-radius:12px; box-shadow:var(--shadow-lg); font-size:13px; font-weight:600; opacity:0; transform:translateY(10px); transition:.25s; z-index:999; pointer-events:none; }
+  .toast.show{ opacity:1; transform:none; }
+  .toast.err{ background:var(--rose); }
+  footer.note{ margin-top:30px; font-size:12px; color:var(--text-mut); line-height:1.7; text-align:center; padding:0 20px; }
+
+  @media (max-width:900px){
+    .kpi-row, .kpi-row.k3{ grid-template-columns:repeat(2,1fr); }
+    .two-col, .status-grid, .donut-wrap{ grid-template-columns:1fr; }
+    .dist-row{ grid-template-columns:110px 1fr 120px; }
+    .hero-actions{ position:static; margin-bottom:14px; }
+    .app{ margin-top:-24px; }
+  }
+  @media (max-width:520px){
+    .kpi-row, .kpi-row.k3{ grid-template-columns:1fr; }
+    nav.tabs button span.lbl{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero-wrap">
+  <div class="hero-inner">
+    <div class="hero-actions" id="hero-actions" style="display:none;">
+      <button class="btn btn-sm btn-hero" id="btn-recarregar">Atualizar dados</button>
+      <button class="btn btn-sm btn-hero" id="btn-sair">Sair</button>
+    </div>
+    <div class="eyebrow"><span class="dot"></span>Águas do Rio · Grandes Clientes</div>
+    <h1>Acompanhamento de Vencidos · Time GC</h1>
+    <p>Visão geral do saldo em aberto, status do TMP, ações de corte e pós corte, maiores saldos com status de cobrança e pagamentos agendados, e comparativo entre as bases importadas.</p>
+    <div class="hero-meta" id="hero-meta"></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- LOGIN -->
+  <div id="login-area">
+    <div class="card login-wrap">
+      <h2>Entrar</h2>
+      <p class="sub">Use o e-mail e a senha cadastrados no Supabase.</p>
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu e-mail de acesso" autocomplete="username"></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="Sua senha" autocomplete="current-password"></div>
+      <button class="btn btn-primary" id="btn-login">Entrar</button>
+      <div class="msg" id="login-msg"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="main-area" style="display:none;">
+    <nav class="tabs" id="tabs">
+      <button class="active" data-view="geral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Visão geral</span></button>
+      <button data-view="tmp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Status TMP</span></button>
+      <button data-view="corte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7s-6 6.3-6 11.3a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/><path d="M4 20 20 4"/></svg><span class="lbl">Corte / pós corte</span></button>
+      <button data-view="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Top 20</span></button>
+      <button data-view="fin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="lbl">Agendamentos</span></button>
+      <button data-view="plano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="lbl">Plano de ação</span></button>
+      <button data-view="comp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/></svg><span class="lbl">Comparativo</span></button>
+      <button data-view="imp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span class="lbl">Importar</span></button>
+    </nav>
+
+    <div class="panel-top" id="filtros-globais">
+      <div class="filters">
+        <div class="field"><label>Perfil do cliente</label><select id="f-perfil"><option value="">Todos os perfis</option></select></div>
+        <div class="field"><label id="lbl-pagou">Pagou algo no mês?</label><select id="f-pagou"><option value="">Todos</option><option value="Sim">Sim — já pagou algo</option><option value="Não">Não — não pagou nada</option></select></div>
+      </div>
+      <div class="filter-note">Os filtros valem para todas as abas (exceto Comparativo e Importar). Consideradas só as matrículas com status <b>Vencido</b> na base mais recente.</div>
+    </div>
+
+    <div id="loading" class="loading">Carregando dados…</div>
+    <div id="sem-base" class="card" style="display:none;"><h2>Nenhuma base importada ainda</h2><p class="sub">Vá na aba <b>Importar base</b> e suba o arquivo VENCIDOS (.xlsx) para começar.</p></div>
+
+    <!-- 1. VISÃO GERAL -->
+    <section class="view active" id="view-geral">
+      <div class="card">
+        <h2>Visão Geral do Saldo em Aberto</h2>
+        <p class="sub" id="geral-sub"></p>
+        <div class="kpi-row" id="geral-kpis"></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><h2>Saldo em aberto por Status (TMP)</h2><p class="sub">Detalhe e plano de ação na aba Status TMP.</p><div class="dist-bars" id="geral-tmp"></div></div>
+        <div class="card"><h2>Saldo em aberto por perfil do cliente</h2><p class="sub">Perfil dos últimos 3 meses (coluna "Perfil Cliente - 3 meses").</p><div class="dist-bars" id="geral-perfil"></div></div>
+      </div>
+      <div class="card">
+        <h2>Saldo em aberto por executivo</h2>
+        <p class="sub">Distribuição por status do TMP e valor já com pagamento agendado.</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Executivo</th><th class="num">Matrículas</th><th class="num">Saldo em aberto</th><th class="num">Crítico</th><th class="num">Alerta</th><th class="num">Dentro do prazo</th><th class="num">Agendado</th></tr></thead>
+          <tbody id="geral-exec"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- 2. STATUS TMP -->
+    <section class="view" id="view-tmp">
+      <div class="card">
+        <h2>Saldo em Aberto por Status (TMP)</h2>
+        <p class="sub">TMP = prazo de tolerância de cada matrícula após o vencimento. O status é contado a partir da <b>data do TMP</b>. Clique num card para ver as matrículas.</p>
+        <div class="donut-wrap">
+          <div class="chart-box" style="height:240px;"><canvas id="chart-tmp"></canvas></div>
+          <div class="legend-list" id="tmp-legend"></div>
+        </div>
+      </div>
+      <div class="status-grid" id="tmp-cards" style="margin-top:20px;"></div>
+      <div class="card">
+        <div class="card-head"><div><h2 id="tmp-lista-titulo">Matrículas</h2><p class="sub">Ordenadas pelo maior saldo em aberto.</p></div>
+          <button class="btn btn-ghost btn-sm" id="btn-csv-tmp">Exportar CSV</button></div>
+        <div class="tablewrap scroll"><table>
+          <thead><tr><th>Matrícula</th><th>Cliente</th><th>Executivo</th><th>Perfil</th><th>Venc.</th><th>Data TMP</th><th>Status cobrança</th><th class="num">Saldo</th></tr></thead>
+          <tbody id="tmp-lista"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- 3. CORTE E PÓS CORTE -->
+    <section class="view" id="view-corte">
+      <div class="card">
+        <h2>Ação de Corte e Pós Corte</h2>
+        <p class="sub">Matrículas vencidas com serviço na coluna "Ação corte e pós corte" da base.</p>
+        <div class="kpi-row" id="corte-kpis"></div>
+      </div>
+      <div class="card">
+        <h2>Quantidade e saldo por serviço</h2>
+        <p class="sub">Serviços de corte (109xxx / 209xxx) e de vistoria pós corte (110xxx / 210xxx).</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Tipo</th><th>Serviço</th><th class="num">Qtd</th><th class="num">Saldo em aberto</th><th class="num">% do saldo c/ ação</th></tr></thead>
+          <tbody id="corte-servicos"></tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h2>Matrículas com ação de corte / pós corte</h2><p class="sub">Ordenadas pelo maior saldo.</p></div>
+          <button class="btn btn-ghost btn-sm" id="btn-csv-corte">Exportar CSV</button></div>
+        <div class="tablewrap scroll"><table>
+          <thead><tr><th>Matrícula</th><th>Cliente</th><th>Executivo</th><th>Serviço</th><th>TMP</th><th>Ligação</th><th class="num">Saldo</th></tr></thead>
+          <tbody id="corte-lista"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- 4. TOP 20 -->
+    <section class="view" id="view-top">
+      <div class="card">
+        <div class="card-head">
+          <div><h2>Top 20 maiores saldos</h2><p class="sub" id="top-sub"></p></div>
+          <div class="filters">
+            <div class="field"><label>Executivo</label><select id="top-exec" class="sel-exec"><option value="">Todos os executivos</option></select></div>
+            <div class="field"><label>Mostrar</label><select id="top-n"><option value="20">Top 20</option><option value="50">Top 50</option><option value="100">Top 100</option><option value="0">Todos</option></select></div>
+          </div>
+        </div>
+        <div class="callout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+          <span><b>Status cobrança</b> e <b>Pagamento agendado</b> são preenchidos aqui e salvos na hora (ficam verdes). Eles não se perdem quando uma base nova é importada. Em cinza aparece o status que veio da planilha, se houver.</span></div>
+        <div class="tablewrap" style="margin-top:14px;"><table>
+          <thead><tr><th>#</th><th>Matrícula / Cliente</th><th class="num">Saldo</th><th>Executivo</th><th>Perfil</th><th>Venc.</th><th>TMP</th><th>Ação corte</th><th>Status cobrança</th><th>Pagamento agendado</th></tr></thead>
+          <tbody id="top-lista"></tbody>
+        </table></div>
+        <datalist id="dl-status"></datalist>
+      </div>
+    </section>
+
+    <!-- 5. VISÃO FINANCEIRA -->
+    <section class="view" id="view-fin">
+      <div class="card">
+        <div class="card-head">
+          <div><h2>Visão financeira dos pagamentos agendados</h2><p class="sub">Soma do saldo em aberto das matrículas com data de pagamento agendado (preenchida no Top 20).</p></div>
+          <div class="filters"><div class="field"><label>Executivo</label><select id="fin-exec" class="sel-exec"><option value="">Todos os executivos</option></select></div></div>
+        </div>
+        <div class="kpi-row" id="fin-kpis"></div>
+      </div>
+      <div class="card">
+        <h2>Agendamentos por data</h2>
+        <div class="chart-box"><canvas id="chart-fin"></canvas></div>
+        <div class="tablewrap" style="margin-top:16px;"><table>
+          <thead><tr><th>Data agendada</th><th>Situação</th><th class="num">Matrículas</th><th class="num">Valor agendado</th><th class="num">Acumulado</th></tr></thead>
+          <tbody id="fin-datas"></tbody>
+        </table></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><h2>Por executivo</h2>
+          <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">Qtd</th><th class="num">Agendado</th><th class="num">Atrasados</th></tr></thead><tbody id="fin-exec-tab"></tbody></table></div></div>
+        <div class="card"><h2>Agendamentos já cumpridos</h2><p class="sub">Matrículas que tinham data agendada e não estão mais vencidas na base atual.</p>
+          <div class="tablewrap scroll" style="max-height:340px;"><table><thead><tr><th>Matrícula</th><th>Cliente</th><th>Data</th><th>Status atual</th></tr></thead><tbody id="fin-cumpridos"></tbody></table></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h2>Lista de agendamentos</h2></div><button class="btn btn-ghost btn-sm" id="btn-csv-fin">Exportar CSV</button></div>
+        <div class="tablewrap scroll"><table>
+          <thead><tr><th>Data</th><th>Matrícula</th><th>Cliente</th><th>Executivo</th><th>TMP</th><th>Status cobrança</th><th class="num">Saldo</th></tr></thead>
+          <tbody id="fin-lista"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- 6. PLANO DE AÇÃO -->
+    <section class="view" id="view-plano">
+      <div class="card">
+        <h2>Plano de Ação por Status (TMP)</h2>
+        <p class="sub">Estratégia de cada faixa cruzada com a carteira atual e com o acompanhamento (status de cobrança e agendamentos).</p>
+        <div class="tablewrap"><table class="plan-table">
+          <thead><tr><th>Status / regra</th><th>Objetivo</th><th>Estratégia</th><th>Canal / atuação</th><th>Prioridade</th><th class="num">Carteira</th><th class="num">Com agendamento</th><th class="num">Sem status cobrança</th></tr></thead>
+          <tbody id="plano-tab"></tbody>
+        </table></div>
+      </div>
+      <div class="two-col" id="plano-canais"></div>
+      <div class="card">
+        <h2>Prioridade dentro da Assessoria + Executivo</h2>
+        <p class="sub">Crítico e Alerta sem pagamento agendado, ordenados por saldo — é a fila de atuação imediata.</p>
+        <div class="tablewrap scroll"><table>
+          <thead><tr><th>Matrícula</th><th>Cliente</th><th class="num">Saldo</th><th>Executivo</th><th>TMP</th><th>Perfil</th><th>Ação corte</th><th>Status cobrança</th></tr></thead>
+          <tbody id="plano-fila"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- 7. COMPARATIVO -->
+    <section class="view" id="view-comp">
+      <div class="card">
+        <h2>Evolução do saldo vencido por base importada</h2>
+        <p class="sub">Uma barra por importação, dividida por status do TMP (sem filtros).</p>
+        <div class="chart-box"><canvas id="chart-evol"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><h2>Comparativo entre bases</h2><p class="sub">Por padrão compara a base mais recente com a base de ~7 dias antes (semanal). Pode escolher quaisquer duas.</p></div>
+          <div class="filters">
+            <div class="field"><label>Base anterior</label><select id="comp-a"></select></div>
+            <div class="field"><label>Base atual</label><select id="comp-b"></select></div>
+            <button class="btn btn-primary btn-sm" id="btn-comparar" style="margin-bottom:2px;">Comparar</button>
+          </div>
+        </div>
+        <div id="comp-res"><div class="faint" style="padding:20px 0;">Selecione as bases e clique em Comparar.</div></div>
+      </div>
+    </section>
+
+    <!-- 8. IMPORTAR -->
+    <section class="view" id="view-imp">
+      <div class="card">
+        <h2>Importar nova base</h2>
+        <p class="sub">Suba o arquivo VENCIDOS (.xlsx) do dia. A plataforma lê a aba de vencidos, envia para o Supabase e guarda <b>só o que mudou</b> em relação à base anterior (matrículas novas, alteradas e que saíram). Os status de cobrança e agendamentos preenchidos à mão são mantidos.</p>
+        <div class="upload-box" id="upload-box">
+          <input type="file" id="imp-file" accept=".xlsx,.xls,.xlsm">
+          <div class="form-row">
+            <div class="field"><label>Data de referência da base</label><input type="date" id="imp-data"></div>
+            <button class="btn btn-primary" id="btn-importar" disabled>Importar base</button>
+          </div>
+        </div>
+        <div class="progress" id="imp-prog"><div></div></div>
+        <div class="log" id="imp-log"></div>
+      </div>
+      <div class="card">
+        <h2>Histórico de importações</h2>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Data da base</th><th>Arquivo</th><th>Importado em</th><th>Por</th><th class="num">Linhas</th><th class="num">Novas</th><th class="num">Alteradas</th><th class="num">Saíram</th><th class="num">Saldo vencido</th><th>Status</th></tr></thead>
+          <tbody id="imp-hist"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <footer class="note" id="rodape"></footer>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO — cole aqui os dados do SEU projeto Supabase
+   (Supabase > Project Settings > API)
+   ===================================================================== */
+const SUPABASE_PROJECT_URL = 'https://COLE_AQUI.supabase.co';
+const SUPABASE_KEY         = 'COLE_AQUI_A_PUBLISHABLE_OU_ANON_KEY';
+/* ===================================================================== */
+
+const REST = SUPABASE_PROJECT_URL.replace(/\/$/,'') + '/rest/v1';
+const AUTH = SUPABASE_PROJECT_URL.replace(/\/$/,'') + '/auth/v1';
+const SESSION_KEY = 'vencidos_gc_sessao';
+
+/* ---------- plano de ação / regras de status ---------- */
+const TMP_STATUS = [
+  { k:'Crítico', cls:'rose', badge:'b-rose', cor:'#C0492E',
+    regra:'<b>6 dias ou mais</b> após a data do TMP.',
+    objetivo:'Reverter a perda e evitar corte',
+    estrategia:'Contato ativo priorizado por valor e risco; intensificar negociação, pagamento ou regularização.',
+    canal:'Assessoria de Cobrança + atuação do executivo', canalCurto:'Assessoria + Executivo', prioridade:'Máxima' },
+  { k:'Alerta', cls:'amber', badge:'b-amber', cor:'#B9791A',
+    regra:'<b>Até 5 dias</b> após a data do TMP.',
+    objetivo:'Evitar que evolua para Crítico',
+    estrategia:'Antecipar a cobrança; confirmar pagamento, identificar impedimentos e obter compromisso (data agendada).',
+    canal:'Assessoria de Cobrança + atuação do executivo', canalCurto:'Assessoria + Executivo', prioridade:'Alta' },
+  { k:'Dentro do prazo', cls:'leaf', badge:'b-leaf', cor:'#2C9A66',
+    regra:'<b>Ainda dentro do prazo</b> do TMP.',
+    objetivo:'Manter adimplência com baixo esforço operacional',
+    estrategia:'Comunicação preventiva automática; monitorar a migração para Alerta/Crítico.',
+    canal:'Infobip — disparo automático (sem esforço individual, salvo clientes estratégicos)', canalCurto:'Infobip', prioridade:'Monitoramento' }
+];
+const TMP_BY = Object.fromEntries(TMP_STATUS.map(s=>[s.k,s]));
+const STATUS_COBRANCA_OPCOES = [
+  'Pagamento agendado','Em negociação','Enviado à Assessoria de Cobrança','Pago - sem débito no sistema',
+  'Sem débito no sistema - parcelamento realizado','Sem contato - visita programada para essa semana',
+  'Cliente com Processo Judicial','Pendente de fluxo interno (aprovação, gestão, faturamento)',
+  'Pendente de recálculo de fatura','Flutuante/Perfil escorregadio','Flutuante/Perfil escorregadio - Já teve pagamento no mês atual',
+  'Vistoria pendente de ser realizada - Já solicitei prioridade','Negociação de contrato/vacância em andamento',
+  'Local fechado/abandonado/consumo final','Sem informação registrada'
+];
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+/* ---------- estado ---------- */
+let SESSION = null;
+let IMPORTS = [];        // importações (mais recente primeiro)
+let VENC = [];           // linhas status=Vencido da base atual
+let ACOMP = {};          // matricula -> {status_cobranca, data_pagamento_agendado}
+let CUMPRIDOS = [];      // agendados que não estão mais vencidos
+let F = { perfil:'', pagou:'', exec:'', topN:20, tmpSel:'Crítico' };
+const CHARTS = {};
+
+/* ---------- utilidades ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nf0 = new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0});
+const nf2 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl = v => 'R$ ' + nf0.format(Math.round(v||0));
+function brlC(v){ v=v||0; const a=Math.abs(v);
+  if(a>=1e6) return 'R$ ' + nf2.format(v/1e6) + ' M';
+  if(a>=1e3) return 'R$ ' + nf0.format(v/1e3) + ' mil';
+  return 'R$ ' + nf0.format(v); }
+const pct = (a,b) => b ? (a/b*100).toFixed(1).replace('.',',') + '%' : '0,0%';
+const dBR = iso => iso ? iso.slice(8,10)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4) : '';
+const dBRc = iso => iso ? iso.slice(8,10)+'/'+iso.slice(5,7) : '';
+const dtBR = iso => iso ? dBRc(iso.slice(0,10)) + ' ' + iso.slice(11,16) : '';
+const hojeISO = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+const soma = (arr, f='faturamento') => arr.reduce((s,r)=>s+(+r[f]||0),0);
+const pagouAlgo = r => (+r.valor_pago_setembro||0) > 0;
+function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast'+(err?' err':''),2600); }
+function tmpBadge(s){ const c=TMP_BY[s]; return `<span class="badge ${c?c.badge:'b-gray'}">${esc(s||'—')}</span>`; }
+function statusCob(r){ const a=ACOMP[r.matricula]; return (a && a.status_cobranca) || r.status_cobranca_base || ''; }
+function dataAg(r){ const a=ACOMP[r.matricula]; return (a && a.data_pagamento_agendado) || ''; }
+
+/* ---------- API Supabase (fetch puro, igual às outras plataformas) ---------- */
+function salvarSessao(s){ SESSION=s; try{ s ? localStorage.setItem(SESSION_KEY, JSON.stringify(s)) : localStorage.removeItem(SESSION_KEY); }catch(e){} }
+function lerSessao(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); }catch(e){ return null; } }
+
+async function authToken(body, grant){
+  const res = await fetch(AUTH + '/token?grant_type=' + grant, { method:'POST', headers:{ apikey:SUPABASE_KEY, 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok || !data.access_token) throw new Error(data.error_description || data.msg || 'E-mail ou senha inválidos.');
+  return { access_token:data.access_token, refresh_token:data.refresh_token, email:(data.user&&data.user.email)||body.email, expires_at:Date.now() + (data.expires_in||3600)*1000 };
+}
+async function refreshSessao(){
+  if(!SESSION || !SESSION.refresh_token) throw new Error('Sessão expirada. Entre novamente.');
+  const s = await authToken({ refresh_token:SESSION.refresh_token }, 'refresh_token');
+  s.email = s.email || SESSION.email; salvarSessao(s);
+}
+async function api(path, { method='GET', body, prefer, headers={} } = {}, retry=true){
+  if(SESSION && SESSION.expires_at && Date.now() > SESSION.expires_at - 60000){ try{ await refreshSessao(); }catch(e){} }
+  const h = { apikey:SUPABASE_KEY, Authorization:'Bearer ' + (SESSION ? SESSION.access_token : SUPABASE_KEY), ...headers };
+  if(body !== undefined) h['Content-Type'] = 'application/json';
+  if(prefer) h['Prefer'] = prefer;
+  const res = await fetch(REST + path, { method, headers:h, body: body!==undefined ? JSON.stringify(body) : undefined });
+  if(res.status === 401 && retry){ await refreshSessao(); return api(path, { method, body, prefer, headers }, false); }
+  const txt = await res.text();
+  if(!res.ok){ let m=txt; try{ const j=JSON.parse(txt); m=j.message||j.msg||txt; }catch(e){} throw new Error(m || ('Erro ' + res.status)); }
+  return txt ? JSON.parse(txt) : null;
+}
+async function apiAll(path){ // pagina de 1000 em 1000 (limite padrão do Supabase)
+  const out=[]; const sep = path.includes('?') ? '&' : '?';
+  for(let off=0; ; off+=1000){
+    const page = await api(path + sep + 'limit=1000&offset=' + off);
+    out.push(...page); if(page.length < 1000) break;
+  }
+  return out;
+}
+const rpc = (fn, args) => api('/rpc/' + fn, { method:'POST', body:args });
+
+/* ---------- LOGIN ---------- */
+async function entrar(){
+  const email=$('login-email').value.trim(), senha=$('login-senha').value, msg=$('login-msg');
+  if(SUPABASE_PROJECT_URL.includes('COLE_AQUI')){ msg.style.color='var(--rose)'; msg.textContent='Configure SUPABASE_PROJECT_URL e SUPABASE_KEY no início do código.'; return; }
+  if(!email || !senha){ msg.style.color='var(--rose)'; msg.textContent='Preencha e-mail e senha.'; return; }
+  msg.style.color='var(--text-mut)'; msg.textContent='Entrando…';
+  try{ salvarSessao(await authToken({ email, password:senha }, 'password')); msg.textContent=''; abrirApp(); }
+  catch(e){ msg.style.color='var(--rose)'; msg.textContent=e.message; }
+}
+function sair(){ salvarSessao(null); $('main-area').style.display='none'; $('hero-actions').style.display='none'; $('login-area').style.display='block'; $('hero-meta').innerHTML=''; }
+$('btn-login').onclick = entrar;
+$('login-senha').addEventListener('keydown', e=>{ if(e.key==='Enter') entrar(); });
+$('btn-sair').onclick = sair;
+$('btn-recarregar').onclick = ()=>carregarTudo();
+
+function abrirApp(){
+  $('login-area').style.display='none'; $('main-area').style.display='block'; $('hero-actions').style.display='flex';
+  $('imp-data').value = hojeISO();
+  carregarTudo();
+}
+
+/* ---------- abas ---------- */
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active', x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+b.dataset.view));
+  $('filtros-globais').style.display = ['comp','imp'].includes(b.dataset.view) ? 'none' : 'flex';
+  const v=b.dataset.view; if(VENC.length || IMPORTS.length){ if(v==='tmp') renderTMP(); if(v==='fin') renderFin(); if(v==='comp') montarEvolucao(); }
+  if(b.dataset.view==='comp' && !$('comp-res').dataset.feito && IMPORTS.filter(i=>i.status==='ok').length>1) comparar();
+});
+
+/* ---------- carga de dados ---------- */
+async function carregarTudo(){
+  $('loading').style.display='block'; $('sem-base').style.display='none';
+  try{
+    IMPORTS = await api('/importacoes?select=id,data_base,arquivo,importado_em,importado_por,total_linhas,qtd_novos,qtd_alterados,qtd_removidos,resumo,status&order=id.desc');
+    const [venc, acomp] = await Promise.all([
+      apiAll('/vencidos_atual?select=*&status=eq.Vencido&order=matricula'),
+      apiAll('/acompanhamento?select=matricula,status_cobranca,data_pagamento_agendado&order=matricula')
+    ]);
+    VENC = venc.map(r=>({ ...r, faturamento:+r.faturamento||0, valor_pago_setembro: r.valor_pago_setembro==null?null:+r.valor_pago_setembro }));
+    ACOMP = Object.fromEntries(acomp.map(a=>[a.matricula, a]));
+    // agendamentos de matrículas que já saíram do vencido
+    const vset = new Set(VENC.map(r=>r.matricula));
+    const fora = acomp.filter(a=>a.data_pagamento_agendado && !vset.has(a.matricula)).map(a=>a.matricula);
+    CUMPRIDOS = [];
+    for(let i=0;i<fora.length;i+=150){
+      const part = await api('/vencidos_atual?select=matricula,cliente,executivo,status,faturamento&matricula=in.(' + fora.slice(i,i+150).join(',') + ')');
+      CUMPRIDOS.push(...part);
+    }
+    const achados = new Set(CUMPRIDOS.map(c=>c.matricula));
+    fora.filter(m=>!achados.has(m)).forEach(m=>CUMPRIDOS.push({ matricula:m, cliente:'(saiu da base)', status:'Fora da base' }));
+    montarFiltros(); renderTudo(); renderImportacoes(); montarComparativo();
+    $('loading').style.display='none';
+    if(!IMPORTS.some(i=>i.status==='ok')) $('sem-base').style.display='block';
+  }catch(e){
+    $('loading').textContent = 'Erro ao carregar: ' + e.message;
+    if(/JWT|expirad|Sessão/i.test(e.message)) sair();
+  }
+}
+
+function ultimaBase(){ return IMPORTS.find(i=>i.status==='ok'); }
+
+function montarFiltros(){
+  const perfis = [...new Set(VENC.map(r=>r.perfil_cliente).filter(Boolean))].sort();
+  $('f-perfil').innerHTML = '<option value="">Todos os perfis</option>' + perfis.map(p=>`<option ${p===F.perfil?'selected':''}>${esc(p)}</option>`).join('');
+  const execs = [...new Set(VENC.map(r=>r.executivo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  document.querySelectorAll('.sel-exec').forEach(s=>{ s.innerHTML='<option value="">Todos os executivos</option>' + execs.map(e=>`<option ${e===F.exec?'selected':''}>${esc(e)}</option>`).join(''); });
+  const base = ultimaBase();
+  const mes = base ? MESES[+base.data_base.slice(5,7)-1] : 'no mês';
+  $('lbl-pagou').textContent = 'Pagou algo em ' + mes + '?';
+  const opts = new Set([...STATUS_COBRANCA_OPCOES, ...VENC.map(r=>r.status_cobranca_base).filter(Boolean), ...Object.values(ACOMP).map(a=>a.status_cobranca).filter(Boolean)]);
+  $('dl-status').innerHTML = [...opts].map(o=>`<option value="${esc(o)}">`).join('');
+  $('hero-meta').innerHTML = base
+    ? `<span class="chip">Base de <b>${dBR(base.data_base)}</b></span><span class="chip">Importada em <b>${new Date(base.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</b></span><span class="chip"><b>${nf0.format(VENC.length)}</b> matrículas vencidas</span><span class="chip">Usuário: <b>${esc(SESSION&&SESSION.email)}</b></span>`
+    : `<span class="chip">Nenhuma base importada</span>`;
+  $('rodape').innerHTML = base ? `Fonte: base de vencidos GC · ${esc(base.arquivo||'')} · referência ${dBR(base.data_base)}` : '';
+}
+
+$('f-perfil').onchange = e=>{ F.perfil=e.target.value; renderTudo(); };
+$('f-pagou').onchange  = e=>{ F.pagou=e.target.value; renderTudo(); };
+document.querySelectorAll('.sel-exec').forEach(s=>s.onchange=e=>{ F.exec=e.target.value; document.querySelectorAll('.sel-exec').forEach(x=>x.value=F.exec); renderTop(); renderFin(); });
+$('top-n').onchange = e=>{ F.topN=+e.target.value; renderTop(); };
+
+function dados(){ // aplica filtros globais
+  return VENC.filter(r => (!F.perfil || r.perfil_cliente===F.perfil) && (!F.pagou || (F.pagou==='Sim') === pagouAlgo(r)));
+}
+function renderTudo(){ renderGeral(); renderTMP(); renderCorte(); renderTop(); renderFin(); renderPlano(); }
+
+function distBars(el, itens, total, corPadrao){
+  const max = Math.max(...itens.map(i=>i.valor), 1);
+  el.innerHTML = itens.map(i=>`<div class="dist-row"><div>${esc(i.nome)}</div><div class="dist-track"><div class="dist-fill" style="width:${i.valor/max*100}%;background:${i.cor||corPadrao||'var(--water)'}"></div></div><div class="dist-val">${brlC(i.valor)} <small>· ${nf0.format(i.qtd)} · ${pct(i.valor,total)}</small></div></div>`).join('') || '<div class="faint">Sem dados.</div>';
+}
+function grupo(arr, key){ const m={}; arr.forEach(r=>{ const k=(typeof key==='function'?key(r):r[key])||'—'; (m[k]=m[k]||[]).push(r); }); return m; }
+
+/* ---------- 1. VISÃO GERAL ---------- */
+function renderGeral(){
+  const d = dados(), tot = soma(d);
+  const pag = d.filter(pagouAlgo), nao = d.filter(r=>!pagouAlgo(r)), ag = d.filter(r=>dataAg(r));
+  const base = ultimaBase(); const mes = base ? MESES[+base.data_base.slice(5,7)-1] : 'no mês';
+  $('geral-sub').textContent = `${nf0.format(d.length)} matrículas vencidas${F.perfil?' · perfil '+F.perfil:''}${F.pagou?' · pagou algo: '+F.pagou:''}.`;
+  $('geral-kpis').innerHTML = `
+    <div class="kpi navy"><div class="label">Saldo total vencido</div><div class="value">${brlC(tot)}</div><div class="hint">${nf0.format(d.length)} matrículas em aberto</div></div>
+    <div class="kpi leaf"><div class="label">Já pagou algo em ${mes}</div><div class="value leaf">${brlC(soma(pag))}</div><div class="hint">${nf0.format(pag.length)} matrículas · ${pct(soma(pag),tot)} do saldo — maior chance de recuperação</div></div>
+    <div class="kpi rose"><div class="label">Não pagou nada</div><div class="value rose">${brlC(soma(nao))}</div><div class="hint">${nf0.format(nao.length)} matrículas · ${pct(soma(nao),tot)} do saldo — foco de atuação</div></div>
+    <div class="kpi"><div class="label">Com pagamento agendado</div><div class="value water">${brlC(soma(ag))}</div><div class="hint">${nf0.format(ag.length)} matrículas · ${pct(soma(ag),tot)} do saldo</div></div>`;
+  const gt = grupo(d,'tmp_status');
+  distBars($('geral-tmp'), TMP_STATUS.map(s=>({ nome:s.k, qtd:(gt[s.k]||[]).length, valor:soma(gt[s.k]||[]), cor:s.cor })), tot);
+  const gp = grupo(d,'perfil_cliente');
+  distBars($('geral-perfil'), Object.keys(gp).map(k=>({ nome:k, qtd:gp[k].length, valor:soma(gp[k]) })).sort((a,b)=>b.valor-a.valor), tot, 'var(--navy-3)');
+  const ge = grupo(d,'executivo');
+  const linhas = Object.keys(ge).map(k=>{ const g=ge[k], t=grupo(g,'tmp_status');
+    return { k, qtd:g.length, v:soma(g), c:soma(t['Crítico']||[]), a:soma(t['Alerta']||[]), p:soma(t['Dentro do prazo']||[]), ag:soma(g.filter(r=>dataAg(r))) }; }).sort((a,b)=>b.v-a.v);
+  $('geral-exec').innerHTML = linhas.map(l=>`<tr><td>${esc(l.k)}</td><td class="num">${nf0.format(l.qtd)}</td><td class="num"><b>${brl(l.v)}</b></td><td class="num" style="color:var(--rose)">${brl(l.c)}</td><td class="num" style="color:var(--amber)">${brl(l.a)}</td><td class="num" style="color:var(--leaf)">${brl(l.p)}</td><td class="num" style="color:var(--water)">${brl(l.ag)}</td></tr>`).join('')
+    + (linhas.length ? `<tr class="total"><td>Total</td><td class="num">${nf0.format(d.length)}</td><td class="num">${brl(tot)}</td><td class="num">${brl(linhas.reduce((s,l)=>s+l.c,0))}</td><td class="num">${brl(linhas.reduce((s,l)=>s+l.a,0))}</td><td class="num">${brl(linhas.reduce((s,l)=>s+l.p,0))}</td><td class="num">${brl(linhas.reduce((s,l)=>s+l.ag,0))}</td></tr>` : '<tr class="empty-row"><td colspan="7">Sem dados.</td></tr>');
+}
+
+/* ---------- 2. STATUS TMP ---------- */
+function renderTMP(){
+  const d = dados(), tot = soma(d), gt = grupo(d,'tmp_status');
+  const vals = TMP_STATUS.map(s=>soma(gt[s.k]||[]));
+  if(window.Chart){
+    CHARTS.tmp && CHARTS.tmp.destroy();
+    CHARTS.tmp = new Chart($('chart-tmp'), { type:'doughnut', data:{ labels:TMP_STATUS.map(s=>s.k), datasets:[{ data:vals, backgroundColor:TMP_STATUS.map(s=>s.cor), borderWidth:2, borderColor:'#fff' }] },
+      options:{ cutout:'64%', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>c.label+': '+brl(c.raw)+' ('+pct(c.raw,tot)+')' } } }, maintainAspectRatio:false } });
+  }
+  $('tmp-legend').innerHTML = TMP_STATUS.map((s,i)=>`<div><span class="sw" style="background:${s.cor}"></span>${s.k} <span class="muted">· ${nf0.format((gt[s.k]||[]).length)} matrículas</span><b>${brlC(vals[i])} · ${pct(vals[i],tot)}</b></div>`).join('')
+    + `<div style="border-top:1px solid var(--border);padding-top:10px;"><span class="sw" style="background:var(--navy)"></span>Total em aberto<b>${brlC(tot)}</b></div>`;
+  $('tmp-cards').innerHTML = TMP_STATUS.map(s=>{
+    const g = gt[s.k]||[], v = soma(g), cor = g.filter(r=>r.acao_corte), ag = g.filter(r=>dataAg(r));
+    const maior = g.slice().sort((a,b)=>b.faturamento-a.faturamento)[0];
+    return `<div class="status-card ${s.cls} ${F.tmpSel===s.k?'sel':''}" data-k="${esc(s.k)}">
+      <div class="sc-title">${s.k}</div>
+      <div class="sc-value">${brlC(v)}</div>
+      <div class="sc-sub">${nf0.format(g.length)} matrículas · ${pct(v,tot)} do saldo em aberto</div>
+      <div class="sc-rule"><b>O que é:</b> ${s.regra}</div>
+      <div class="sc-plan"><b>Plano de ação:</b> ${esc(s.canal)}<br><span class="muted">${esc(s.estrategia)}</span></div>
+      <div class="sc-foot"><span>Agendados: <b>${ag.length}</b> · ${brlC(soma(ag))}</span><span>Ação corte: <b>${cor.length}</b></span></div>
+      ${maior?`<div class="sc-sub" style="font-style:italic">Maior: ${esc(maior.cliente)} (${brlC(maior.faturamento)})</div>`:''}
+    </div>`; }).join('');
+  document.querySelectorAll('#tmp-cards .status-card').forEach(c=>c.onclick=()=>{ F.tmpSel=c.dataset.k; renderTMP(); });
+  const lista = (gt[F.tmpSel]||[]).slice().sort((a,b)=>b.faturamento-a.faturamento);
+  $('tmp-lista-titulo').textContent = `Matrículas — ${F.tmpSel} (${nf0.format(lista.length)})`;
+  $('tmp-lista').innerHTML = lista.map(r=>`<tr><td>${r.matricula}</td><td class="cli" title="${esc(r.cliente)}">${esc(r.cliente)}</td><td>${esc(r.executivo)}</td><td>${esc(r.perfil_cliente)}</td><td>${dBRc(r.vencimento)}</td><td>${dtBR(r.data_tmp)}</td><td class="cli">${esc(statusCob(r))||'<span class="faint">—</span>'}</td><td class="num"><b>${brl(r.faturamento)}</b></td></tr>`).join('') || '<tr class="empty-row"><td colspan="8">Nenhuma matrícula.</td></tr>';
+}
+
+/* ---------- 3. CORTE ---------- */
+function tipoServico(s){ return /P[ÓO]S CORTE|VISTORIA/i.test(s) ? 'Pós corte' : 'Corte'; }
+function renderCorte(){
+  const d = dados(), tot = soma(d), c = d.filter(r=>r.acao_corte), vc = soma(c);
+  const corte = c.filter(r=>tipoServico(r.acao_corte)==='Corte'), pos = c.filter(r=>tipoServico(r.acao_corte)==='Pós corte');
+  $('corte-kpis').innerHTML = `
+    <div class="kpi rose"><div class="label">Matrículas com ação</div><div class="value">${nf0.format(c.length)}</div><div class="hint">${pct(c.length,d.length)} das vencidas</div></div>
+    <div class="kpi navy"><div class="label">Saldo em aberto</div><div class="value">${brlC(vc)}</div><div class="hint">${pct(vc,tot)} do saldo vencido</div></div>
+    <div class="kpi rose"><div class="label">Corte</div><div class="value rose">${nf0.format(corte.length)}</div><div class="hint">${brlC(soma(corte))}</div></div>
+    <div class="kpi amber"><div class="label">Pós corte (vistoria)</div><div class="value amber">${nf0.format(pos.length)}</div><div class="hint">${brlC(soma(pos))}</div></div>`;
+  const gs = grupo(c,'acao_corte');
+  const ls = Object.keys(gs).map(k=>({ k, t:tipoServico(k), q:gs[k].length, v:soma(gs[k]) })).sort((a,b)=>a.t.localeCompare(b.t) || b.q-a.q);
+  $('corte-servicos').innerHTML = ls.map(l=>`<tr><td><span class="badge ${l.t==='Corte'?'b-rose':'b-amber'}">${l.t}</span></td><td>${esc(l.k)}</td><td class="num">${l.q}</td><td class="num"><b>${brl(l.v)}</b></td><td class="num">${pct(l.v,vc)}</td></tr>`).join('')
+    + (ls.length ? `<tr class="total"><td colspan="2">Total</td><td class="num">${c.length}</td><td class="num">${brl(vc)}</td><td class="num">100%</td></tr>` : '<tr class="empty-row"><td colspan="5">Nenhuma ação de corte na seleção.</td></tr>');
+  $('corte-lista').innerHTML = c.slice().sort((a,b)=>b.faturamento-a.faturamento).map(r=>`<tr><td>${r.matricula}</td><td class="cli" title="${esc(r.cliente)}">${esc(r.cliente)}</td><td>${esc(r.executivo)}</td><td class="cli" title="${esc(r.acao_corte)}">${esc(r.acao_corte)}</td><td>${tmpBadge(r.tmp_status)}</td><td>${esc(r.status_ligacao)}</td><td class="num"><b>${brl(r.faturamento)}</b></td></tr>`).join('') || '<tr class="empty-row"><td colspan="7">Nenhuma matrícula.</td></tr>';
+}
+
+/* ---------- 4. TOP 20 ---------- */
+function renderTop(){
+  const d = dados().filter(r=>!F.exec || r.executivo===F.exec).sort((a,b)=>b.faturamento-a.faturamento);
+  const top = F.topN ? d.slice(0,F.topN) : d, vt = soma(top), tot = soma(dados());
+  $('top-sub').textContent = `${F.exec||'Todos os executivos'} · ${top.length} matrículas concentram ${brlC(vt)} — ${pct(vt,tot)} do saldo vencido da seleção.`;
+  $('top-lista').innerHTML = top.map((r,i)=>{ const a=ACOMP[r.matricula]||{};
+    return `<tr><td>${i+1}</td><td><b>${r.matricula}</b><div class="cli muted" title="${esc(r.cliente)}" style="max-width:190px;font-size:12px">${esc(r.cliente)}</div></td><td class="num"><b>${brl(r.faturamento)}</b></td><td>${esc(r.executivo)}</td><td>${esc(r.perfil_cliente)}</td><td>${dBRc(r.vencimento)}</td><td>${tmpBadge(r.tmp_status)}<div class="faint" style="font-size:11px;margin-top:3px">TMP ${dtBR(r.data_tmp)}</div></td><td>${r.acao_corte?`<span class="badge ${tipoServico(r.acao_corte)==='Corte'?'b-rose':'b-amber'}" title="${esc(r.acao_corte)}">${tipoServico(r.acao_corte)}</span>`:'<span class="faint">—</span>'}</td>
+      <td><input class="cell-input" list="dl-status" data-m="${r.matricula}" data-f="status_cobranca" value="${esc(a.status_cobranca||'')}" placeholder="Digite ou escolha…">${r.status_cobranca_base?`<div class="base-hint" title="${esc(r.status_cobranca_base)}">base: ${esc(r.status_cobranca_base)}</div>`:''}</td>
+      <td><input class="cell-input" type="date" data-m="${r.matricula}" data-f="data_pagamento_agendado" value="${esc(a.data_pagamento_agendado||'')}"></td></tr>`; }).join('')
+    + (top.length ? `<tr class="total"><td colspan="2">Total ${F.topN?'Top '+F.topN:''}</td><td class="num">${brl(vt)}</td><td colspan="7"></td></tr>` : '<tr class="empty-row"><td colspan="10">Nenhuma matrícula.</td></tr>');
+  document.querySelectorAll('#top-lista .cell-input').forEach(inp=>inp.onchange=()=>salvarAcomp(inp));
+}
+async function salvarAcomp(inp){
+  const m = +inp.dataset.m, f = inp.dataset.f, v = inp.value.trim() || null;
+  const atual = ACOMP[m] || { matricula:m };
+  const body = { matricula:m, status_cobranca:atual.status_cobranca||null, data_pagamento_agendado:atual.data_pagamento_agendado||null };
+  body[f] = v;
+  if(f==='data_pagamento_agendado' && v && !body.status_cobranca){ body.status_cobranca='Pagamento agendado'; }
+  inp.classList.remove('saved','err');
+  try{
+    await api('/acompanhamento?on_conflict=matricula', { method:'POST', body:[body], prefer:'resolution=merge-duplicates,return=minimal' });
+    ACOMP[m] = { ...atual, ...body };
+    inp.classList.add('saved'); toast('Salvo');
+    if(f==='data_pagamento_agendado' && body.status_cobranca==='Pagamento agendado'){ const s=document.querySelector(`#top-lista input[data-m="${m}"][data-f="status_cobranca"]`); if(s && !s.value){ s.value='Pagamento agendado'; s.classList.add('saved'); } }
+    renderGeral(); renderTMP(); renderFin(); renderPlano();
+  }catch(e){ inp.classList.add('err'); toast('Erro ao salvar: '+e.message, true); }
+}
+
+/* ---------- 5. VISÃO FINANCEIRA ---------- */
+function renderFin(){
+  const hoje = hojeISO(), em7 = new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+  const d = dados().filter(r=>!F.exec || r.executivo===F.exec);
+  const ag = d.filter(r=>dataAg(r)).sort((a,b)=>dataAg(a).localeCompare(dataAg(b)) || b.faturamento-a.faturamento);
+  const vt = soma(ag), tot = soma(d);
+  const atras = ag.filter(r=>dataAg(r)<hoje), prox = ag.filter(r=>dataAg(r)>=hoje && dataAg(r)<=em7);
+  const cumpr = CUMPRIDOS.filter(c=>!F.exec || c.executivo===F.exec);
+  $('fin-kpis').innerHTML = `
+    <div class="kpi navy"><div class="label">Total agendado</div><div class="value">${brlC(vt)}</div><div class="hint">${nf0.format(ag.length)} matrículas · ${pct(vt,tot)} do saldo em aberto</div></div>
+    <div class="kpi"><div class="label">Próximos 7 dias</div><div class="value water">${brlC(soma(prox))}</div><div class="hint">${prox.length} matrículas até ${dBR(em7)}</div></div>
+    <div class="kpi rose"><div class="label">Agendamento vencido</div><div class="value rose">${brlC(soma(atras))}</div><div class="hint">${atras.length} matrículas com data passada e ainda em aberto — recontatar</div></div>
+    <div class="kpi leaf"><div class="label">Cumpridos</div><div class="value leaf">${nf0.format(cumpr.length)}</div><div class="hint">agendados que saíram do vencido</div></div>`;
+  const gd = grupo(ag, r=>dataAg(r)); const datas = Object.keys(gd).sort(); let acc=0;
+  $('fin-datas').innerHTML = datas.map(dt=>{ const v=soma(gd[dt]); acc+=v;
+    const sit = dt<hoje ? '<span class="badge b-rose">Data passou</span>' : dt===hoje ? '<span class="badge b-amber">Hoje</span>' : '<span class="badge b-water">A receber</span>';
+    return `<tr><td><b>${dBR(dt)}</b></td><td>${sit}</td><td class="num">${gd[dt].length}</td><td class="num"><b>${brl(v)}</b></td><td class="num">${brl(acc)}</td></tr>`; }).join('')
+    + (datas.length ? `<tr class="total"><td colspan="2">Total</td><td class="num">${ag.length}</td><td class="num">${brl(vt)}</td><td></td></tr>` : '<tr class="empty-row"><td colspan="5">Nenhum pagamento agendado. Preencha as datas na aba Top 20.</td></tr>');
+  if(window.Chart){
+    CHARTS.fin && CHARTS.fin.destroy();
+    CHARTS.fin = new Chart($('chart-fin'), { type:'bar', data:{ labels:datas.map(dBRc), datasets:[{ label:'Valor agendado', data:datas.map(dt=>soma(gd[dt])), backgroundColor:datas.map(dt=>dt<hoje?'#C0492E':'#1C7EBE'), borderRadius:6 }] },
+      options:{ maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>brl(c.raw)+' · '+gd[datas[c.dataIndex]].length+' matrículas' } } }, scales:{ y:{ ticks:{ callback:v=>brlC(v) }, grid:{ color:'#EEF3F6' } }, x:{ grid:{display:false} } } } });
+  }
+  const ge = grupo(ag,'executivo');
+  $('fin-exec-tab').innerHTML = Object.keys(ge).map(k=>({ k, q:ge[k].length, v:soma(ge[k]), a:ge[k].filter(r=>dataAg(r)<hoje).length })).sort((a,b)=>b.v-a.v)
+    .map(l=>`<tr><td>${esc(l.k)}</td><td class="num">${l.q}</td><td class="num"><b>${brl(l.v)}</b></td><td class="num">${l.a?`<span class="badge b-rose">${l.a}</span>`:'0'}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="4">—</td></tr>';
+  $('fin-cumpridos').innerHTML = cumpr.map(c=>`<tr><td>${c.matricula}</td><td class="cli">${esc(c.cliente)}</td><td>${dBR((ACOMP[c.matricula]||{}).data_pagamento_agendado)}</td><td><span class="badge ${c.status==='Pagou'?'b-leaf':'b-gray'}">${esc(c.status)}</span></td></tr>`).join('') || '<tr class="empty-row"><td colspan="4">—</td></tr>';
+  $('fin-lista').innerHTML = ag.map(r=>`<tr><td><b>${dBR(dataAg(r))}</b></td><td>${r.matricula}</td><td class="cli" title="${esc(r.cliente)}">${esc(r.cliente)}</td><td>${esc(r.executivo)}</td><td>${tmpBadge(r.tmp_status)}</td><td class="cli">${esc(statusCob(r))}</td><td class="num"><b>${brl(r.faturamento)}</b></td></tr>`).join('') || '<tr class="empty-row"><td colspan="7">—</td></tr>';
+}
+
+/* ---------- 6. PLANO DE AÇÃO ---------- */
+function renderPlano(){
+  const d = dados(), gt = grupo(d,'tmp_status');
+  $('plano-tab').innerHTML = TMP_STATUS.map(s=>{ const g=gt[s.k]||[], ag=g.filter(r=>dataAg(r)), sem=g.filter(r=>!statusCob(r));
+    return `<tr style="background:var(--${s.cls}-soft)"><td style="min-width:150px"><span class="badge ${s.badge}">${s.k.toUpperCase()}</span><div style="font-size:12px;margin-top:6px">${s.regra}</div></td><td style="min-width:130px">${esc(s.objetivo)}</td><td style="min-width:200px">${esc(s.estrategia)}</td><td style="min-width:170px"><b>${esc(s.canal)}</b></td><td><b style="color:var(--${s.cls})">${s.prioridade.toUpperCase()}</b></td>
+      <td class="num"><b>${brlC(soma(g))}</b><br><span class="muted">${g.length} matr.</span></td><td class="num">${brlC(soma(ag))}<br><span class="muted">${ag.length} matr.</span></td><td class="num">${sem.length}<br><span class="muted">${brlC(soma(sem))}</span></td></tr>`; }).join('');
+  const assess = d.filter(r=>r.tmp_status==='Crítico' || r.tmp_status==='Alerta'), info = gt['Dentro do prazo']||[];
+  const assessSemAg = assess.filter(r=>!dataAg(r));
+  $('plano-canais').innerHTML = `
+    <div class="card channel"><h3>Assessoria de Cobrança + Executivo</h3><div class="big">${brlC(soma(assess))}</div>
+      <ul><li>${assess.length} matrículas em Crítico ou Alerta</li><li>${assessSemAg.length} sem pagamento agendado (${brlC(soma(assessSemAg))})</li><li>${assess.filter(r=>r.acao_corte).length} com ação de corte / pós corte</li><li>Executivo registra status e data agendada no Top 20</li></ul>
+      <button class="btn btn-ghost btn-sm" id="btn-csv-assess">Exportar lista para a Assessoria (CSV)</button></div>
+    <div class="card channel leafy"><h3>Infobip — Dentro do prazo</h3><div class="big">${brlC(soma(info))}</div>
+      <ul><li>${info.length} matrículas ainda dentro do prazo do TMP</li><li>Disparo preventivo automático</li><li>Esforço individual só para estratégicos / alto valor</li><li>Monitorar migração para Alerta na próxima base</li></ul>
+      <button class="btn btn-ghost btn-sm" id="btn-csv-info">Exportar lista para o Infobip (CSV)</button></div>`;
+  $('btn-csv-assess').onclick = ()=>exportCSV(assess, 'assessoria_cobranca');
+  $('btn-csv-info').onclick = ()=>exportCSV(info, 'infobip_dentro_do_prazo');
+  $('plano-fila').innerHTML = assessSemAg.slice().sort((a,b)=>b.faturamento-a.faturamento).map(r=>`<tr><td>${r.matricula}</td><td class="cli" title="${esc(r.cliente)}">${esc(r.cliente)}</td><td class="num"><b>${brl(r.faturamento)}</b></td><td>${esc(r.executivo)}</td><td>${tmpBadge(r.tmp_status)}</td><td>${esc(r.perfil_cliente)}</td><td>${r.acao_corte?`<span class="badge ${tipoServico(r.acao_corte)==='Corte'?'b-rose':'b-amber'}">${tipoServico(r.acao_corte)}</span>`:'—'}</td><td class="cli">${esc(statusCob(r))||'<span class="faint">—</span>'}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="8">Nenhuma matrícula.</td></tr>';
+}
+
+/* ---------- CSV ---------- */
+function exportCSV(rows, nome){
+  const cols = [['matricula','Matrícula'],['cliente','Cliente'],['executivo','Executivo'],['carteira','Carteira'],['perfil_cliente','Perfil cliente'],['vencimento','Vencimento'],['tmp_status','Status TMP'],['data_tmp','Data TMP'],['acao_corte','Ação corte e pós corte'],['status_ligacao','Status ligação'],['_status','Status cobrança'],['_agendado','Pagamento agendado'],['faturamento','Saldo em aberto']];
+  const linhas = rows.slice().sort((a,b)=>b.faturamento-a.faturamento).map(r=>cols.map(([k])=>{
+    let v = k==='_status' ? statusCob(r) : k==='_agendado' ? dataAg(r) : r[k];
+    if(k==='faturamento') v = nf2.format(v); if(k==='vencimento' || k==='_agendado') v = dBR(v); if(k==='data_tmp') v = v ? dBR(v.slice(0,10))+' '+v.slice(11,16) : '';
+    v = String(v ?? ''); return /[;"\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }).join(';'));
+  const csv = '﻿' + cols.map(c=>c[1]).join(';') + '\n' + linhas.join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `${nome}_${hojeISO()}.csv`; document.body.appendChild(a); a.click(); a.remove();
+}
+$('btn-csv-tmp').onclick = ()=>exportCSV(dados().filter(r=>r.tmp_status===F.tmpSel), 'status_'+F.tmpSel.replace(/\s/g,'_'));
+$('btn-csv-corte').onclick = ()=>exportCSV(dados().filter(r=>r.acao_corte), 'acao_corte');
+$('btn-csv-fin').onclick = ()=>exportCSV(dados().filter(r=>dataAg(r) && (!F.exec || r.executivo===F.exec)), 'pagamentos_agendados');
+
+/* ---------- 7. COMPARATIVO ---------- */
+function labelImp(i){ return `${dBR(i.data_base)} · ${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}`; }
+function montarComparativo(){
+  const ok = IMPORTS.filter(i=>i.status==='ok');
+  const opts = ok.map(i=>`<option value="${i.id}">${labelImp(i)}</option>`).join('');
+  $('comp-a').innerHTML = opts; $('comp-b').innerHTML = opts;
+  if(ok.length){
+    const b = ok[0]; const alvo = new Date(new Date(b.data_base).getTime() - 7*864e5).toISOString().slice(0,10);
+    const a = ok.find(i=>i.id!==b.id && i.data_base<=alvo) || ok[ok.length-1];
+    $('comp-b').value = b.id; $('comp-a').value = a.id;
+  }
+  delete $('comp-res').dataset.feito;
+  $('comp-res').innerHTML = ok.length>1 ? '<div class="faint" style="padding:20px 0;">Clique em Comparar.</div>' : '<div class="faint" style="padding:20px 0;">O comparativo aparece a partir da 2ª base importada.</div>';
+  montarEvolucao();
+}
+function montarEvolucao(){
+  if(!$('view-comp').classList.contains('active')) return;
+  const ev = IMPORTS.filter(i=>i.status==='ok').reverse();
+  if(window.Chart){
+    CHARTS.evol && CHARTS.evol.destroy();
+    CHARTS.evol = new Chart($('chart-evol'), { type:'bar', data:{ labels:ev.map(i=>dBRc(i.data_base)),
+      datasets: TMP_STATUS.map(s=>({ label:s.k, data:ev.map(i=>+(((i.resumo||{}).por_tmp||{})[s.k]||{}).valor||0), backgroundColor:s.cor, borderRadius:4, stack:'s' })) },
+      options:{ animation:false, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:c=>c.dataset.label+': '+brl(c.raw) } } }, scales:{ x:{ stacked:true, grid:{display:false} }, y:{ stacked:true, ticks:{ callback:v=>brlC(v) }, grid:{ color:'#EEF3F6' } } } } });
+  }
+}
+$('btn-comparar').onclick = comparar;
+function deltaCell(a,b,moeda,inverso){ const d=b-a; const cls = d===0?'delta-zero':((d>0)!==!!inverso?'delta-up':'delta-down');
+  const f = moeda?brl:(x=>nf0.format(x)); return `<td class="num ${cls}">${d>0?'+':''}${f(d)}${a?` <small>(${d>0?'+':''}${(d/a*100).toFixed(1).replace('.',',')}%)</small>`:''}</td>`; }
+async function comparar(){
+  const a=+$('comp-a').value, b=+$('comp-b').value, box=$('comp-res');
+  if(!a || !b){ return; }
+  if(a===b){ box.innerHTML='<div class="msg" style="color:var(--rose)">Escolha duas bases diferentes.</div>'; return; }
+  box.innerHTML = '<div class="loading">Comparando bases…</div>';
+  try{
+    const r = await rpc('comparar_bases', { p_base_a:a, p_base_b:b });
+    const ra = r.base_a.resumo||{}, rb = r.base_b.resumo||{};
+    const g = (o,p)=>p.split('.').reduce((x,k)=>(x||{})[k],o)||0;
+    const lin = [['Saldo vencido total','saldo_vencido',1],['Matrículas vencidas','qtd_vencidos',0],['Já pagou algo (saldo)','pagou_algo.valor',1,1],['Não pagou nada (saldo)','nao_pagou.valor',1],
+      ...TMP_STATUS.map(s=>[s.k+' (saldo)','por_tmp.'+s.k+'.valor',1]), ...TMP_STATUS.map(s=>[s.k+' (matrículas)','por_tmp.'+s.k+'.qtd',0]),
+      ['Com ação de corte (saldo)','acao_corte.valor',1],
+      ...[...new Set([...Object.keys(ra.por_perfil||{}),...Object.keys(rb.por_perfil||{})])].sort().map(p=>['Perfil '+p+' (saldo)','por_perfil.'+p+'.valor',1])];
+    const mig = r.migracoes||[], mud = r.maiores_mudancas||[];
+    const sitBadge = s => { const t=s.replace('Vencido · ',''); return s.startsWith('Vencido') ? tmpBadge(t) : `<span class="badge ${s==='Pagou'?'b-leaf':'b-gray'}">${esc(s)}</span>`; };
+    box.innerHTML = `
+      <div class="callout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span>Base anterior: <b>${labelImp(r.base_a)}</b> → Base atual: <b>${labelImp(r.base_b)}</b>. Vermelho = piorou (mais saldo vencido), verde = melhorou.</span></div>
+      <h3 style="margin-top:20px;">Indicadores</h3>
+      <div class="tablewrap"><table><thead><tr><th>Indicador</th><th class="num">Base anterior</th><th class="num">Base atual</th><th class="num">Variação</th></tr></thead><tbody>
+        ${lin.map(([n,p,m,inv])=>{ const va=+g(ra,p), vb=+g(rb,p); return `<tr><td>${esc(n)}</td><td class="num">${m?brl(va):nf0.format(va)}</td><td class="num"><b>${m?brl(vb):nf0.format(vb)}</b></td>${deltaCell(va,vb,m,inv)}</tr>`; }).join('')}
+      </tbody></table></div>
+      <h3 style="margin-top:24px;">Migração de situação entre as bases</h3>
+      <p class="sub">Quantas matrículas mudaram de situação (ex.: Dentro do prazo → Alerta, Vencido → Pagou, entrou no vencido).</p>
+      <div class="tablewrap"><table><thead><tr><th>De</th><th></th><th>Para</th><th class="num">Matrículas</th><th class="num">Saldo vencido antes</th><th class="num">Saldo vencido agora</th></tr></thead><tbody>
+        ${mig.map(m=>`<tr><td>${sitBadge(m.sit_a)}</td><td class="faint">→</td><td>${sitBadge(m.sit_b)}</td><td class="num"><b>${nf0.format(m.qtd)}</b></td><td class="num">${brl(m.valor_a)}</td><td class="num">${brl(m.valor_b)}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="6">Nenhuma migração.</td></tr>'}
+      </tbody></table></div>
+      <h3 style="margin-top:24px;">Maiores mudanças (até 100)</h3>
+      <div class="tablewrap scroll"><table><thead><tr><th>Matrícula</th><th>Cliente</th><th>Executivo</th><th>Antes</th><th>Agora</th><th class="num">Vencido antes</th><th class="num">Vencido agora</th></tr></thead><tbody>
+        ${mud.map(m=>`<tr><td>${m.matricula}</td><td class="cli" title="${esc(m.cliente)}">${esc(m.cliente)}</td><td>${esc(m.executivo)}</td><td>${sitBadge(m.sit_a)}</td><td>${sitBadge(m.sit_b)}</td><td class="num">${brl(m.venc_a)}</td><td class="num"><b>${brl(m.venc_b)}</b></td></tr>`).join('') || '<tr class="empty-row"><td colspan="7">—</td></tr>'}
+      </tbody></table></div>`;
+    box.dataset.feito = '1';
+  }catch(e){ box.innerHTML = `<div class="msg" style="color:var(--rose)">Erro ao comparar: ${esc(e.message)}</div>`; }
+}
+
+/* ---------- 8. IMPORTAÇÃO ---------- */
+function renderImportacoes(){
+  $('imp-hist').innerHTML = IMPORTS.map(i=>`<tr><td><b>${dBR(i.data_base)}</b></td><td class="cli">${esc(i.arquivo)}</td><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(i.importado_por)}</td><td class="num">${nf0.format(i.total_linhas||0)}</td><td class="num">${nf0.format(i.qtd_novos||0)}</td><td class="num">${nf0.format(i.qtd_alterados||0)}</td><td class="num">${nf0.format(i.qtd_removidos||0)}</td><td class="num">${i.resumo?brlC(i.resumo.saldo_vencido):'—'}</td><td><span class="badge ${i.status==='ok'?'b-leaf':i.status==='erro'?'b-rose':'b-amber'}">${esc(i.status)}</span></td></tr>`).join('') || '<tr class="empty-row"><td colspan="10">Nenhuma importação.</td></tr>';
+}
+
+/* Leitura da planilha: localiza a aba com o cabeçalho de vencidos e mapeia as colunas pelo nome.
+   (não depende da ordem das colunas nem do nome do mês em "Pagou em ...?") */
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+function serialParaISO(v, comHora){
+  if(v===null || v===undefined || v==='') return null;
+  if(typeof v === 'number'){
+    if(v < 1) return null; // hora solta / zero = vazio
+    const d = new Date(Math.round((v - 25569) * 86400000));
+    return comHora ? d.toISOString().slice(0,19).replace('T',' ') : d.toISOString().slice(0,10);
+  }
+  const m = String(v).trim().match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+  if(m) return comHora ? `${m[3]}-${m[2]}-${m[1]} ${m[4]||'00'}:${m[5]||'00'}:00` : `${m[3]}-${m[2]}-${m[1]}`;
+  const iso = String(v).trim().match(/^\d{4}-\d{2}-\d{2}/);
+  return iso ? (comHora ? String(v).trim().slice(0,19).replace('T',' ') : iso[0]) : null;
+}
+const num = v => { if(v===null || v===undefined || v==='') return null; if(typeof v==='number') return v; const s=String(v).replace(/[R$\s]/g,''); const n = s.includes(',') ? +s.replace(/\./g,'').replace(',','.') : +s; return isNaN(n)?null:n; };
+const txt = v => { if(v===null || v===undefined) return null; if(typeof v==='number' && v===0) return null; const s=String(v).trim(); return s===''||s==='0'?null:s; };
+
+function lerBase(wb){
+  const obrig = ['matricula','faturamento','status','executivo','tmp - vencimento'];
+  for(const nome of wb.SheetNames){
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[nome], { header:1, raw:true, defval:null });
+    for(let h=0; h<Math.min(rows.length,15); h++){
+      const head = (rows[h]||[]).map(norm);
+      if(!obrig.every(c=>head.includes(c))) continue;
+      const idx = c => head.indexOf(c);
+      const idxStart = p => head.findIndex(x=>x.startsWith(p));
+      const pagouIdx = head.map((x,i)=>x.startsWith('pagou em')?i:-1).filter(i=>i>=0);
+      const col = {
+        matricula:idx('matricula'), cliente:idx('cliente'), faturamento:idx('faturamento'), vencimento:idx('vencimento'), status:idx('status'),
+        carteira:idx('carteira'), executivo:idx('executivo'), macrocluster:idxStart('classificacao macrocluster'), diretoria:idx('diretoria'),
+        tmp:idx('tmp'), data_tmp:idx('data tmp'), perfil_cliente:idxStart('perfil cliente'), tmp_status:idx('tmp - vencimento'),
+        semana_vencimento:idx('semana vencimento'), acao_corte:idxStart('acao corte'), status_cobranca_base:idx('status cobranca'),
+        pagou:pagouIdx[0] ?? -1, valor_pago:pagouIdx[1] ?? -1, vencimento_pago:idx('vencimento pago'), status_ligacao:idxStart('status de ligacao')
+      };
+      const g = (r,k) => col[k] >= 0 ? r[col[k]] : null;
+      const out = []; const vistos = new Set();
+      for(let i=h+1; i<rows.length; i++){
+        const r = rows[i]; if(!r) continue;
+        const mat = parseInt(String(g(r,'matricula') ?? '').replace(/\D/g,''),10);
+        if(!mat || vistos.has(mat)) continue; vistos.add(mat);
+        const vp = g(r,'valor_pago');
+        out.push({
+          matricula:mat, cliente:txt(g(r,'cliente')), faturamento:num(g(r,'faturamento')), vencimento:serialParaISO(g(r,'vencimento')),
+          status:txt(g(r,'status')), carteira:txt(g(r,'carteira')), executivo:txt(g(r,'executivo')),
+          macrocluster: (typeof g(r,'macrocluster')==='number' || /^\d{1,2}:\d{2}/.test(String(g(r,'macrocluster')))) ? null : txt(g(r,'macrocluster')), diretoria:txt(g(r,'diretoria')),
+          tmp:num(g(r,'tmp')), data_tmp:serialParaISO(g(r,'data_tmp'), true), perfil_cliente:txt(g(r,'perfil_cliente')),
+          tmp_status:txt(g(r,'tmp_status')), semana_vencimento:txt(g(r,'semana_vencimento')), acao_corte:txt(g(r,'acao_corte')),
+          status_cobranca_base:txt(g(r,'status_cobranca_base')), pagou_setembro:txt(g(r,'pagou')),
+          valor_pago_setembro: typeof vp==='number' ? vp : num(vp), vencimento_pago:serialParaISO(g(r,'vencimento_pago')), status_ligacao:txt(g(r,'status_ligacao'))
+        });
+      }
+      return { aba:nome, linhas:out };
+    }
+  }
+  throw new Error('Não encontrei a aba de vencidos. O cabeçalho precisa ter: Matrícula, Faturamento, Status, Executivo e TMP - VENCIMENTO.');
+}
+
+$('imp-file').onchange = ()=>{ const f=$('imp-file').files[0]; $('btn-importar').disabled=!f; $('upload-box').classList.toggle('has-file', !!f); $('imp-log').textContent=''; };
+$('btn-importar').onclick = importar;
+function logImp(t){ $('imp-log').textContent += t + '\n'; }
+function prog(p){ $('imp-prog').style.display='block'; $('imp-prog').firstElementChild.style.width = p + '%'; }
+
+async function importar(){
+  const f = $('imp-file').files[0], dataBase = $('imp-data').value;
+  if(!f || !dataBase) return;
+  const ultima = ultimaBase();
+  $('imp-log').textContent = '';
+  if(ultima && dataBase < ultima.data_base){ logImp(`⚠ A data informada (${dBR(dataBase)}) é anterior à última base importada (${dBR(ultima.data_base)}). Importe as bases em ordem cronológica.`); return; }
+  $('btn-importar').disabled = true; let impId = null;
+  try{
+    prog(5); logImp('Lendo planilha…');
+    const buf = await f.arrayBuffer();
+    const wb = XLSX.read(buf, { type:'array', cellDates:false });
+    const { aba, linhas } = lerBase(wb);
+    const venc = linhas.filter(l=>l.status==='Vencido');
+    logImp(`Aba "${aba.trim()}": ${nf0.format(linhas.length)} matrículas (${nf0.format(venc.length)} vencidas · ${brlC(soma(venc))}).`);
+    prog(15);
+    const [imp] = await api('/importacoes', { method:'POST', body:{ data_base:dataBase, arquivo:f.name, importado_por:SESSION.email, status:'processando' }, prefer:'return=representation' });
+    impId = imp.id;
+    const LOTE = 1000;
+    for(let i=0; i<linhas.length; i+=LOTE){
+      await api('/vencidos_staging', { method:'POST', body:linhas.slice(i,i+LOTE).map(l=>({ importacao_id:impId, ...l })), prefer:'return=minimal' });
+      prog(15 + Math.round(70*(i+LOTE)/linhas.length));
+    }
+    logImp('Enviado ao Supabase. Comparando com a base anterior…');
+    const r = await rpc('processar_importacao', { p_importacao_id:impId });
+    prog(100);
+    logImp(`✓ Importação concluída: ${nf0.format(r.novos)} novas, ${nf0.format(r.alterados)} alteradas, ${nf0.format(r.removidos)} saíram da base.`);
+    toast('Base importada');
+    $('imp-file').value=''; $('upload-box').classList.remove('has-file');
+    await carregarTudo();
+  }catch(e){
+    logImp('✗ Erro: ' + e.message);
+    if(impId){ try{ await api('/vencidos_staging?importacao_id=eq.'+impId, { method:'DELETE' }); await api('/importacoes?id=eq.'+impId, { method:'PATCH', body:{ status:'erro' } }); }catch(_){} }
+    toast('Erro na importação', true);
+  }finally{ $('btn-importar').disabled = !$('imp-file').files[0]; }
+}
+
+/* ---------- início ---------- */
+(async function init(){
+  const s = lerSessao();
+  if(s && s.access_token){ SESSION = s; try{ if(Date.now() > s.expires_at - 60000) await refreshSessao(); abrirApp(); return; }catch(e){ salvarSessao(null); } }
+  $('login-area').style.display='block';
+})();
+</script>
+</body>
+</html>
