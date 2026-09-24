@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vencidos GC · Grandes Clientes</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -587,8 +588,9 @@
         </div>
       </div>
       <div class="two-col">
-        <div class="card"><h2>Por prioridade</h2><p class="sub">Prioridade 1: variação acima de 50% · Prioridade 2: de 20% a 50% (aumento ou redução).</p><div class="chart-box" style="height:230px"><canvas id="chart-cprio"></canvas></div></div>
-        <div class="card"><h2>Por carteira</h2><p class="sub">Analisado × pendente.</p><div class="chart-box" style="height:230px"><canvas id="chart-ccart"></canvas></div></div>
+        <div class="card"><h2>Por prioridade</h2><p class="sub">Prioridade 1: variação acima de 50% · Prioridade 2: de 20% a 50% (aumento ou redução).</p>
+          <div class="donut-wrap" style="grid-template-columns:210px 1fr;gap:18px"><div class="chart-box" style="height:210px"><canvas id="chart-cprio"></canvas></div><div class="legend-list" id="cprio-leg"></div></div></div>
+        <div class="card"><h2>Por carteira</h2><p class="sub">Registros analisados × pendentes em cada carteira.</p><div class="chart-box" style="height:250px"><canvas id="chart-ccart"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div><h2>Por condicional</h2></div>
           <div class="filters"><div class="field"><label>Carteira</label><select id="cg-cart"><option value="">Todas</option></select></div></div></div>
@@ -603,7 +605,7 @@
 
     <!-- 2. POR EXECUTIVO -->
     <section class="view" id="view-cexec">
-      <div class="card"><div class="card-head"><div><h2>Por executivo</h2><p class="sub">Clique no executivo para abrir os registros e motivos dele.</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-cexec">Exportar Excel</button></div>
+      <div class="card"><div class="card-head"><div><h2>Por executivo</h2><p class="sub">Clique no executivo para ver os motivos (consumo, desdobro e faturamento) dele.</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-cexec">Exportar Excel</button></div>
         <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">Total</th><th class="num">Analisado</th><th class="num">Pendente</th><th style="min-width:200px">% atingido</th><th class="num">Prioridade 1</th><th class="num">Vencidas</th></tr></thead><tbody id="ce-tab"></tbody></table></div></div>
     </section>
 
@@ -629,7 +631,7 @@
       <div class="card"><h2>Visão financeira</h2><p class="sub">Aumento/redução pelo Δ de faturamento (atual − mês anterior). Status: <b>Pago</b> = fatura da referência encontrada na arrecadação (matrícula + mês + ano); senão <b>Vencido</b> se o vencimento já passou, ou <b>A vencer</b>.</p>
         <div class="kpi-row" id="cf-kpis"></div>
         <div class="filters" style="margin-top:16px">
-          <div class="field"><label>Perfil</label><select id="cf-perf"><option value="">Todos</option></select></div>
+          <div class="field"><label>Perfil do cliente</label><div class="multi" id="cf-perf"><button type="button" class="multi-btn"><span class="multi-txt">Todos os perfis</span><span class="car">▼</span></button><div class="multi-pop"></div></div></div>
           <div class="field"><label>Status</label><select id="cf-stat"><option value="">Todos</option></select></div>
         </div></div>
       <div class="card"><div class="card-head"><div><h2>Faturas vencidas</h2><p class="sub" id="cf-venc-sub"></p></div><button class="btn btn-ghost btn-sm" id="btn-xls-cvenc">Exportar Excel</button></div>
@@ -641,8 +643,6 @@
         <div class="card"><h2>Pagamentos e status por perfil</h2><p class="sub">Quantidade e valor das faturas.</p>
           <div class="tablewrap"><table><thead id="cf-cross-head"></thead><tbody id="cf-cross"></tbody></table></div></div>
       </div>
-      <div class="card"><div class="card-head"><div><h2>Detalhamento completo</h2><p class="sub" id="cf-det-sub"></p></div><button class="btn btn-primary btn-sm" id="btn-xls-cdet">⤓ Exportar Excel (filtrado)</button></div>
-        <div class="tablewrap scroll" style="max-height:560px"><table><thead id="cf-det-head"></thead><tbody id="cf-det"></tbody></table></div></div>
     </section>
 
     <!-- 5. LEGENDA -->
@@ -801,6 +801,8 @@ const SUPABASE_PROJECT_URL = 'https://rekwbpzyxufkzsdvgfjp.supabase.co';
 const SUPABASE_KEY         = 'sb_publishable_5QkwhsxuSfVo9U7g9PghsQ_p-K4UCdZ';
 /* ===================================================================== */
 
+if(window.Chart && window.ChartDataLabels){ Chart.register(ChartDataLabels); Chart.defaults.set('plugins.datalabels', { display:false }); }
+if(window.Chart){ Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = '#5B7285'; }
 const REST = SUPABASE_PROJECT_URL.replace(/\/$/,'') + '/rest/v1';
 const AUTH = SUPABASE_PROJECT_URL.replace(/\/$/,'') + '/auth/v1';
 const SESSION_KEY = 'vencidos_gc_sessao';
@@ -1915,7 +1917,7 @@ async function consultarMatricula(){
    MÓDULO CONSUMO ESTRATÉGICO
    ===================================================================== */
 let CONS = [], CONS_BASES = [], CONS_OK = false;
-const FC = { mes:'', execs:new Set(), aberto:new Set() };
+const FC = { mes:'', execs:new Set(), aberto:new Set(), perfis:new Set() };
 // colunas conhecidas (ordem do arquivo) — o que não estiver aqui vai para "extras"
 const CONS_COLS = [
   ['matricula','Matrícula', h=>h==='matricula'], ['cliente','Cliente', h=>h==='cliente'],
@@ -2031,29 +2033,38 @@ function renderCGeral(){
     <div class="kpi ${an.length/Math.max(1,d.length)>=0.9?'leaf':'rose'}"><div class="label">% atingido</div><div class="value ${an.length/Math.max(1,d.length)>=0.9?'leaf':'rose'}">${pct(an.length,d.length)}</div><div class="hint">analisado ÷ total</div></div>`;
   const ord = $('cg-ord').value;
   const chave = r => ord==='pct' ? Math.abs(r.variacao||0) : Math.abs(r.delta||0);
-  const head = `<tr><th>Cliente / matrícula</th><th class="num">Variação</th><th ${tipAttr('motivo_consumo')}>Motivo</th><th ${tipAttr('acao_desdobro')}>Ação</th><th>Vencimento</th></tr>`;
+  const head = `<tr><th>Cliente / matrícula</th><th class="num">Variação</th><th ${tipAttr('motivo_consumo')}>Motivo de Consumo</th><th ${tipAttr('acao_desdobro')}>Ação de Desdobro</th><th ${tipAttr('motivo_faturamento')}>Motivo de Faturamento</th><th>Vencimento</th></tr>`;
   $('cg-top-head-a').innerHTML = head; $('cg-top-head-r').innerHTML = head;
   const linha = r => `<tr><td><div class="cli2" title="${esc(r.cliente)}"><b>${esc(r.cliente)}</b></div><a href="#" class="lk-cmat muted" data-m="${r.matricula}" style="font-size:12px">${r.matricula}</a> · <span class="faint" style="font-size:11px">${esc(r.executivo||'')}</span></td>
     <td class="num"><b style="color:var(--${r.delta>0?'rose':'leaf'})">${fmtVar(r.variacao)}</b><div class="faint" style="font-size:11px">${r.delta>0?'+':''}${brl(r.delta)}</div></td>
-    <td class="cli2" title="${esc(r.motivo_consumo||'')}" style="max-width:170px">${esc(r.motivo_consumo)||'<span class="badge b-amber">pendente</span>'}</td>
-    <td class="cli2" title="${esc(r.acao_desdobro||'')}" style="max-width:150px">${esc(r.acao_desdobro)||'—'}</td>
+    <td class="cli2" title="${esc(r.motivo_consumo||'')}" style="max-width:220px">${esc(r.motivo_consumo)||'<span class="badge b-amber">pendente</span>'}</td>
+    <td class="cli2" title="${esc(r.acao_desdobro||'')}" style="max-width:190px">${esc(r.acao_desdobro)||'—'}</td>
+    <td class="cli2" title="${esc(r.motivo_faturamento||'')}" style="max-width:220px">${esc(r.motivo_faturamento)||'—'}</td>
     <td>${dBR(r.data_vencimento)||'—'}<div>${stBadge(r.status_pagamento)}</div></td></tr>`;
-  $('cg-top-a').innerHTML = d.filter(r=>r.delta>0).sort((a,b)=>chave(b)-chave(a)).slice(0,10).map(linha).join('') || '<tr class="empty-row"><td colspan="5">—</td></tr>';
-  $('cg-top-r').innerHTML = d.filter(r=>r.delta<0).sort((a,b)=>chave(b)-chave(a)).slice(0,10).map(linha).join('') || '<tr class="empty-row"><td colspan="5">—</td></tr>';
+  $('cg-top-a').innerHTML = d.filter(r=>r.delta>0).sort((a,b)=>chave(b)-chave(a)).slice(0,10).map(linha).join('') || '<tr class="empty-row"><td colspan="6">—</td></tr>';
+  $('cg-top-r').innerHTML = d.filter(r=>r.delta<0).sort((a,b)=>chave(b)-chave(a)).slice(0,10).map(linha).join('') || '<tr class="empty-row"><td colspan="6">—</td></tr>';
   document.querySelectorAll('#view-cgeral .lk-cmat').forEach(a=>a.onclick=e=>{ e.preventDefault(); buscarMatCons(a.dataset.m); });
   if(window.Chart && $('view-cgeral').classList.contains('active')){
-    const prios = ['Prioridade 1','Prioridade 2'];
+    const prios = [['Prioridade 1','#C0492E'],['Prioridade 2','#B9791A']];
+    const qP = prios.map(([p])=>d.filter(r=>r.prioridade_calc===p).length), totP = qP.reduce((a,b)=>a+b,0);
     CHARTS.cprio && CHARTS.cprio.destroy();
-    CHARTS.cprio = new Chart($('chart-cprio'), { type:'bar', data:{ labels:prios, datasets:[
-      { label:'Analisado', data:prios.map(p=>d.filter(r=>r.prioridade_calc===p && analisadoOk(r)).length), backgroundColor:'#2C9A66', borderRadius:4 },
-      { label:'Pendente',  data:prios.map(p=>d.filter(r=>r.prioridade_calc===p && !analisadoOk(r)).length), backgroundColor:'#B9791A', borderRadius:4 } ] },
-      options:{ indexAxis:'y', animation:false, maintainAspectRatio:false, scales:{ x:{ stacked:true, grid:{ color:'#EEF3F6' } }, y:{ stacked:true, grid:{ display:false } } } } });
+    CHARTS.cprio = new Chart($('chart-cprio'), { type:'doughnut', data:{ labels:prios.map(p=>p[0]), datasets:[{ data:qP, backgroundColor:prios.map(p=>p[1]), borderColor:'#fff', borderWidth:3 }] },
+      options:{ animation:false, maintainAspectRatio:false, cutout:'58%', plugins:{ legend:{ display:false },
+        datalabels:{ display:true, color:'#fff', font:{ weight:'700', size:12 }, textAlign:'center', formatter:(v)=> v ? nf0.format(v)+'\n'+pct(v,totP) : '' } } } });
+    $('cprio-leg').innerHTML = prios.map(([p,c],i)=>{ const g=d.filter(r=>r.prioridade_calc===p), a=g.filter(analisadoOk).length;
+      return `<div style="flex-direction:column;align-items:stretch;gap:6px"><div style="display:flex;align-items:center;gap:8px"><span class="sw" style="background:${c}"></span><b style="margin-left:0;color:var(--navy)">${p}</b><span class="muted" style="margin-left:auto">${nf0.format(qP[i])} registros</span></div>
+        <div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${a/Math.max(1,g.length)*100}%;background:#2C9A66"></div></div><b style="color:#2C9A66;min-width:50px;text-align:right">${pct(a,g.length)}</b></div>
+        <div class="faint" style="font-size:11.5px">${nf0.format(a)} analisados · <span style="color:var(--amber);font-weight:700">${nf0.format(g.length-a)} pendentes</span></div></div>`; }).join('');
     const carts = [...new Set(d.map(r=>r.carteira).filter(Boolean))].sort((a,b)=>d.filter(r=>r.carteira===b).length-d.filter(r=>r.carteira===a).length);
+    const aC = carts.map(c=>d.filter(r=>r.carteira===c && analisadoOk(r)).length), pC = carts.map(c=>d.filter(r=>r.carteira===c && !analisadoOk(r)).length);
     CHARTS.ccart && CHARTS.ccart.destroy();
-    CHARTS.ccart = new Chart($('chart-ccart'), { type:'bar', data:{ labels:carts, datasets:[
-      { label:'Analisado', data:carts.map(c=>d.filter(r=>r.carteira===c && analisadoOk(r)).length), backgroundColor:'#2C9A66', borderRadius:4 },
-      { label:'Pendente',  data:carts.map(c=>d.filter(r=>r.carteira===c && !analisadoOk(r)).length), backgroundColor:'#B9791A', borderRadius:4 } ] },
-      options:{ animation:false, maintainAspectRatio:false, scales:{ x:{ stacked:true, grid:{ display:false } }, y:{ stacked:true, grid:{ color:'#EEF3F6' } } } } });
+    CHARTS.ccart = new Chart($('chart-ccart'), { type:'bar', data:{ labels:carts.map((c,i)=>[c, nf0.format(aC[i]+pC[i])+' · '+pct(aC[i],aC[i]+pC[i])+' atingido']), datasets:[
+      { label:'Analisado', data:aC, backgroundColor:'#2C9A66', borderRadius:6, maxBarThickness:46 },
+      { label:'Pendente',  data:pC, backgroundColor:'#B9791A', borderRadius:6, maxBarThickness:46 } ] },
+      options:{ animation:false, maintainAspectRatio:false, layout:{ padding:{ top:22 } },
+        plugins:{ legend:{ position:'top', labels:{ boxWidth:12, boxHeight:12, useBorderRadius:true, borderRadius:3 } },
+          datalabels:{ display:ctx=>ctx.dataset.data[ctx.dataIndex]>0, anchor:'end', align:'end', offset:2, color:ctx=>ctx.dataset.backgroundColor, font:{ weight:'700', size:12 }, formatter:v=>nf0.format(v) } },
+        scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:11.5 } } }, y:{ display:false, grid:{ display:false }, beginAtZero:true, suggestedMax:Math.max(1,...aC,...pC)*1.22 } } } });
   }
   const cartSel = $('cg-cart').value, dc = d.filter(r=>!cartSel || r.carteira===cartSel);
   const conds = [...new Set(dc.map(r=>r.condicional||'—'))].sort((a,b)=>{ const ia=ORDEM_COND.indexOf(a), ib=ORDEM_COND.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
@@ -2077,11 +2088,8 @@ function renderCExec(){
     let det = '';
     if(aberto){
       const an = l.x.filter(analisadoOk);
-      const mini = (k,tit) => `<div><h3 ${tipAttr(k)}>${tit}</h3><div class="dist-bars">${contar(an,k).slice(0,8).map(i=>`<div class="dist-row"><div title="${esc(i.nome)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.nome)}</div><div class="dist-track"><div class="dist-fill" style="width:${i.q/Math.max(1,an.length)*100}%"></div></div><div class="dist-val">${i.q}</div></div>`).join('')||'<div class="faint">—</div>'}</div></div>`;
-      det = `<tr class="ce-det"><td colspan="7"><div class="mot-grid" style="margin-bottom:16px">${mini('motivo_consumo','Motivo de Consumo')}${mini('acao_desdobro','Ação de Desdobro')}${mini('motivo_faturamento','Motivo de Faturamento')}</div>
-        <div class="tablewrap scroll" style="max-height:380px"><table><thead><tr><th>Matrícula</th><th>Cliente</th><th>Prioridade</th><th class="num">Variação</th><th>Analisado?</th><th ${tipAttr('motivo_consumo')}>Motivo consumo</th><th ${tipAttr('acao_desdobro')}>Ação</th><th ${tipAttr('motivo_faturamento')}>Motivo faturamento</th><th>Pagamento</th></tr></thead><tbody>
-        ${l.x.slice().sort((a,b)=>(analisadoOk(a)-analisadoOk(b)) || (a.prioridade_calc||'').localeCompare(b.prioridade_calc||'') || Math.abs(b.delta||0)-Math.abs(a.delta||0)).map(r=>`<tr><td><a href="#" class="lk-cmat" data-m="${r.matricula}" style="color:var(--water);font-weight:700;text-decoration:none">${r.matricula}</a></td><td class="cli2" title="${esc(r.cliente)}">${esc(r.cliente)}</td><td>${prioBadge(r.prioridade_calc)}</td><td class="num" style="color:var(--${r.delta>0?'rose':'leaf'})">${fmtVar(r.variacao)}</td><td>${analisadoOk(r)?'<span class="badge b-leaf">Sim</span>':'<span class="badge b-amber">Não</span>'}</td><td class="cli2" title="${esc(r.motivo_consumo||'')}">${esc(r.motivo_consumo)||'—'}</td><td class="cli2" title="${esc(r.acao_desdobro||'')}">${esc(r.acao_desdobro)||'—'}</td><td class="cli2" title="${esc(r.motivo_faturamento||'')}">${esc(r.motivo_faturamento)||'—'}</td><td>${stBadge(r.status_pagamento)}</td></tr>`).join('')}
-        </tbody></table></div></td></tr>`;
+      const mini = (k,tit) => `<div><h3 ${tipAttr(k)}>${tit}</h3><div class="dist-bars">${contar(an,k).map(i=>`<div class="dist-row"><div title="${esc(i.nome)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.nome)}</div><div class="dist-track"><div class="dist-fill" style="width:${i.q/Math.max(1,an.length)*100}%;background:${k==='motivo_consumo'?'var(--water)':k==='acao_desdobro'?'var(--navy-3)':'var(--leaf)'}"></div></div><div class="dist-val">${i.q} <small>${pct(i.q,an.length)}</small></div></div>`).join('')||'<div class="faint">—</div>'}</div></div>`;
+      det = `<tr class="ce-det"><td colspan="7"><p class="sub" style="margin:0 0 12px">Motivos dos ${an.length} registros analisados de ${esc(l.k)}${l.p?` · <b style="color:var(--amber)">${l.p} pendentes</b>`:''}.</p><div class="mot-grid">${mini('motivo_consumo','Motivo de Consumo')}${mini('acao_desdobro','Ação de Desdobro')}${mini('motivo_faturamento','Motivo de Faturamento')}</div></td></tr>`;
     }
     return `<tr class="ce-row" data-k="${esc(l.k)}"><td><b>${aberto?'▾':'▸'} ${esc(l.k)}</b></td><td class="num">${l.t}</td><td class="num">${l.a}</td><td class="num">${l.p?`<span class="badge b-amber">${l.p}</span>`:'0'}</td>
       <td><div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${l.pc*100}%;background:${cor}"></div></div><b style="color:${cor};min-width:52px;text-align:right">${pct(l.a,l.t)}</b></div></td>
@@ -2111,7 +2119,8 @@ function montarFiltrosCons(){
   document.querySelectorAll('.ca-f').forEach(s=>{ const k=s.dataset.k, cur=s.value; const vals=[...new Set(CONS.map(r=>r[k]).filter(Boolean))].sort();
     s.innerHTML = '<option value="">Todos</option>' + vals.map(v=>`<option ${v===cur?'selected':''}>${esc(v)}</option>`).join(''); });
   const perfs = [...new Set(CONS.map(r=>r.perfil_cliente).filter(Boolean))].sort();
-  const cp=$('cf-perf').value; $('cf-perf').innerHTML = '<option value="">Todos</option>' + perfs.map(v=>`<option ${v===cp?'selected':''}>${esc(v)}</option>`).join('');
+  FC.perfis = new Set([...FC.perfis].filter(p=>perfs.includes(p)));
+  montarMultiGen('cf-perf', perfs, FC.perfis, 'Todos os perfis', 'perfis selecionados', ()=>renderCFin());
   const cs=$('cf-stat').value; $('cf-stat').innerHTML = '<option value="">Todos</option>' + STATUS_PAG.map(s=>s[0]).filter(s=>CONS.some(r=>r.status_pagamento===s)).map(v=>`<option ${v===cs?'selected':''}>${v}</option>`).join('');
   const cc=$('cg-cart').value; $('cg-cart').innerHTML = '<option value="">Todas</option>' + [...new Set(CONS.map(r=>r.carteira).filter(Boolean))].sort().map(v=>`<option ${v===cc?'selected':''}>${esc(v)}</option>`).join('');
 }
@@ -2146,8 +2155,8 @@ function exportXLSX(rows, nome){
 
 /* ---------- 4. FINANCEIRO ---------- */
 function renderCFin(){
-  const d0 = dadosCons(), perf = $('cf-perf').value, stat = $('cf-stat').value;
-  const dp = d0.filter(r=>!perf || r.perfil_cliente===perf), d = dp.filter(r=>!stat || r.status_pagamento===stat);
+  const d0 = dadosCons(), perf = [...FC.perfis].join(', '), stat = $('cf-stat').value;
+  const dp = d0.filter(r=>!FC.perfis.size || FC.perfis.has(r.perfil_cliente)), d = dp.filter(r=>!stat || r.status_pagamento===stat);
   const aum = d0.filter(r=>r.delta>0), red = d0.filter(r=>r.delta<0), venc = dp.filter(r=>r.status_pagamento==='Vencido');
   const sF = arr => arr.reduce((s,r)=>s+(r.faturamento||0),0), sD = arr => arr.reduce((s,r)=>s+(r.delta||0),0);
   $('cf-kpis').innerHTML = `
@@ -2155,7 +2164,7 @@ function renderCFin(){
     <div class="kpi leaf"><div class="label">Reduções no mês</div><div class="value leaf">${nf0.format(red.length)}</div><div class="hint">Δ faturamento ${brlC(sD(red))}</div></div>
     <div class="kpi amber"><div class="label">Faturas vencidas</div><div class="value amber">${nf0.format(d0.filter(r=>r.status_pagamento==='Vencido').length)}</div><div class="hint">referência ${mesRefNome(FC.mes)}, sem pagamento na arrecadação</div></div>
     <div class="kpi navy"><div class="label">Saldo vencido</div><div class="value">${brlC(sF(d0.filter(r=>r.status_pagamento==='Vencido')))}</div><div class="hint">soma da coluna Faturamento</div></div>`;
-  $('cf-venc-sub').textContent = `${nf0.format(venc.length)} faturas · ${brl(sF(venc))}${perf?' · perfil '+perf:''}. Ordenadas pelo maior valor.`;
+  $('cf-venc-sub').textContent = `${nf0.format(venc.length)} faturas · ${brl(sF(venc))}${perf?' · perfil: '+perf:''}. Ordenadas pelo maior valor.`;
   $('cf-venc').innerHTML = venc.slice().sort((a,b)=>(b.faturamento||0)-(a.faturamento||0)).map(r=>`<tr><td><a href="#" class="lk-cmat" data-m="${r.matricula}" style="color:var(--water);font-weight:700;text-decoration:none">${r.matricula}</a></td><td class="cli2" title="${esc(r.cliente)}">${esc(r.cliente)}</td><td>${esc(r.executivo)}</td><td>${esc(r.perfil_cliente)}</td><td>${dBR(r.data_vencimento)}</td><td class="num">${r.dias_atraso!=null?`<span class="badge b-rose">${r.dias_atraso} d</span>`:'—'}</td><td class="num"><b>${brl(r.faturamento)}</b></td></tr>`).join('') || '<tr class="empty-row"><td colspan="7">Nenhuma fatura vencida.</td></tr>';
   $('btn-xls-cvenc').onclick = ()=>exportXLSX(venc.map(r=>({ Matrícula:r.matricula, Cliente:r.cliente, Executivo:r.executivo, Carteira:r.carteira, Perfil:r.perfil_cliente, Referência:mesRefNome(FC.mes), Vencimento:dBR(r.data_vencimento), 'Dias em atraso':r.dias_atraso, 'Valor da fatura':r.faturamento })), `consumo_faturas_vencidas_${FC.mes}`);
   // status
@@ -2173,17 +2182,8 @@ function renderCFin(){
   $('cf-cross').innerHTML = perfis.map(p=>{ const g=d.filter(r=>(r.perfil_cliente||'—')===p);
     return `<tr><td>${esc(p)}</td>${sts.map(s=>{ const x=g.filter(r=>r.status_pagamento===s); return `<td class="num">${x.length?`${x.length}<div class="faint" style="font-size:11px">${brlC(sF(x))}</div>`:'<span class="faint">—</span>'}</td>`; }).join('')}<td class="num"><b>${g.length}</b><div class="faint" style="font-size:11px">${brlC(sF(g))}</div></td></tr>`; }).join('')
     + (d.length?`<tr class="total"><td>Total</td>${sts.map(s=>{ const x=d.filter(r=>r.status_pagamento===s); return `<td class="num">${x.length}<div style="font-size:11px">${brlC(sF(x))}</div></td>`; }).join('')}<td class="num">${d.length}<div style="font-size:11px">${brlC(sF(d))}</div></td></tr>`:'<tr class="empty-row"><td colspan="6">—</td></tr>');
-  // detalhamento
-  const colsF = [['matricula','Matrícula'],['cliente','Cliente'],['executivo','Executivo'],['carteira','Carteira'],['perfil_cliente','Perfil'],['data_vencimento','Vencimento'],['faturamento','Faturamento (fatura)'],['fat_atual','Faturamento mês atual'],['fat_ant','Faturamento mês ant.'],['delta','Δ faturamento'],['variacao','%'],['tipo_variacao','Tipo'],['status_pagamento','Status'],['data_pagamento_ref','Data pagamento'],['valor_pago_ref','Valor pago'],['dias_atraso','Dias em atraso'],['saldo_contas','Saldo de contas']];
-  $('cf-det-sub').textContent = `${nf0.format(d.length)} faturas${perf?' · perfil '+perf:''}${stat?' · '+stat:''}${d.length>500?' (mostrando 500 — o Excel exporta todas)':''}.`;
-  $('cf-det-head').innerHTML = '<tr>' + colsF.map(c=>`<th>${c[1]}</th>`).join('') + '</tr>';
-  $('cf-det').innerHTML = d.slice().sort((a,b)=>(b.faturamento||0)-(a.faturamento||0)).slice(0,500).map(r=>'<tr>' + colsF.map(([k])=>{ const v=r[k];
-    if(k==='status_pagamento') return `<td>${stBadge(v)}</td>`; if(k==='cliente') return `<td class="cli2" title="${esc(v)}">${esc(v)}</td>`;
-    return `<td class="${typeof v==='number'?'num':''}">${fmtCol(k,v)}</td>`; }).join('') + '</tr>').join('') || '<tr class="empty-row"><td colspan="17">—</td></tr>';
-  $('btn-xls-cdet').onclick = ()=>exportXLSX(d.map(r=>linhaExport(r, colsF)), `consumo_financeiro_${FC.mes}_filtrado`);
   document.querySelectorAll('#view-cfin .lk-cmat').forEach(a=>a.onclick=e=>{ e.preventDefault(); buscarMatCons(a.dataset.m); });
 }
-$('cf-perf').onchange = ()=>renderCFin();
 $('cf-stat').onchange = ()=>renderCFin();
 
 /* ---------- 5. LEGENDA ---------- */
