@@ -2045,7 +2045,7 @@ function renderCGeral(){
   $('cg-top-r').innerHTML = d.filter(r=>r.delta<0).sort((a,b)=>chave(b)-chave(a)).slice(0,10).map(linha).join('') || '<tr class="empty-row"><td colspan="6">—</td></tr>';
   document.querySelectorAll('#view-cgeral .lk-cmat').forEach(a=>a.onclick=e=>{ e.preventDefault(); buscarMatCons(a.dataset.m); });
   if(window.Chart && $('view-cgeral').classList.contains('active')){
-    const prios = [['Prioridade 1','#C0492E'],['Prioridade 2','#B9791A']];
+    const prios = [['Prioridade 1','#0A2A43'],['Prioridade 2','#1C7EBE']];
     const qP = prios.map(([p])=>d.filter(r=>r.prioridade_calc===p).length), totP = qP.reduce((a,b)=>a+b,0);
     CHARTS.cprio && CHARTS.cprio.destroy();
     CHARTS.cprio = new Chart($('chart-cprio'), { type:'doughnut', data:{ labels:prios.map(p=>p[0]), datasets:[{ data:qP, backgroundColor:prios.map(p=>p[1]), borderColor:'#fff', borderWidth:3 }] },
@@ -2053,17 +2053,17 @@ function renderCGeral(){
         datalabels:{ display:true, color:'#fff', font:{ weight:'700', size:12 }, textAlign:'center', formatter:(v)=> v ? nf0.format(v)+'\n'+pct(v,totP) : '' } } } });
     $('cprio-leg').innerHTML = prios.map(([p,c],i)=>{ const g=d.filter(r=>r.prioridade_calc===p), a=g.filter(analisadoOk).length;
       return `<div style="flex-direction:column;align-items:stretch;gap:6px"><div style="display:flex;align-items:center;gap:8px"><span class="sw" style="background:${c}"></span><b style="margin-left:0;color:var(--navy)">${p}</b><span class="muted" style="margin-left:auto">${nf0.format(qP[i])} registros</span></div>
-        <div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${a/Math.max(1,g.length)*100}%;background:#2C9A66"></div></div><b style="color:#2C9A66;min-width:50px;text-align:right">${pct(a,g.length)}</b></div>
-        <div class="faint" style="font-size:11.5px">${nf0.format(a)} analisados · <span style="color:var(--amber);font-weight:700">${nf0.format(g.length-a)} pendentes</span></div></div>`; }).join('');
+        <div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${a/Math.max(1,g.length)*100}%;background:#1C7EBE"></div></div><b style="color:#123A5C;min-width:50px;text-align:right">${pct(a,g.length)}</b></div>
+        <div class="faint" style="font-size:11.5px">${nf0.format(a)} analisados · <span style="color:#1C7EBE;font-weight:700">${nf0.format(g.length-a)} pendentes</span></div></div>`; }).join('');
     const carts = [...new Set(d.map(r=>r.carteira).filter(Boolean))].sort((a,b)=>d.filter(r=>r.carteira===b).length-d.filter(r=>r.carteira===a).length);
     const aC = carts.map(c=>d.filter(r=>r.carteira===c && analisadoOk(r)).length), pC = carts.map(c=>d.filter(r=>r.carteira===c && !analisadoOk(r)).length);
     CHARTS.ccart && CHARTS.ccart.destroy();
     CHARTS.ccart = new Chart($('chart-ccart'), { type:'bar', data:{ labels:carts.map((c,i)=>[c, nf0.format(aC[i]+pC[i])+' · '+pct(aC[i],aC[i]+pC[i])+' atingido']), datasets:[
-      { label:'Analisado', data:aC, backgroundColor:'#2C9A66', borderRadius:6, maxBarThickness:46 },
-      { label:'Pendente',  data:pC, backgroundColor:'#B9791A', borderRadius:6, maxBarThickness:46 } ] },
+      { label:'Analisado', data:aC, backgroundColor:'#123A5C', borderRadius:6, maxBarThickness:46 },
+      { label:'Pendente',  data:pC, backgroundColor:'#9CCBEA', borderRadius:6, maxBarThickness:46 } ] },
       options:{ animation:false, maintainAspectRatio:false, layout:{ padding:{ top:22 } },
         plugins:{ legend:{ position:'top', labels:{ boxWidth:12, boxHeight:12, useBorderRadius:true, borderRadius:3 } },
-          datalabels:{ display:ctx=>ctx.dataset.data[ctx.dataIndex]>0, anchor:'end', align:'end', offset:2, color:ctx=>ctx.dataset.backgroundColor, font:{ weight:'700', size:12 }, formatter:v=>nf0.format(v) } },
+          datalabels:{ display:ctx=>ctx.dataset.data[ctx.dataIndex]>0, anchor:'end', align:'end', offset:2, color:ctx=>ctx.datasetIndex===0?'#123A5C':'#1C7EBE', font:{ weight:'700', size:12 }, formatter:v=>nf0.format(v) } },
         scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:11.5 } } }, y:{ display:false, grid:{ display:false }, beginAtZero:true, suggestedMax:Math.max(1,...aC,...pC)*1.22 } } } });
   }
   const cartSel = $('cg-cart').value, dc = d.filter(r=>!cartSel || r.carteira===cartSel);
