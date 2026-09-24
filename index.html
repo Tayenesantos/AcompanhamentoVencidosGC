@@ -182,6 +182,8 @@
   .cell-input.saved{ border-color:var(--leaf); background:var(--leaf-soft); }
   .cell-input.err{ border-color:var(--rose); background:var(--rose-soft); }
   .obs-input{ min-width:240px; resize:vertical; line-height:1.45; font-family:var(--font-body); white-space:pre-wrap; }
+  .btn-del{ background:none; border:1px solid var(--rose-line); color:var(--rose); }
+  .btn-del:hover{ background:var(--rose-soft); }
   .base-hint{ font-size:10.5px; color:var(--text-faint); margin-top:3px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   .plan-table td{ vertical-align:top; line-height:1.5; white-space:normal; }
@@ -519,7 +521,7 @@
       <div class="card">
         <h2>Histórico de importações</h2>
         <div class="tablewrap"><table>
-          <thead><tr><th>Data da base</th><th>Arquivo</th><th>Importado em</th><th>Por</th><th class="num">Linhas</th><th class="num">Novas</th><th class="num">Alteradas</th><th class="num">Saíram</th><th class="num">Saldo vencido</th><th>Status</th></tr></thead>
+          <thead><tr><th>Data da base</th><th>Arquivo</th><th>Importado em</th><th>Por</th><th class="num">Linhas</th><th class="num">Novas</th><th class="num">Alteradas</th><th class="num">Saíram</th><th class="num">Saldo vencido</th><th>Status</th><th></th></tr></thead>
           <tbody id="imp-hist"></tbody>
         </table></div>
       </div>
@@ -592,7 +594,7 @@
           <div class="form-row"><button class="btn btn-primary" id="btn-arr-importar" disabled>Importar base</button></div></div>
         <div class="progress" id="arr-prog"><div></div></div><div class="log" id="arr-log"></div></div>
       <div class="card"><h2>Histórico de importações</h2>
-        <div class="tablewrap"><table><thead><tr><th>Importado em</th><th>Arquivo</th><th>Por</th><th>Período (crédito)</th><th class="num">Pagamentos</th><th class="num">Matrículas</th><th class="num">Valor</th><th>Status</th></tr></thead><tbody id="arr-hist"></tbody></table></div></div>
+        <div class="tablewrap"><table><thead><tr><th>Importado em</th><th>Arquivo</th><th>Por</th><th>Período (crédito)</th><th class="num">Pagamentos</th><th class="num">Matrículas</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead><tbody id="arr-hist"></tbody></table></div></div>
     </section>
   </div>
 </div>
@@ -1126,7 +1128,25 @@ async function comparar(){
 
 /* ---------- 8. IMPORTAÇÃO ---------- */
 function renderImportacoes(){
-  $('imp-hist').innerHTML = IMPORTS.map(i=>`<tr><td><b>${dBR(i.data_base)}</b></td><td class="cli">${esc(i.arquivo)}</td><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(i.importado_por)}</td><td class="num">${nf0.format(i.total_linhas||0)}</td><td class="num">${nf0.format(i.qtd_novos||0)}</td><td class="num">${nf0.format(i.qtd_alterados||0)}</td><td class="num">${nf0.format(i.qtd_removidos||0)}</td><td class="num">${i.resumo?brlC(i.resumo.saldo_vencido):'—'}</td><td><span class="badge ${i.status==='ok'?'b-leaf':i.status==='erro'?'b-rose':'b-amber'}">${esc(i.status)}</span></td></tr>`).join('') || '<tr class="empty-row"><td colspan="10">Nenhuma importação.</td></tr>';
+  $('imp-hist').innerHTML = IMPORTS.map(i=>`<tr><td><b>${dBR(i.data_base)}</b></td><td class="cli">${esc(i.arquivo)}</td><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(i.importado_por)}</td><td class="num">${nf0.format(i.total_linhas||0)}</td><td class="num">${nf0.format(i.qtd_novos||0)}</td><td class="num">${nf0.format(i.qtd_alterados||0)}</td><td class="num">${nf0.format(i.qtd_removidos||0)}</td><td class="num">${i.resumo?brlC(i.resumo.saldo_vencido):'—'}</td><td><span class="badge ${i.status==='ok'?'b-leaf':i.status==='erro'?'b-rose':'b-amber'}">${esc(i.status)}</span></td><td>${(i.status!=='ok' || i.id===(ultimaBase()||{}).id) ? `<button class="btn btn-sm btn-del" data-id="${i.id}">Excluir</button>` : ''}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="11">Nenhuma importação.</td></tr>';
+  document.querySelectorAll('#imp-hist .btn-del').forEach(b=>b.onclick=()=>excluirBase(+b.dataset.id));
+}
+
+async function excluirBase(id){
+  const i = IMPORTS.find(x=>x.id===id); if(!i) return;
+  const ok = IMPORTS.filter(x=>x.status==='ok'), prev = ok.find(x=>x.id<id && x.id!==id);
+  const msg = i.status==='ok'
+    ? `Excluir a base de ${dBR(i.data_base)} (${i.arquivo}, importada em ${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})})?\n\n` + (prev ? `A plataforma volta para a base anterior, de ${dBR(prev.data_base)}.` : 'Era a única base: a plataforma fica sem dados até uma nova importação.') + '\n\nStatus de cobrança, agendamentos e observações NÃO são apagados.'
+    : `Excluir a importação com status "${i.status}"?`;
+  if(!confirm(msg)) return;
+  try{
+    const r = await rpc('excluir_importacao', { p_importacao_id:id });
+    toast('Base excluída'); $('imp-log').textContent = `✓ Base de ${dBR(i.data_base)} excluída.` + (r.restaurada ? ` Base atual voltou para a de ${dBR(prev.data_base)} (${nf0.format(r.linhas)} matrículas).` : '');
+    await carregarTudo();
+  }catch(e){
+    toast('Erro ao excluir', true);
+    $('imp-log').textContent = '✗ Erro ao excluir: ' + e.message + (/excluir_importacao/.test(e.message) ? ' — rode o arquivo supabase_excluir_base.sql no Supabase.' : '');
+  }
 }
 
 /* Leitura da planilha: localiza a aba com o cabeçalho de vencidos e mapeia as colunas pelo nome.
@@ -1149,7 +1169,8 @@ const txt = v => { if(v===null || v===undefined) return null; if(typeof v==='num
 
 function lerBase(wb){
   const obrig = ['matricula','faturamento','status','executivo','tmp - vencimento'];
-  for(const nome of wb.SheetNames){
+  const abas = [...wb.SheetNames].sort((a,b)=>(/vencid/i.test(b)?1:0)-(/vencid/i.test(a)?1:0)); // aba "Vencidos" primeiro
+  for(const nome of abas){
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[nome], { header:1, raw:true, defval:null });
     for(let h=0; h<Math.min(rows.length,15); h++){
       const head = (rows[h]||[]).map(norm);
@@ -1206,6 +1227,10 @@ async function importar(){
     const { aba, linhas } = lerBase(wb);
     const venc = linhas.filter(l=>l.status==='Vencido');
     logImp(`Aba "${aba.trim()}": ${nf0.format(linhas.length)} matrículas (${nf0.format(venc.length)} vencidas · ${brlC(soma(venc))}).`);
+    if(ultima && ultima.total_linhas && linhas.length < ultima.total_linhas * 0.5 &&
+       !confirm(`Atenção: esta base tem ${nf0.format(linhas.length)} matrículas, bem menos que a anterior (${nf0.format(ultima.total_linhas)}).\nSe continuar, ${nf0.format(ultima.total_linhas - linhas.length)} matrículas vão contar como "saíram da base".\n\nConfira se é o arquivo/aba certa. Importar mesmo assim?`)){
+      logImp('Importação cancelada.'); $('imp-prog').style.display='none'; return;
+    }
     prog(15);
     const [imp] = await api('/importacoes', { method:'POST', body:{ data_base:dataBase, arquivo:f.name, importado_por:SESSION.email, status:'processando' }, prefer:'return=representation' });
     impId = imp.id;
@@ -1388,13 +1413,25 @@ function csvGen(head, rows, nome){
 }
 
 function renderArrHist(){
-  $('arr-hist').innerHTML = ARR_IMPS.map(i=>`<tr><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td class="cli">${esc(i.arquivo)}</td><td>${esc(i.importado_por)}</td><td>${i.data_ini?dBR(i.data_ini)+' a '+dBR(i.data_fim):'—'}</td><td class="num">${nf0.format(i.linhas||0)}</td><td class="num">${nf0.format(i.matriculas||0)}</td><td class="num">${i.valor!=null?brlC(+i.valor):'—'}</td><td><span class="badge ${i.status==='ok'?'b-leaf':i.status==='erro'?'b-rose':'b-amber'}">${esc(i.status)}</span></td></tr>`).join('') || '<tr class="empty-row"><td colspan="8">Nenhuma importação.</td></tr>';
+  $('arr-hist').innerHTML = ARR_IMPS.map(i=>`<tr><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td class="cli">${esc(i.arquivo)}</td><td>${esc(i.importado_por)}</td><td>${i.data_ini?dBR(i.data_ini)+' a '+dBR(i.data_fim):'—'}</td><td class="num">${nf0.format(i.linhas||0)}</td><td class="num">${nf0.format(i.matriculas||0)}</td><td class="num">${i.valor!=null?brlC(+i.valor):'—'}</td><td><span class="badge ${i.status==='ok'?'b-leaf':i.status==='erro'?'b-rose':'b-amber'}">${esc(i.status)}</span></td><td><button class="btn btn-sm btn-del" data-id="${i.id}">Excluir</button></td></tr>`).join('') || '<tr class="empty-row"><td colspan="9">Nenhuma importação.</td></tr>';
+  document.querySelectorAll('#arr-hist .btn-del').forEach(b=>b.onclick=()=>excluirArrec(+b.dataset.id));
+}
+
+async function excluirArrec(id){
+  const i = ARR_IMPS.find(x=>x.id===id); if(!i) return;
+  if(!confirm(`Excluir a importação de arrecadação "${i.arquivo}" (${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})})?\n\nOs pagamentos gravados por ela${i.data_ini?` (crédito de ${dBR(i.data_ini)} a ${dBR(i.data_fim)})`:''} serão apagados. Depois é só importar o arquivo correto.`)) return;
+  try{
+    const r = await rpc('excluir_arrecadacao', { p_importacao_id:id });
+    toast('Importação excluída'); $('arr-log').textContent = `✓ Importação excluída (${nf0.format(r.linhas)} pagamentos removidos).`;
+    await carregarArrec(true);
+  }catch(e){ toast('Erro ao excluir', true); $('arr-log').textContent = '✗ Erro ao excluir: ' + e.message + (/excluir_arrecadacao/.test(e.message) ? ' — rode o arquivo supabase_excluir_base.sql no Supabase.' : ''); }
 }
 
 /* leitura da planilha de arrecadação (colunas pelo nome) */
 function lerArrec(wb){
   const obrig = ['val. autenticado','data credito','executivo','carteira'];
-  for(const nome of wb.SheetNames){
+  const abas = [...wb.SheetNames].sort((a,b)=>(/arrecad/i.test(norm(b))?1:0)-(/arrecad/i.test(norm(a))?1:0));
+  for(const nome of abas){
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[nome], { header:1, raw:true, defval:null });
     for(let h=0; h<Math.min(rows.length,15); h++){
       const head = (rows[h]||[]).map(norm);
