@@ -537,6 +537,7 @@
       <button data-view="adia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="lbl">Por dia</span></button>
       <button data-view="avenc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="lbl">Vencimento pago</span></button>
       <button data-view="amat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Por matrícula</span></button>
+      <button data-view="acomp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/></svg><span class="lbl">Comparativo mensal</span></button>
       <button data-view="aimp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span class="lbl">Importar</span></button>
     </nav>
 
@@ -587,12 +588,43 @@
         <div class="faint" id="am-info" style="font-size:12px;margin-top:8px;"></div></div>
     </section>
 
+    <section class="view" id="view-acomp">
+      <div class="card">
+        <div class="card-head">
+          <div><h2>Comparativo entre meses — por dia útil</h2>
+            <p class="sub">Compara o acumulado do mês com o <b>mesmo número de dias úteis</b> do mês de comparação (ex.: 17º dia útil de set × 17º dia útil de ago). Meses fechados usam a foto do fechamento; mês aberto é parcial. Filtros de carteira e executivo valem aqui; o período (datas) não.</p></div>
+          <div class="filters">
+            <div class="field"><label>Mês</label><select id="cm-a"></select></div>
+            <div class="field"><label>Comparar com</label><select id="cm-b"></select></div>
+            <div class="field"><label>Até o dia útil</label><select id="cm-n"></select></div>
+          </div>
+        </div>
+        <div id="cm-status"></div>
+        <div class="kpi-row" id="cm-kpis" style="margin-top:14px"></div>
+      </div>
+      <div class="card"><h2>Acumulado por dia útil</h2><p class="sub" id="cm-graf-sub"></p>
+        <div class="chart-box" style="height:320px;"><canvas id="chart-cm"></canvas></div></div>
+      <div class="card"><h2>Dia útil a dia útil</h2>
+        <div class="tablewrap scroll"><table><thead id="cm-du-head"></thead><tbody id="cm-du"></tbody></table></div></div>
+      <div class="two-col">
+        <div class="card"><h2>Por carteira</h2><p class="sub" id="cm-cart-sub"></p>
+          <div class="tablewrap"><table><thead id="cm-cart-head"></thead><tbody id="cm-cart"></tbody></table></div></div>
+        <div class="card"><h2>Histórico mensal</h2><p class="sub">Meses fechados + mês em aberto (parcial).</p>
+          <div class="tablewrap"><table><thead><tr><th>Mês</th><th>Situação</th><th class="num">Dias úteis</th><th class="num">Arrecadado</th><th class="num">Média / DU</th><th class="num">Var. média/DU</th></tr></thead><tbody id="cm-hist"></tbody></table></div></div>
+      </div>
+      <div class="card"><div class="card-head"><div><h2>Por executivo</h2><p class="sub" id="cm-exec-sub"></p></div><button class="btn btn-ghost btn-sm" id="btn-csv-cm">Exportar CSV</button></div>
+        <div class="tablewrap"><table><thead id="cm-exec-head"></thead><tbody id="cm-exec"></tbody></table></div></div>
+    </section>
+
     <section class="view" id="view-aimp">
       <div class="card"><h2>Importar base de arrecadação</h2>
         <p class="sub">Suba o arquivo ARRECADAÇÃO (.xlsx) do dia, sempre no mesmo padrão. O período de <b>Data Crédito</b> do arquivo substitui o mesmo período já gravado — então pode subir o arquivo acumulado do mês todo dia, sem duplicar. Meses anteriores continuam guardados.</p>
         <div class="upload-box" id="arr-upload-box"><input type="file" id="arr-file" accept=".xlsx,.xls,.xlsm">
           <div class="form-row"><button class="btn btn-primary" id="btn-arr-importar" disabled>Importar base</button></div></div>
         <div class="progress" id="arr-prog"><div></div></div><div class="log" id="arr-log"></div></div>
+            <div class="card"><h2>Fechamento mensal</h2>
+        <p class="sub">Ao <b>fechar</b> um mês, a arrecadação daquele mês de referência é consolidada e passa a ser a base do comparativo. O mês fechado fica travado para importação e exclusão; se precisar corrigir, clique em <b>Reabrir</b>, importe de novo e feche outra vez.</p>
+        <div class="tablewrap"><table><thead><tr><th>Mês de referência</th><th>Situação</th><th class="num">Dias úteis</th><th class="num">Pagamentos</th><th class="num">Matrículas</th><th class="num">Arrecadado</th><th></th></tr></thead><tbody id="fech-tab"></tbody></table></div></div>
       <div class="card"><h2>Histórico de importações</h2>
         <div class="tablewrap"><table><thead><tr><th>Importado em</th><th>Arquivo</th><th>Por</th><th>Período (crédito)</th><th class="num">Pagamentos</th><th class="num">Matrículas</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead><tbody id="arr-hist"></tbody></table></div></div>
     </section>
@@ -1280,7 +1312,7 @@ async function carregarArrec(resetPeriodo){
   try{
     ARR_IMPS = await api('/arrec_importacoes?select=*&order=id.desc');
     const ok = ARR_IMPS.filter(i=>i.status==='ok');
-    renderArrHist();
+    renderArrHist(); await carregarFechamentos();
     if(!ok.length){ ARR=[]; $('arr-loading').style.display='none'; $('arr-sem-base').style.display='block'; heroArr(); renderArr(); return; }
     if(resetPeriodo || !FA.de){
       const fim = ok.reduce((m,i)=>i.data_fim>m?i.data_fim:m, ok[0].data_fim);
@@ -1303,13 +1335,14 @@ async function carregarArrec(resetPeriodo){
 }
 $('fa-de').onchange = e=>{ if(e.target.value){ FA.de=e.target.value; carregarArrec(false); } };
 $('fa-ate').onchange = e=>{ if(e.target.value){ FA.ate=e.target.value; carregarArrec(false); } };
-$('fa-cart').onchange = e=>{ FA.cart=e.target.value; renderArr(); };
-$('fa-exec').onchange = e=>{ FA.exec=e.target.value; renderArr(); };
+$('fa-cart').onchange = e=>{ FA.cart=e.target.value; renderArr(); renderComp(); };
+$('fa-exec').onchange = e=>{ FA.exec=e.target.value; renderArr(); renderComp(); };
 document.querySelectorAll('#tabs-arr button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#tabs-arr button').forEach(x=>x.classList.toggle('active', x===b));
   document.querySelectorAll('#arr-area .view').forEach(v=>v.classList.toggle('active', v.id==='view-'+b.dataset.view));
   $('arr-filtros').style.display = b.dataset.view==='aimp' ? 'none' : 'flex';
   if(b.dataset.view==='adia') renderADia();
+  if(b.dataset.view==='acomp') renderComp();
 });
 const dadosA = () => ARR.filter(r => (!FA.cart || r.carteira===FA.cart) && (!FA.exec || r.executivo===FA.exec));
 function renderArr(){ renderAGeral(); renderADia(); renderAVenc(); renderAMat(); }
@@ -1415,6 +1448,165 @@ function csvGen(head, rows, nome){
 function renderArrHist(){
   $('arr-hist').innerHTML = ARR_IMPS.map(i=>`<tr><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td class="cli">${esc(i.arquivo)}</td><td>${esc(i.importado_por)}</td><td>${i.data_ini?dBR(i.data_ini)+' a '+dBR(i.data_fim):'—'}</td><td class="num">${nf0.format(i.linhas||0)}</td><td class="num">${nf0.format(i.matriculas||0)}</td><td class="num">${i.valor!=null?brlC(+i.valor):'—'}</td><td><span class="badge ${i.status==='ok'?'b-leaf':i.status==='erro'?'b-rose':'b-amber'}">${esc(i.status)}</span></td><td><button class="btn btn-sm btn-del" data-id="${i.id}">Excluir</button></td></tr>`).join('') || '<tr class="empty-row"><td colspan="9">Nenhuma importação.</td></tr>';
   document.querySelectorAll('#arr-hist .btn-del').forEach(b=>b.onclick=()=>excluirArrec(+b.dataset.id));
+}
+
+
+/* ---------- COMPARATIVO MENSAL (dias úteis) + FECHAMENTO ---------- */
+let FECH = {}, AGG = {}, MESES_ARR = [];
+function pascoa(y){ const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mes=Math.floor((h+l-7*m+114)/31),dia=((h+l-7*m+114)%31)+1; return new Date(Date.UTC(y,mes-1,dia)); }
+const FERIADOS_CACHE = {};
+function feriados(y){ // nacionais + bancários + RJ (São Sebastião 20/01, São Jorge 23/04)
+  if(FERIADOS_CACHE[y]) return FERIADOS_CACHE[y];
+  const fixos = ['01-01','01-20','04-21','04-23','05-01','09-07','10-12','11-02','11-15','11-20','12-25'].map(md=>y+'-'+md);
+  const p = pascoa(y), off = n => new Date(p.getTime()+n*864e5).toISOString().slice(0,10);
+  return FERIADOS_CACHE[y] = new Set([...fixos, off(-48), off(-47), off(-2), off(60)]); // carnaval (seg/ter), sexta santa, corpus christi
+}
+const ehDU = iso => { const d = new Date(iso+'T12:00:00Z').getUTCDay(); return d!==0 && d!==6 && !feriados(+iso.slice(0,4)).has(iso); };
+function diasUteisMes(ym){ const out=[]; const d=new Date(Date.UTC(+ym.slice(0,4), +ym.slice(5,7)-1, 1));
+  while(d.getUTCMonth()===+ym.slice(5,7)-1){ const iso=d.toISOString().slice(0,10); if(ehDU(iso)) out.push(iso); d.setUTCDate(d.getUTCDate()+1); } return out; }
+// último dia útil "com movimento": ignora créditos futuros e dias com valor residual (< 10% da média por dia útil)
+function nAutomatico(linhas, dus){
+  const hoje = hojeISO(), porDia = {};
+  linhas.forEach(l=>{ if(l.d<=hoje) porDia[l.d]=(porDia[l.d]||0)+(+l.v); });
+  const dias = Object.keys(porDia).sort(); if(!dias.length) return 0;
+  const tot = Object.values(porDia).reduce((a,b)=>a+b,0), media = tot / Math.max(1, duDe(dias[dias.length-1], dus));
+  const bons = dias.filter(d=>porDia[d] >= media*0.10);
+  return duDe((bons.length?bons:dias)[(bons.length?bons:dias).length-1], dus);
+}
+let CM_N = 0; // 0 = automático
+const duDe = (iso, dus) => Math.max(1, dus.filter(x=>x<=iso).length); // fim de semana/feriado conta junto com o dia útil anterior
+const ultimoDiaMes = ym => new Date(Date.UTC(+ym.slice(0,4), +ym.slice(5,7), 0)).toISOString().slice(0,10);
+const mesNome = ym => MESES[+ym.slice(5,7)-1] + '/' + ym.slice(0,4);
+
+function montarMesesArr(){
+  const set = new Set(Object.keys(FECH));
+  ARR_IMPS.filter(i=>i.status==='ok' && i.data_ini).forEach(i=>{ let ym=i.data_ini.slice(0,7); while(ym<=i.data_fim.slice(0,7)){ set.add(ym); ym=addMes(ym,1); } });
+  MESES_ARR = [...set].sort().reverse();
+  const a = $('cm-a').value, b = $('cm-b').value;
+  const opt = sel => MESES_ARR.map(m=>`<option value="${m}" ${m===sel?'selected':''}>${mesNome(m)}${FECH[m]?' · fechado':' · aberto'}</option>`).join('');
+  const va = MESES_ARR.includes(a) ? a : MESES_ARR[0], vb = MESES_ARR.includes(b) && b!==va ? b : (MESES_ARR.find(m=>m<va) || MESES_ARR[1] || '');
+  $('cm-a').innerHTML = opt(va); $('cm-b').innerHTML = opt(vb);
+  renderFechamento();
+}
+async function aggMes(ym){
+  if(FECH[ym] && FECH[ym].resumo) return FECH[ym].resumo;
+  if(!AGG[ym]) AGG[ym] = await rpc('arrec_agregado', { p_ini: ym+'-01', p_fim: ultimoDiaMes(ym) });
+  return AGG[ym];
+}
+$('cm-a').onchange = ()=>{ CM_N=0; renderComp(); };
+$('cm-n').onchange = e=>{ CM_N=+e.target.value; renderComp(); };
+$('cm-b').onchange = ()=>renderComp();
+
+async function renderComp(){
+  if(!$('view-acomp').classList.contains('active')) return;
+  const A = $('cm-a').value, B = $('cm-b').value;
+  if(!A){ $('cm-status').innerHTML = '<div class="faint">Importe pelo menos um mês de arrecadação.</div>'; return; }
+  $('cm-status').innerHTML = '<div class="faint">Calculando…</div>';
+  try{
+    const [ga, gb] = await Promise.all([aggMes(A), B ? aggMes(B) : Promise.resolve({ linhas:[], matriculas:0 })]);
+    const filt = l => (!FA.cart || l.c===FA.cart) && (!FA.exec || l.e===FA.exec);
+    const la = ga.linhas.filter(filt), lb = gb.linhas.filter(filt);
+    const dusA = diasUteisMes(A), dusB = B ? diasUteisMes(B) : [];
+    const hoje = hojeISO();
+    const fechadoA = !!FECH[A] || ultimoDiaMes(A) < hoje;
+    const nAuto = fechadoA ? dusA.length : nAutomatico(ga.linhas, dusA);
+    const N = CM_N && CM_N<=dusA.length ? CM_N : nAuto;
+    $('cm-n').innerHTML = dusA.map((d,i)=>`<option value="${i+1===nAuto?0:i+1}" ${i+1===N?'selected':''}>${i+1}º (${dBRc(d)})${i+1===nAuto?' · automático':''}</option>`).join('');
+    const porDU = (linhas, dus) => { const v = Array(dus.length+1).fill(0); linhas.forEach(l=>{ v[Math.min(duDe(l.d,dus), dus.length)] += +l.v; }); return v; };
+    const vA = porDU(la, dusA), vB = porDU(lb, dusB);
+    const acc = v => { const o=[0]; for(let k=1;k<v.length;k++) o[k]=o[k-1]+v[k]; return o; };
+    const aA = acc(vA), aB = acc(vB);
+    const totA = aA[dusA.length]||0, totB = aB[dusB.length]||0;
+    const Nb = Math.min(N, dusB.length), acA = aA[N]||0, acB = aB[Nb]||0;
+    const varP = acB ? (acA/acB-1)*100 : null;
+    const proj = (!fechadoA && acB>0 && totB>0) ? acA / (acB/totB) : null;
+    const pctV = x => x==null ? '—' : (x>0?'+':'') + x.toFixed(1).replace('.',',') + '%';
+    const corV = x => x==null ? '' : x>=0 ? 'leaf' : 'rose';
+    $('cm-status').innerHTML = `<div class="callout ${fechadoA?'':'amber'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg><span>
+      <b>${mesNome(A)}</b> ${FECH[A]?'fechado':fechadoA?'encerrado (ainda não fechado)':'em aberto — comparativo parcial'}: ${N} de ${dusA.length} dias úteis.
+      ${B?` Comparando com os ${Nb} primeiros dias úteis de <b>${mesNome(B)}</b> (${FECH[B]?'fechado':'aberto'}, ${dusB.length} dias úteis no mês).`:''}</span></div>`;
+    $('cm-kpis').innerHTML = `
+      <div class="kpi leaf"><div class="label">${mesNome(A)} até o ${N}º DU</div><div class="value leaf">${brlC(acA)}</div><div class="hint">${fechadoA?'mês completo':'acumulado até '+dBR(dusA[N-1]||'')}</div></div>
+      <div class="kpi navy"><div class="label">${B?mesNome(B)+' até o '+Nb+'º DU':'Sem mês de comparação'}</div><div class="value">${B?brlC(acB):'—'}</div><div class="hint">${B?'mesmo nº de dias úteis · até '+dBR(dusB[Nb-1]||''):''}</div></div>
+      <div class="kpi ${corV(varP)}"><div class="label">Variação no mesmo período</div><div class="value ${corV(varP)}">${pctV(varP)}</div><div class="hint">${B?(acA-acB>=0?'+':'')+brlC(acA-acB)+' · média/DU '+brlC(N?acA/N:0)+' × '+brlC(Nb?acB/Nb:0):''}</div></div>
+      <div class="kpi amber"><div class="label">${proj!=null?'Projeção de fechamento':'Total '+(B?mesNome(B):'')}</div><div class="value amber">${proj!=null?brlC(proj):B?brlC(totB):'—'}</div><div class="hint">${proj!=null?`se seguir a curva de ${mesNome(B)} (total do mês: ${brlC(totB)}) · ${pctV((proj/totB-1)*100)}`:B?`${mesNome(A)} total: ${brlC(totA)} · ${pctV(totB?(totA/totB-1)*100:null)}`:''}</div></div>`;
+    $('cm-graf-sub').textContent = `Linha cheia = ${mesNome(A)} · tracejada = ${B?mesNome(B):'—'}. Barras = valor de cada dia útil de ${mesNome(A)}.`;
+    const maxK = Math.max(dusA.length, dusB.length), labels = Array.from({length:maxK},(_,i)=>(i+1)+'º');
+    if(window.Chart){
+      CHARTS.cm && CHARTS.cm.destroy();
+      CHARTS.cm = new Chart($('chart-cm'), { data:{ labels, datasets:[
+        { type:'line', label:'Acumulado '+mesNome(A), data:labels.map((_,i)=>i+1<=N?aA[i+1]:null), borderColor:'#2C9A66', backgroundColor:'#2C9A66', tension:.25, pointRadius:2, yAxisID:'y' },
+        ...(B?[{ type:'line', label:'Acumulado '+mesNome(B), data:labels.map((_,i)=>i+1<=dusB.length?aB[i+1]:null), borderColor:'#0A2A43', backgroundColor:'#0A2A43', borderDash:[6,4], tension:.25, pointRadius:1.5, yAxisID:'y' }]:[]),
+        { type:'bar', label:'Dia útil '+mesNome(A), data:labels.map((_,i)=>i+1<=N?vA[i+1]:null), backgroundColor:'rgba(44,154,102,.25)', borderRadius:4, yAxisID:'y2' } ] },
+        options:{ animation:false, maintainAspectRatio:false, interaction:{ mode:'index', intersect:false },
+          plugins:{ tooltip:{ callbacks:{ label:c=>c.dataset.label+': '+brl(c.raw) } } },
+          scales:{ y:{ ticks:{ callback:v=>brlC(v) }, grid:{ color:'#EEF3F6' } }, y2:{ position:'right', ticks:{ callback:v=>brlC(v) }, grid:{ display:false } }, x:{ grid:{ display:false } } } } });
+    }
+    $('cm-du-head').innerHTML = `<tr><th>Dia útil</th><th>${mesNome(A)}</th><th class="num">Valor</th><th class="num">Acumulado</th>${B?`<th>${mesNome(B)}</th><th class="num">Valor</th><th class="num">Acumulado</th><th class="num">Var. acumulada</th>`:''}</tr>`;
+    $('cm-du').innerHTML = labels.map((lb,i)=>{ const k=i+1, temA=k<=N, temB=k<=dusB.length; const v = temA&&temB&&aB[k] ? (aA[k]/aB[k]-1)*100 : null;
+      return `<tr class="${k===N&&!fechadoA?'sel-row':''}"><td><b>${lb}</b></td><td>${dusA[i]?dBRc(dusA[i])+' <span class="muted">'+diaSem(dusA[i])+'</span>':'—'}</td><td class="num">${temA?brl(vA[k]):'<span class="faint">—</span>'}</td><td class="num">${temA?'<b>'+brl(aA[k])+'</b>':'<span class="faint">—</span>'}</td>
+        ${B?`<td>${dusB[i]?dBRc(dusB[i])+' <span class="muted">'+diaSem(dusB[i])+'</span>':'—'}</td><td class="num">${temB?brl(vB[k]):'—'}</td><td class="num">${temB?brl(aB[k]):'—'}</td><td class="num" style="color:var(--${v==null?'text-faint':v>=0?'leaf':'rose'});font-weight:700">${pctV(v)}</td>`:''}</tr>`; }).join('');
+    // carteira / executivo: até o DU N (mesmo período) + total do mês de comparação
+    const ateN = (linhas, dus, n) => linhas.filter(l=>duDe(l.d,dus)<=n);
+    const soma2 = arr => arr.reduce((s,l)=>s+(+l.v),0);
+    const grp = (arr,k) => arr.reduce((m,l)=>((m[l[k]]=m[l[k]]||[]).push(l),m),{});
+    const pa = grp(ateN(la,dusA,N),'c'), pb = grp(ateN(lb,dusB,Nb),'c'), tb = grp(lb,'c');
+    const carts = [...new Set([...Object.keys(pa),...Object.keys(tb)])].sort((x,y)=>soma2(pa[y]||[])-soma2(pa[x]||[]));
+    const headCmp = nome => `<tr><th>${nome}</th><th class="num">${mesNome(A)} (até ${N}º DU)</th>${B?`<th class="num">${mesNome(B)} (até ${Nb}º DU)</th><th class="num">Var.</th><th class="num">${mesNome(B)} total</th>`:''}</tr>`;
+    const linhaCmp = (nome, x, y, t) => { const v = y ? (x/y-1)*100 : null; return `<tr><td>${nome==='—'?'<span class="muted">(sem executivo na base)</span>':esc(nome)}</td><td class="num"><b>${brl(x)}</b></td>${B?`<td class="num">${brl(y)}</td><td class="num" style="color:var(--${v==null?'text-faint':v>=0?'leaf':'rose'});font-weight:700">${pctV(v)}</td><td class="num muted">${brl(t)}</td>`:''}</tr>`; };
+    $('cm-cart-sub').textContent = `Mesmo número de dias úteis nos dois meses.`;
+    $('cm-cart-head').innerHTML = headCmp('Carteira');
+    $('cm-cart').innerHTML = carts.map(c=>linhaCmp(c, soma2(pa[c]||[]), soma2(pb[c]||[]), soma2(tb[c]||[]))).join('')
+      + `<tr class="total"><td>Total</td><td class="num">${brl(acA)}</td>${B?`<td class="num">${brl(acB)}</td><td class="num">${pctV(varP)}</td><td class="num">${brl(totB)}</td>`:''}</tr>`;
+    const ea = grp(ateN(la,dusA,N),'e'), eb = grp(ateN(lb,dusB,Nb),'e'), etb = grp(lb,'e');
+    const execs = [...new Set([...Object.keys(ea),...Object.keys(etb)])].sort((x,y)=>soma2(ea[y]||[])-soma2(ea[x]||[]));
+    $('cm-exec-sub').textContent = `${mesNome(A)} até o ${N}º dia útil × ${B?mesNome(B)+' até o '+Nb+'º dia útil':'—'}.`;
+    $('cm-exec-head').innerHTML = headCmp('Executivo');
+    $('cm-exec').innerHTML = execs.map(e=>linhaCmp(e, soma2(ea[e]||[]), soma2(eb[e]||[]), soma2(etb[e]||[]))).join('')
+      + `<tr class="total"><td>Total</td><td class="num">${brl(acA)}</td>${B?`<td class="num">${brl(acB)}</td><td class="num">${pctV(varP)}</td><td class="num">${brl(totB)}</td>`:''}</tr>`;
+    $('btn-csv-cm').onclick = ()=>csvGen(['Executivo', `${mesNome(A)} até ${N}º DU`, `${B?mesNome(B):''} até ${Nb}º DU`, 'Var %', `${B?mesNome(B):''} total`],
+      execs.map(e=>{ const x=soma2(ea[e]||[]), y=soma2(eb[e]||[]); return [e, nf2.format(x), nf2.format(y), y?((x/y-1)*100).toFixed(1).replace('.',','):'', nf2.format(soma2(etb[e]||[]))]; }), 'comparativo_mensal_executivos');
+    renderHistMensal();
+  }catch(e){ $('cm-status').innerHTML = `<div class="msg" style="color:var(--rose)">Erro no comparativo: ${esc(e.message)}${/arrec_agregado|arrec_fechamentos/.test(e.message)?' — rode o arquivo supabase_fechamento_arrecadacao.sql no Supabase.':''}</div>`; }
+}
+async function renderHistMensal(){
+  const meses = MESES_ARR.slice().sort();
+  const rows = [];
+  for(const m of meses){
+    const f = FECH[m]; let v, du = diasUteisMes(m).length, sit, n = du;
+    if(f){ v = +f.valor; sit = '<span class="badge b-leaf">fechado</span>'; }
+    else { const g = await aggMes(m); v = g.linhas.reduce((s,l)=>s+(+l.v),0);
+      n = ultimoDiaMes(m) < hojeISO() ? du : nAutomatico(g.linhas, diasUteisMes(m)); v = g.linhas.filter(l=>duDe(l.d, diasUteisMes(m))<=n).reduce((s,l)=>s+(+l.v),0);
+      sit = `<span class="badge b-amber">aberto · ${n}/${du} DU</span>`; }
+    rows.push({ m, v, du, n, sit });
+  }
+  $('cm-hist').innerHTML = rows.slice().reverse().map((r,i,arr)=>{ const ant = arr[i+1]; const media = r.n ? r.v/r.n : 0; const mAnt = ant && ant.n ? ant.v/ant.n : 0;
+    const v = mAnt ? (media/mAnt-1)*100 : null;
+    return `<tr><td><b>${mesNome(r.m)}</b></td><td>${r.sit}</td><td class="num">${r.n}${r.n!==r.du?' / '+r.du:''}</td><td class="num"><b>${brl(r.v)}</b></td><td class="num">${brl(media)}</td><td class="num" style="color:var(--${v==null?'text-faint':v>=0?'leaf':'rose'});font-weight:700" title="variação da média por dia útil">${v==null?'—':(v>0?'+':'')+v.toFixed(1).replace('.',',')+'%'}</td></tr>`; }).join('') || '<tr class="empty-row"><td colspan="6">—</td></tr>';
+}
+
+function renderFechamento(){
+  $('fech-tab').innerHTML = MESES_ARR.map(m=>{ const f = FECH[m];
+    return `<tr><td><b>${mesNome(m)}</b></td><td>${f?`<span class="badge b-leaf">Fechado</span> <span class="muted" style="font-size:12px">${new Date(f.fechado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}${f.fechado_por?' · '+esc(f.fechado_por):''}</span>`:'<span class="badge b-amber">Aberto</span>'}</td>
+      <td class="num">${f?f.dias_uteis:diasUteisMes(m).length}</td><td class="num">${f?nf0.format(f.pagamentos):'—'}</td><td class="num">${f?nf0.format(f.matriculas):'—'}</td><td class="num">${f?'<b>'+brl(+f.valor)+'</b>':'—'}</td>
+      <td>${f?`<button class="btn btn-sm btn-del" data-reabrir="${m}">Reabrir</button>`:`<button class="btn btn-sm btn-primary" data-fechar="${m}">Fechar mês</button>`}</td></tr>`; }).join('') || '<tr class="empty-row"><td colspan="7">Importe uma base de arrecadação para poder fechar o mês.</td></tr>';
+  document.querySelectorAll('#fech-tab [data-fechar]').forEach(b=>b.onclick=async()=>{
+    const m = b.dataset.fechar;
+    if(!confirm(`Fechar a arrecadação de ${mesNome(m)}?\n\nO mês será consolidado para o comparativo e ficará travado para novas importações e exclusões (dá para reabrir depois).`)) return;
+    try{ const r = await rpc('fechar_mes_arrec', { p_mes:m, p_dias_uteis:diasUteisMes(m).length }); toast(`${mesNome(m)} fechado: ${brlC(+r.valor)}`); await carregarFechamentos(); }
+    catch(e){ toast('Erro ao fechar', true); alert('Erro ao fechar o mês: ' + e.message + (/fechar_mes_arrec/.test(e.message)?'\n\nRode o arquivo supabase_fechamento_arrecadacao.sql no Supabase.':'')); }
+  });
+  document.querySelectorAll('#fech-tab [data-reabrir]').forEach(b=>b.onclick=async()=>{
+    const m = b.dataset.reabrir;
+    if(!confirm(`Reabrir ${mesNome(m)}?\n\nA foto do fechamento será apagada e o mês volta a aceitar importações. Os pagamentos continuam gravados.`)) return;
+    try{ await rpc('reabrir_mes_arrec', { p_mes:m }); toast(`${mesNome(m)} reaberto`); await carregarFechamentos(); }
+    catch(e){ toast('Erro ao reabrir', true); }
+  });
+}
+async function carregarFechamentos(){
+  try{ const f = await api('/arrec_fechamentos?select=*&order=mes_ref'); FECH = Object.fromEntries(f.map(x=>[x.mes_ref, x])); }
+  catch(e){ FECH = {}; }
+  AGG = {}; montarMesesArr(); renderComp();
 }
 
 async function excluirArrec(id){
