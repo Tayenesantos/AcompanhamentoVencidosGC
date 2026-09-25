@@ -809,7 +809,8 @@
         </div>
         <h3 style="margin-top:18px">Executivos considerados na meta do time</h3>
         <div class="cfg-execs" id="cfg-execs"></div>
-        <details style="margin-top:16px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Fontes externas (Pesquisa de Satisfação e Atualização Cadastral)</summary>
+        <details style="margin-top:16px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Fontes externas (Pesquisa de Satisfação e Atualização Cadastral) — já vêm preenchidas</summary>
+          <p class="sub" style="margin:10px 0 0">Não precisa mexer. A Pesquisa lê a tabela <b>registros</b> (validadas pela data de validação) e a Atualização Cadastral lê a tabela <b>matriculas</b> (status <b>cadastro_atualizado</b>, pela data de atualização, sem as cargas iniciais de 04 e 06/08). Só altere se a estrutura das outras plataformas mudar.</p>
           <div class="cfg-grid" style="margin-top:12px">
             <div class="field" style="grid-column:span 2"><label>Pesquisa — URL do projeto Supabase</label><input id="cfg-pq-url"></div>
             <div class="field" style="grid-column:span 2"><label>Pesquisa — chave publishable</label><input id="cfg-pq-key"></div>
@@ -2524,7 +2525,9 @@ const PROD_CFG_PADRAO = {
   meta_cons_ciclo: 150, meta_acion_dia: 15, meta_pesq_semana: 15, nota_alvo: 4.5, meta_alt_semana: 15,
   excluir_parecer: ['gc visita em campo'], executivos: null,
   pesquisa: { url:'https://yidsjyfcuzytkejctqfp.supabase.co', key:'sb_publishable_dJWDHA-YGrM3jIXgFBuk1w_ZxZSaHBQ' },
-  alteracao: { url:'https://yidsjyfcuzytkejctqfp.supabase.co', key:'sb_publishable_dJWDHA-YGrM3jIXgFBuk1w_ZxZSaHBQ', tabela:'', col_exec:'', col_data:'', filtro:'' }
+  // Atualização Cadastral: tabela matriculas — conta quem ficou "cadastro_atualizado" pela data de atualização (validação),
+  // ignorando as cargas iniciais da base (04 e 06/08/2026)
+  alteracao: { url:'https://yidsjyfcuzytkejctqfp.supabase.co', key:'sb_publishable_dJWDHA-YGrM3jIXgFBuk1w_ZxZSaHBQ', tabela:'matriculas', col_exec:'executivo', col_data:'atualizado_em', filtro:'status_fluxo=eq.cadastro_atualizado&atualizado_em=gte.2026-08-07' }
 };
 let PCFG = JSON.parse(JSON.stringify(PROD_CFG_PADRAO)), PROD_OK = false;
 const PD = { mes:'', visao:'', ev:{}, consMeta:[], fontes:{}, execsTodos:[] };
@@ -2550,15 +2553,23 @@ function periodoDe(ind, ym){ // calendário; consumo = dia 5 até dia 4 do mês 
 }
 function execsMeta(){ return PD.visao ? [PD.visao] : (PCFG.executivos && PCFG.executivos.length ? PCFG.executivos : PD.execsTodos); }
 
+function normalizarFonte(f, padrao){ // corrige automaticamente URL, nome da tabela e campos vazios
+  const o = { ...padrao, ...Object.fromEntries(Object.entries(f||{}).filter(([k,v])=>v!=null && String(v).trim()!=='')) };
+  o.url = String(o.url).trim().replace(/\/+$/,'').replace(/\/rest\/v1$/i,'');
+  if(o.tabela) o.tabela = String(o.tabela).trim().toLowerCase();
+  if(padrao.tabela && o.tabela===padrao.tabela){ o.col_exec = padrao.col_exec; o.col_data = padrao.col_data; o.filtro = padrao.filtro; } // estrutura conhecida: usa sempre os campos certos
+  return o;
+}
 async function carregarProdCfg(){
-  try{ const r = await api('/prod_config?select=*&chave=eq.geral'); if(r[0] && r[0].valor) PCFG = { ...JSON.parse(JSON.stringify(PROD_CFG_PADRAO)), ...r[0].valor,
-      pesquisa:{ ...PROD_CFG_PADRAO.pesquisa, ...(r[0].valor.pesquisa||{}) }, alteracao:{ ...PROD_CFG_PADRAO.alteracao, ...(r[0].valor.alteracao||{}) } }; }
+  try{ const r = await api('/prod_config?select=*&chave=eq.geral'); if(r[0] && r[0].valor) PCFG = { ...JSON.parse(JSON.stringify(PROD_CFG_PADRAO)), ...r[0].valor }; }
   catch(e){ if(/prod_config/.test(e.message)) throw new Error('Rode o arquivo supabase_produtividade.sql no Supabase.'); throw e; }
+  PCFG.pesquisa = normalizarFonte(PCFG.pesquisa, PROD_CFG_PADRAO.pesquisa);
+  PCFG.alteracao = normalizarFonte(PCFG.alteracao, PROD_CFG_PADRAO.alteracao);
 }
 async function fetchExterno(url, key, path){ // lê de outro projeto Supabase (Pesquisa / Atualização Cadastral)
   const out=[]; const sep = path.includes('?')?'&':'?';
   for(let off=0; off<200000; off+=1000){
-    const res = await fetch(url.replace(/\/$/,'') + '/rest/v1' + path + sep + 'limit=1000&offset=' + off, { headers:{ apikey:key, Authorization:'Bearer '+key } });
+    const res = await fetch(String(url).trim().replace(/\/+$/,'').replace(/\/rest\/v1$/i,'') + '/rest/v1' + path + sep + 'limit=1000&offset=' + off, { headers:{ apikey:key, Authorization:'Bearer '+key } });
     if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0,160));
     const p = await res.json(); out.push(...p); if(p.length<1000) break;
   }
@@ -2944,8 +2955,8 @@ function lerCfgTela(){
   return { meta_cons_ciclo:+$('cfg-cons').value||150, meta_acion_dia:+$('cfg-acion').value||0, meta_pesq_semana:+$('cfg-pesq').value||0, nota_alvo:+$('cfg-nota').value||0, meta_alt_semana:+$('cfg-alt').value||0,
     excluir_parecer: $('cfg-excl').value.split('\n').map(s=>s.trim()).filter(Boolean),
     executivos: [...document.querySelectorAll('#cfg-execs input:checked')].map(i=>i.value),
-    pesquisa:{ url:$('cfg-pq-url').value.trim(), key:$('cfg-pq-key').value.trim() },
-    alteracao:{ url:$('cfg-al-url').value.trim(), key:$('cfg-al-key').value.trim(), tabela:$('cfg-al-tab').value.trim(), col_exec:$('cfg-al-exec').value.trim(), col_data:$('cfg-al-data').value.trim(), filtro:$('cfg-al-filtro').value.trim() } };
+    pesquisa: normalizarFonte({ url:$('cfg-pq-url').value, key:$('cfg-pq-key').value.trim() }, PROD_CFG_PADRAO.pesquisa),
+    alteracao: normalizarFonte({ url:$('cfg-al-url').value, key:$('cfg-al-key').value.trim(), tabela:$('cfg-al-tab').value, col_exec:$('cfg-al-exec').value.trim(), col_data:$('cfg-al-data').value.trim(), filtro:$('cfg-al-filtro').value.trim() }, PROD_CFG_PADRAO.alteracao) };
 }
 $('btn-cfg-salvar').onclick = async ()=>{
   const v = lerCfgTela();
