@@ -810,7 +810,7 @@
         <h3 style="margin-top:18px">Executivos considerados na meta do time</h3>
         <div class="cfg-execs" id="cfg-execs"></div>
         <details style="margin-top:16px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Fontes externas (Pesquisa de Satisfação e Atualização Cadastral) — já vêm preenchidas</summary>
-          <p class="sub" style="margin:10px 0 0">Não precisa mexer. A Pesquisa lê a tabela <b>registros</b> (validadas pela data de validação) e a Atualização Cadastral lê a tabela <b>matriculas</b> (status <b>cadastro_atualizado</b>, pela data de atualização, sem as cargas iniciais de 04 e 06/08). Só altere se a estrutura das outras plataformas mudar.</p>
+          <p class="sub" style="margin:10px 0 0">Não precisa mexer. A Pesquisa lê a tabela <b>registros</b> (validadas pela data de validação) e a Atualização Cadastral lê só a <b>contagem</b> de matrículas com status <b>cadastro_atualizado</b> por executivo e dia (função segura <b>prod_atualizacao_diaria</b>, sem acesso aos dados pessoais), sem as cargas iniciais de 04 e 06/08. Só altere se a estrutura das outras plataformas mudar.</p>
           <div class="cfg-grid" style="margin-top:12px">
             <div class="field" style="grid-column:span 2"><label>Pesquisa — URL do projeto Supabase</label><input id="cfg-pq-url"></div>
             <div class="field" style="grid-column:span 2"><label>Pesquisa — chave publishable</label><input id="cfg-pq-key"></div>
@@ -2606,7 +2606,16 @@ async function carregarProd(){
     }catch(e){ PD.ev.pesq = []; PD.fontes.pesq = 'Erro ao ler a Pesquisa: ' + e.message; }
     // Atualização Cadastral (outra plataforma)
     const al = PCFG.alteracao;
-    if(al.tabela && al.col_exec && al.col_data){
+    if(al.tabela==='matriculas'){
+      // tabela protegida (dados pessoais): lê só a contagem por executivo e dia, pela função segura prod_atualizacao_diaria
+      try{
+        const base = String(al.url).trim().replace(/\/+$/,'').replace(/\/rest\/v1$/i,'');
+        const res = await fetch(base + '/rest/v1/rpc/prod_atualizacao_diaria', { method:'POST', headers:{ apikey:al.key, Authorization:'Bearer '+al.key, 'Content-Type':'application/json' }, body:JSON.stringify({ p_ini:ini, p_fim:fim }) });
+        if(!res.ok){ const t = await res.text(); throw new Error(res.status===404 || /prod_atualizacao_diaria|PGRST202/.test(t) ? 'falta rodar o arquivo RODAR_NO_PROJETO_ATUALIZACAO_CADASTRAL.sql no projeto da Atualização Cadastral.' : 'HTTP ' + res.status + ' ' + t.slice(0,160)); }
+        PD.ev.alt = (await res.json()).map(r=>({ e:r.executivo, d:String(r.dia).slice(0,10), q:+r.qtd }));
+        PD.fontes.alt = 'ok';
+      }catch(e){ PD.ev.alt = []; PD.fontes.alt = 'Atualização Cadastral: ' + e.message; }
+    } else if(al.tabela && al.col_exec && al.col_data){
       try{
         const regs = await fetchExterno(al.url, al.key, `/${al.tabela}?select=${al.col_exec},${al.col_data}&${al.col_data}=gte.${ini}${al.filtro?'&'+al.filtro:''}`);
         PD.ev.alt = regs.filter(r=>r[al.col_data]).map(r=>({ e:r[al.col_exec], d:isoLocal(new Date(String(r[al.col_data]).length<=10 ? r[al.col_data]+'T12:00:00' : r[al.col_data])), q:1 }));
@@ -2967,7 +2976,9 @@ $('btn-cfg-salvar').onclick = async ()=>{
 $('btn-cfg-testar').onclick = async ()=>{
   const v = lerCfgTela(), m = $('cfg-msg'); m.style.color='var(--text-mut)'; m.textContent='Testando…'; const r=[];
   try{ const x = await fetchExterno(v.pesquisa.url, v.pesquisa.key, '/registros?select=analista&limit=1'); r.push('Pesquisa: OK'); }catch(e){ r.push('Pesquisa: ' + e.message); }
-  if(v.alteracao.tabela){ try{ await fetchExterno(v.alteracao.url, v.alteracao.key, `/${v.alteracao.tabela}?select=${v.alteracao.col_exec||'*'},${v.alteracao.col_data||''}`.replace(/,$/,'')); r.push('Alteração cadastral: OK'); }catch(e){ r.push('Alteração cadastral: ' + e.message); } }
+  if(v.alteracao.tabela==='matriculas'){ try{ const res = await fetch(v.alteracao.url + '/rest/v1/rpc/prod_atualizacao_diaria', { method:'POST', headers:{ apikey:v.alteracao.key, Authorization:'Bearer '+v.alteracao.key, 'Content-Type':'application/json' }, body:JSON.stringify({ p_ini:hojeISO().slice(0,8)+'01', p_fim:hojeISO() }) });
+      r.push(res.ok ? 'Alteração cadastral: OK' : 'Alteração cadastral: ' + (res.status===404 ? 'falta rodar RODAR_NO_PROJETO_ATUALIZACAO_CADASTRAL.sql' : 'HTTP '+res.status)); }catch(e){ r.push('Alteração cadastral: ' + e.message); } }
+  else if(v.alteracao.tabela){ try{ await fetchExterno(v.alteracao.url, v.alteracao.key, `/${v.alteracao.tabela}?select=${v.alteracao.col_exec||'*'},${v.alteracao.col_data||''}`.replace(/,$/,'')); r.push('Alteração cadastral: OK'); }catch(e){ r.push('Alteração cadastral: ' + e.message); } }
   else r.push('Alteração cadastral: tabela não informada');
   m.textContent = r.join(' · ');
 };
