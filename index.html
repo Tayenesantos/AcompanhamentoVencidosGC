@@ -212,7 +212,7 @@
   .login-wrap{ max-width:420px; margin:0 auto; }
   .login-wrap .field{ margin-bottom:14px; }
   .loading{ text-align:center; padding:50px 10px; color:var(--text-mut); font-size:14px; }
-  .toast{ position:fixed; bottom:22px; right:22px; background:var(--navy); color:#fff; padding:12px 18px; border-radius:12px; box-shadow:var(--shadow-lg); font-size:13px; font-weight:600; opacity:0; transform:translateY(10px); transition:.25s; z-index:999; pointer-events:none; }
+  .toast{ max-width:min(520px,90vw); line-height:1.45; position:fixed; bottom:22px; right:22px; background:var(--navy); color:#fff; padding:12px 18px; border-radius:12px; box-shadow:var(--shadow-lg); font-size:13px; font-weight:600; opacity:0; transform:translateY(10px); transition:.25s; z-index:999; pointer-events:none; }
   .toast.show{ opacity:1; transform:none; }
   .toast.err{ background:var(--rose); }
   footer.note{ margin-top:30px; font-size:12px; color:var(--text-mut); line-height:1.7; text-align:center; padding:0 20px; }
@@ -863,7 +863,7 @@ const dtBR = iso => iso ? dBRc(iso.slice(0,10)) + ' ' + iso.slice(11,16) : '';
 const hojeISO = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const soma = (arr, f='faturamento') => arr.reduce((s,r)=>s+(+r[f]||0),0);
 const pagouAlgo = r => (+r.valor_pago_setembro||0) > 0;
-function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast'+(err?' err':''),2600); }
+function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(t._h); t._h=setTimeout(()=>t.className='toast'+(err?' err':''), err?9000:2600); }
 function tmpBadge(s){ const c=TMP_BY[s]; return `<span class="badge ${c?c.badge:'b-gray'}">${esc(s||'—')}</span>`; }
 function statusCob(r){ const a=ACOMP[r.matricula]; return (a && a.status_cobranca) || r.status_cobranca_base || ''; }
 function dataAg(r){ const a=ACOMP[r.matricula]; return (a && a.data_pagamento_agendado) || ''; }
@@ -878,22 +878,41 @@ async function authToken(body, grant){
   if(!res.ok || !data.access_token) throw new Error(data.error_description || data.msg || 'E-mail ou senha inválidos.');
   return { access_token:data.access_token, refresh_token:data.refresh_token, email:(data.user&&data.user.email)||body.email, expires_at:Date.now() + (data.expires_in||3600)*1000 };
 }
-async function refreshSessao(){
-  if(!SESSION || !SESSION.refresh_token) throw new Error('Sessão expirada. Entre novamente.');
-  const s = await authToken({ refresh_token:SESSION.refresh_token }, 'refresh_token');
-  s.email = s.email || SESSION.email; salvarSessao(s);
+let REFRESH_EM_ANDAMENTO = null; // uma renovação por vez (o Supabase invalida o refresh token após o uso)
+function refreshSessao(){
+  if(REFRESH_EM_ANDAMENTO) return REFRESH_EM_ANDAMENTO;
+  REFRESH_EM_ANDAMENTO = (async ()=>{
+    if(!SESSION || !SESSION.refresh_token) throw new Error('Sessão expirada. Entre novamente.');
+    const s = await authToken({ refresh_token:SESSION.refresh_token }, 'refresh_token');
+    s.email = s.email || SESSION.email; salvarSessao(s);
+  })();
+  REFRESH_EM_ANDAMENTO.finally(()=>{ REFRESH_EM_ANDAMENTO = null; }).catch(()=>{});
+  return REFRESH_EM_ANDAMENTO;
+}
+function sessaoExpirada(){
+  sair();
+  const msg = $('login-msg'); msg.style.color = 'var(--rose)';
+  msg.textContent = 'Sua sessão expirou (a página ficou aberta muito tempo). Entre novamente e repita a operação.';
 }
 async function api(path, { method='GET', body, prefer, headers={} } = {}, retry=true){
-  if(SESSION && SESSION.expires_at && Date.now() > SESSION.expires_at - 60000){ try{ await refreshSessao(); }catch(e){} }
+  if(SESSION && SESSION.expires_at && Date.now() > SESSION.expires_at - 120000){ try{ await refreshSessao(); }catch(e){} }
   const h = { apikey:SUPABASE_KEY, Authorization:'Bearer ' + (SESSION ? SESSION.access_token : SUPABASE_KEY), ...headers };
   if(body !== undefined) h['Content-Type'] = 'application/json';
   if(prefer) h['Prefer'] = prefer;
   const res = await fetch(REST + path, { method, headers:h, body: body!==undefined ? JSON.stringify(body) : undefined });
-  if(res.status === 401 && retry){ await refreshSessao(); return api(path, { method, body, prefer, headers }, false); }
+  if(res.status === 401 && retry){
+    try{ await refreshSessao(); }
+    catch(e){ sessaoExpirada(); throw new Error('Sessão expirada — entre novamente e repita a operação.'); }
+    return api(path, { method, body, prefer, headers }, false);
+  }
   const txt = await res.text();
+  if(res.status === 401){ sessaoExpirada(); throw new Error('Sessão expirada — entre novamente e repita a operação.'); }
   if(!res.ok){ let m=txt; try{ const j=JSON.parse(txt); m=j.message||j.msg||txt; }catch(e){} throw new Error(m || ('Erro ' + res.status)); }
   return txt ? JSON.parse(txt) : null;
 }
+// renova a sessão em segundo plano a cada 20 min enquanto a página estiver aberta
+setInterval(()=>{ if(SESSION && SESSION.refresh_token && Date.now() > SESSION.expires_at - 15*60000) refreshSessao().catch(()=>{}); }, 20*60000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && SESSION && SESSION.refresh_token && Date.now() > SESSION.expires_at - 120000) refreshSessao().catch(()=>{}); });
 async function apiAll(path){ // pagina de 1000 em 1000 (limite padrão do Supabase)
   const out=[]; const sep = path.includes('?') ? '&' : '?';
   for(let off=0; ; off+=1000){
@@ -1440,7 +1459,7 @@ async function importar(){
   }catch(e){
     logImp('✗ Erro: ' + e.message);
     if(impId){ try{ await api('/vencidos_staging?importacao_id=eq.'+impId, { method:'DELETE' }); await api('/importacoes?id=eq.'+impId, { method:'PATCH', body:{ status:'erro' } }); }catch(_){} }
-    toast('Erro na importação', true);
+    toast('Erro na importação: ' + e.message, true);
   }finally{ $('btn-importar').disabled = !$('imp-file').files[0]; }
 }
 
@@ -1840,7 +1859,7 @@ $('btn-arr-importar').onclick = async ()=>{
   }catch(e){
     log('✗ Erro: ' + e.message);
     if(impId){ try{ await api('/arrec_staging?importacao_id=eq.'+impId, { method:'DELETE' }); await api('/arrec_importacoes?id=eq.'+impId, { method:'PATCH', body:{ status:'erro' } }); }catch(_){} }
-    toast('Erro na importação', true);
+    toast('Erro na importação: ' + e.message, true);
   }finally{ $('btn-arr-importar').disabled = !$('arr-file').files[0]; }
 };
 
@@ -2291,7 +2310,7 @@ $('btn-cons-importar').onclick = async ()=>{
   }catch(e){
     log('✗ Erro: ' + e.message + (/consumo_/.test(e.message)?' — rode o arquivo supabase_consumo.sql no Supabase.':''));
     if(bid){ try{ await api('/consumo_staging?base_id=eq.'+bid, { method:'DELETE' }); await api('/consumo_bases?id=eq.'+bid, { method:'DELETE' }); }catch(_){} }
-    toast('Erro na importação', true);
+    toast('Erro na importação: ' + e.message, true);
   }finally{ $('btn-cons-importar').disabled = !CONS_LIDO; }
 };
 
