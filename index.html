@@ -1798,19 +1798,42 @@ async function excluirArrec(id){
 }
 
 /* leitura da planilha de arrecadação (colunas pelo nome) */
+/* leitura tolerante: aceita variações de nome de coluna (Val./Valor/Vl. Autenticado, Data/Dt. Crédito, Nº Ligação/Matrícula...) */
+const normH = x => norm(x).replace(/[.:ºª°\/_-]/g,' ').replace(/\s+/g,' ').trim();
+const ARR_COLS = {
+  matricula:        h => h.includes('ligacao') || h==='matricula' || h.startsWith('matricula') || h==='n matricula',
+  valor_autenticado:h => /^(val|valor|vl|vlr) autenticad/.test(h),
+  data_credito:     h => /^(data|dt) (de |do )?credito/.test(h),
+  carteira:         h => h.startsWith('carteira'),
+  executivo:        h => h.startsWith('executivo') || h==='analista' || h.startsWith('executivo de contas'),
+  nota:             h => h.includes('nota') && !h.includes('tipo'),
+  mes:              h => h==='mes' || h==='mes ref' || h==='mes referencia',
+  ano:              h => h==='ano' || h==='ano ref' || h==='ano referencia',
+  valor_pago:       h => /^(val|valor|vl|vlr) pago/.test(h),
+  vencimento:       h => h==='vencimento' || /^(data|dt) (de )?vencimento/.test(h),
+  data_pagto:       h => /^(data|dt) (de |do )?pag/.test(h),
+  data_atualiz:     h => /^(data|dt) (de )?atualiz/.test(h),
+  utilizacao:       h => h.startsWith('utilizacao'),
+  zona:             h => h.startsWith('zona'),
+  classificacao:    h => h.startsWith('classificacao'),
+  contrato:         h => h.includes('contrato'),
+  cliente:          h => h==='cliente' || h.startsWith('nome cliente') || h==='nome' || h.startsWith('cliente '),
+  tipo_fatura:      h => h.startsWith('tipo fatura') || h.startsWith('tipo de fatura'),
+  situacao_pagto:   h => h.startsWith('situacao pag') || h.startsWith('situacao do pag'),
+  banco:            h => h==='banco' || h.startsWith('banco '),
+  tipo_pagamento:   h => h.startsWith('tipo pagamento') || h.startsWith('tipo de pagamento') || h.startsWith('forma de pagamento')
+};
 function lerArrec(wb){
-  const obrig = ['val. autenticado','data credito','executivo','carteira'];
   const abas = [...wb.SheetNames].sort((a,b)=>(/arrecad/i.test(norm(b))?1:0)-(/arrecad/i.test(norm(a))?1:0));
+  const vistos = [];
   for(const nome of abas){
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[nome], { header:1, raw:true, defval:null });
-    for(let h=0; h<Math.min(rows.length,15); h++){
-      const head = (rows[h]||[]).map(norm);
-      if(!obrig.every(c=>head.includes(c)) || !head.some(x=>x.includes('ligacao'))) continue;
-      const ix = c => head.indexOf(c), st = p => head.findIndex(x=>x.startsWith(p)), inc = p => head.findIndex(x=>x.includes(p));
-      const col = { matricula:inc('ligacao'), nota:inc('nota'), mes:ix('mes'), ano:ix('ano'), valor_pago:ix('valor pago'), vencimento:ix('vencimento'),
-        data_pagto:st('data pagto'), data_atualiz:st('data atualiz'), data_credito:ix('data credito'), valor_autenticado:ix('val. autenticado'),
-        utilizacao:st('utilizacao'), zona:st('zona'), classificacao:ix('classificacao'), contrato:inc('contrato'), cliente:ix('cliente'),
-        tipo_fatura:ix('tipo fatura'), situacao_pagto:st('situacao pagto'), banco:ix('banco'), tipo_pagamento:ix('tipo pagamento'), carteira:ix('carteira'), executivo:ix('executivo') };
+    for(let h=0; h<Math.min(rows.length,30); h++){
+      const orig = (rows[h]||[]).map(x=>x==null?'':String(x).trim()); const head = orig.map(normH);
+      if(orig.filter(Boolean).length < 3) continue;
+      const col = {}; const usados = new Set();
+      Object.entries(ARR_COLS).forEach(([k,fn])=>{ const i = head.findIndex((x,ix)=>x && !usados.has(ix) && fn(x)); col[k] = i; if(i>=0) usados.add(i); });
+      if(col.matricula<0 || col.valor_autenticado<0 || col.data_credito<0){ if(h<3 || orig.filter(Boolean).length>=5) vistos.push(`aba "${nome}" linha ${h+1}: ${orig.filter(Boolean).slice(0,25).join(' | ')}`); continue; }
       const g = (r,k) => col[k] >= 0 ? r[col[k]] : null;
       const int = v => { const n = parseInt(String(v ?? '').replace(/\D/g,''),10); return isNaN(n)?null:n; };
       const out = [];
@@ -1825,10 +1848,12 @@ function lerArrec(wb){
           tipo_fatura:txt(g(r,'tipo_fatura')), situacao_pagto:txt(g(r,'situacao_pagto')), banco:txt(g(r,'banco')), tipo_pagamento:txt(g(r,'tipo_pagamento')),
           carteira:txt(g(r,'carteira')), executivo:txt(g(r,'executivo')) });
       }
-      return { aba:nome, linhas:out };
+      if(!out.length) continue;
+      const faltando = ['carteira','executivo','mes','ano','vencimento'].filter(k=>col[k]<0);
+      return { aba:nome, linhas:out, faltando };
     }
   }
-  throw new Error('Não encontrei a aba de arrecadação. O cabeçalho precisa ter: Nº Ligação, Val. Autenticado, Data Crédito, Carteira e Executivo.');
+  throw new Error('Não encontrei as colunas obrigatórias (Nº Ligação/Matrícula, Val. Autenticado e Data Crédito) em nenhuma aba. Cabeçalhos encontrados: ' + (vistos.slice(0,3).join(' || ') || 'nenhum'));
 }
 $('arr-file').onchange = ()=>{ const f=$('arr-file').files[0]; $('btn-arr-importar').disabled=!f; $('arr-upload-box').classList.toggle('has-file',!!f); $('arr-log').textContent=''; };
 $('btn-arr-importar').onclick = async ()=>{
@@ -1839,7 +1864,15 @@ $('btn-arr-importar').onclick = async ()=>{
   try{
     prg(5); log('Lendo planilha…');
     const wb = XLSX.read(await f.arrayBuffer(), { type:'array', cellDates:false });
-    const { aba, linhas } = lerArrec(wb);
+    const { aba, linhas, faltando } = lerArrec(wb);
+    if(faltando.includes('carteira') || faltando.includes('executivo')){
+      log('O arquivo não tem a coluna ' + faltando.filter(k=>k==='carteira'||k==='executivo').join(' / ') + ' — completando pela base de vencidos (matrícula)…');
+      const ref = await apiAll('/vencidos_atual?select=matricula,carteira,executivo&order=matricula');
+      const mp = Object.fromEntries(ref.map(r=>[r.matricula, r]));
+      let ok = 0; linhas.forEach(l=>{ const x = mp[l.matricula]; if(x){ if(!l.carteira) l.carteira = x.carteira; if(!l.executivo) l.executivo = x.executivo; ok++; } });
+      log(`   ${nf0.format(ok)} de ${nf0.format(linhas.length)} pagamentos completados.`);
+    }
+    if(faltando.some(k=>['mes','ano','vencimento'].includes(k))) log('Atenção: sem a(s) coluna(s) ' + faltando.filter(k=>['mes','ano','vencimento'].includes(k)).join(', ') + ' — a visão de vencimento pago e o cruzamento do Consumo ficam incompletos para este arquivo.');
     const datas = linhas.map(l=>l.data_credito).sort();
     log(`Aba "${aba.trim()}": ${nf0.format(linhas.length)} pagamentos · ${nf0.format(nMat(linhas))} matrículas · ${brlC(somaA(linhas))} · crédito de ${dBR(datas[0])} a ${dBR(datas[datas.length-1])}.`);
     prg(12);
