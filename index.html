@@ -218,7 +218,65 @@
   footer.note{ margin-top:30px; font-size:12px; color:var(--text-mut); line-height:1.7; text-align:center; padding:0 20px; }
 
   /* ---------- HOME ---------- */
-  .home-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:0; }
+  .home-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-top:0; }
+  .mod-card.prod::before{ background:var(--navy); }
+  .mod-card.prod .mod-icon{ background:#E6ECF2; color:var(--navy); }
+  .prod-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:20px; }
+  .pc{ background:#fff; border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow-xs); }
+  .pc-top{ padding:16px 16px 12px; border-top:4px solid var(--c); background:linear-gradient(180deg,var(--cs),#fff 85%); }
+  .pc-h{ display:flex; gap:10px; align-items:center; }
+  .pc-ic{ width:40px; height:40px; border-radius:11px; background:var(--c); color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
+  .pc-ic svg{ width:21px; height:21px; }
+  .pc-t{ font-family:var(--font-display); font-weight:800; font-size:14.5px; color:var(--c); line-height:1.2; }
+  .pc-s{ font-size:11.5px; color:var(--text-mut); }
+  .pc-kpis{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:14px; }
+  .pc-kpis div{ font-size:9.5px; color:var(--text-mut); font-weight:800; text-transform:uppercase; letter-spacing:.03em; }
+  .pc-kpis b{ display:block; font-family:var(--font-display); font-size:19px; color:var(--navy); letter-spacing:-.01em; margin-top:2px; text-transform:none; }
+  .pc-kpis .at b{ color:var(--c); }
+  .pc-trend{ font-size:11.5px; margin-top:8px; text-align:right; font-weight:700; }
+  .pc-hint{ font-size:11px; color:var(--text-faint); margin-top:4px; }
+  .pc-bar{ height:6px; background:#EEF3F6; border-radius:10px; overflow:hidden; margin-top:8px; }
+  .pc-bar div{ height:100%; background:var(--c); border-radius:10px; }
+  .pc-ch{ padding:10px 14px 4px; border-top:1px solid var(--border); }
+  .pc-ch small{ font-size:10px; font-weight:800; color:var(--text-mut); text-transform:uppercase; letter-spacing:.03em; }
+  .pc-foot{ margin:6px 14px 14px; background:var(--cs); border-radius:10px; padding:9px 12px; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700; color:var(--c); text-transform:uppercase; }
+  .pc-foot b{ font-family:var(--font-display); font-size:18px; color:var(--c); }
+  .pc-off{ padding:30px 16px; text-align:center; color:var(--text-mut); font-size:12.5px; }
+  .pct-cell{ font-weight:800; }
+  .pd-tab td, .pd-tab th{ padding:6px 6px; text-align:center; font-size:12px; }
+  .pd-tab td:first-child, .pd-tab th:first-child{ text-align:left; position:sticky; left:0; background:#fff; z-index:1; }
+  .pd-leg{ display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--text-mut); margin-bottom:10px; }
+  .pd-leg i{ display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-2px; margin-right:5px; }
+  .cfg-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .cfg-execs{ display:flex; flex-wrap:wrap; gap:8px 18px; font-size:13px; }
+  .cfg-execs label{ display:flex; gap:6px; align-items:center; cursor:pointer; }
+  .pm-row input{ width:100px; }
+  /* ---------- APRESENTAÇÃO ---------- */
+  .apres{ position:fixed; inset:0; z-index:2000; background:linear-gradient(160deg,#F4F7FA,#E9EFF4); display:none; flex-direction:column; }
+  .apres.on{ display:flex; }
+  .ap-top{ display:flex; justify-content:space-between; align-items:center; padding:14px 28px; background:#fff; border-bottom:1px solid var(--border); gap:16px; }
+  .ap-brand{ display:flex; gap:12px; align-items:center; }
+  .ap-brand b{ font-family:var(--font-display); font-size:20px; color:var(--navy); letter-spacing:.01em; display:block; }
+  .ap-brand small{ color:var(--text-mut); font-size:12.5px; }
+  .ap-logo{ width:44px; height:44px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; }
+  .ap-logo svg{ width:24px; height:24px; }
+  .ap-ctrl{ display:flex; gap:10px; align-items:center; }
+  .ap-ctrl select{ font-size:13px; padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; min-width:220px; }
+  .ap-ctrl button{ border:1px solid var(--border); background:#fff; border-radius:10px; height:36px; min-width:36px; font-size:20px; color:var(--navy); cursor:pointer; }
+  .ap-ctrl .ap-sair{ font-size:13px; font-weight:700; padding:0 14px; background:var(--navy); color:#fff; border-color:var(--navy); }
+  #ap-num{ font-size:13px; color:var(--text-mut); min-width:48px; text-align:center; }
+  .ap-stage{ flex:1; overflow:auto; padding:24px 32px; }
+  .ap-slide{ max-width:1500px; margin:0 auto; animation:viewIn .3s; }
+  .ap-slide h2{ font-family:var(--font-display); font-size:26px; color:var(--navy); margin:0 0 4px; }
+  .ap-slide .sub{ color:var(--text-mut); margin:0 0 18px; font-size:14px; }
+  .ap-slide .prod-grid{ margin-top:0; }
+  .ap-slide .pc-kpis b{ font-size:24px; }
+  .ap-big{ display:grid; grid-template-columns:380px 1fr; gap:22px; }
+  .ap-rank .dist-row{ grid-template-columns:170px 1fr 120px; font-size:13.5px; }
+  .ap-exec-row{ cursor:pointer; } .ap-exec-row:hover td{ background:var(--water-soft) !important; }
+  @media (max-width:1100px){ .prod-grid{ grid-template-columns:repeat(2,1fr); } .cfg-grid{ grid-template-columns:repeat(2,1fr); } .ap-big{ grid-template-columns:1fr; } }
+  @media (max-width:600px){ .prod-grid{ grid-template-columns:1fr; } }
+
   .mod-card.cons::before{ background:var(--water); }
   .mod-card.cons .mod-icon{ background:var(--water-soft); color:var(--water); }
   .mot-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
@@ -331,6 +389,13 @@
         <h2>Consumo Estratégico</h2>
         <p>Variações de consumo e faturamento por mês, análise por executivo, motivos, prioridade e situação de pagamento da fatura.</p>
         <div class="mod-stats" id="home-cons-stats"><div>Carregando…</div></div>
+        <div class="mod-go">Abrir →</div>
+      </button>
+      <button class="mod-card prod" data-mod="prod">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></div>
+        <h2>Produtividade do Setor</h2>
+        <p>Consumo estratégico, acionamentos, pesquisa de satisfação e alteração cadastral — meta × realizado por dia, semana e mês, com modo apresentação.</p>
+        <div class="mod-stats" id="home-prod-stats"><div>Carregando…</div></div>
         <div class="mod-go">Abrir →</div>
       </button>
     </div>
@@ -677,6 +742,90 @@
     </section>
   </div>
 
+  <!-- PRODUTIVIDADE DO SETOR -->
+  <div id="prod-area" style="display:none;">
+    <nav class="tabs" id="tabs-prod">
+      <button class="active" data-view="pgeral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Visão geral</span></button>
+      <button data-view="pexec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/></svg><span class="lbl">Por executivo</span></button>
+      <button data-view="pdia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="lbl">Produtividade diária</span></button>
+      <button data-view="pimp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span class="lbl">Importar e configurar</span></button>
+    </nav>
+
+    <div class="panel-top" id="prod-filtros">
+      <div class="filters">
+        <div class="field"><label>Macro mês</label><select id="fp-mes"></select></div>
+        <div class="field"><label>Visão</label><select id="fp-visao"><option value="">Geral (time)</option></select></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="filter-note" id="fp-nota" style="max-width:300px"></div>
+        <button class="btn btn-primary" id="btn-apresentar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Apresentar</button>
+      </div>
+    </div>
+    <div id="prod-loading" class="loading" style="display:none">Carregando produtividade…</div>
+
+    <section class="view active" id="view-pgeral">
+      <div class="prod-grid" id="pg-cards"></div>
+      <div class="card"><h2>Resumo por executivo</h2><p class="sub">% de atingimento de cada meta até hoje (realizado ÷ meta proporcional aos dias úteis). Clique para abrir a visão do executivo.</p>
+        <div class="tablewrap"><table><thead id="pg-res-head"></thead><tbody id="pg-res"></tbody></table></div></div>
+    </section>
+
+    <section class="view" id="view-pexec">
+      <div class="card"><div class="card-head"><div><h2>Por executivo</h2><p class="sub" id="pe-sub"></p></div><button class="btn btn-ghost btn-sm" id="btn-xls-pexec">Exportar Excel</button></div>
+        <div class="tablewrap"><table><thead id="pe-head"></thead><tbody id="pe-tab"></tbody></table></div></div>
+    </section>
+
+    <section class="view" id="view-pdia">
+      <div class="card"><div class="card-head"><div><h2>Produtividade diária por executivo</h2><p class="sub" id="pd-sub"></p></div>
+          <div class="filters"><div class="field"><label>Indicador</label><select id="pd-ind"></select></div><button class="btn btn-ghost btn-sm" id="btn-xls-pdia" style="margin-bottom:2px">Exportar Excel</button></div></div>
+        <div class="pd-leg"><span><i style="background:#D8EFE2"></i>bateu a meta do dia</span><span><i style="background:#FBF1DE"></i>80% a 99%</span><span><i style="background:#FBE9E5"></i>abaixo de 80%</span><span><i style="background:#EEF3F6"></i>fim de semana/feriado</span></div>
+        <div class="tablewrap scroll" style="max-height:640px"><table class="pd-tab"><thead id="pd-head"></thead><tbody id="pd-body"></tbody></table></div></div>
+      <div class="card"><h2>Por semana</h2><p class="sub">Realizado × meta de cada semana do período (segunda a domingo).</p>
+        <div class="tablewrap"><table><thead id="pw-head"></thead><tbody id="pw-body"></tbody></table></div></div>
+    </section>
+
+    <section class="view" id="view-pimp">
+      <div class="two-col">
+        <div class="card"><h2>Acionamentos</h2><p class="sub">Base diária (Query1). Pode subir a base completa do mês todo dia: o período de datas do arquivo substitui o que já estava gravado, sem duplicar. "GC Visita em Campo" é guardado mas <b>não conta</b>.</p>
+          <div class="upload-box" id="pa-box"><input type="file" id="pa-file" accept=".xlsx,.xls,.xlsm,.csv"><div class="form-row"><button class="btn btn-primary" id="btn-pa" disabled>Importar acionamentos</button></div></div>
+          <div class="log" id="pa-log"></div></div>
+        <div class="card"><h2>Forms — Consumo Estratégico</h2><p class="sub">Análises feitas (Nome, Matrícula, Mês, Dia). Cada upload substitui só os meses que vierem no arquivo.</p>
+          <div class="upload-box" id="pf-box"><input type="file" id="pf-file" accept=".xlsx,.xls,.xlsm,.csv"><div class="form-row"><div class="field"><label>Ano</label><input type="number" id="pf-ano" style="width:100px"></div><button class="btn btn-primary" id="btn-pf" disabled>Importar Forms</button></div></div>
+          <div class="log" id="pf-log"></div></div>
+      </div>
+      <div class="card"><h2>Meta progressiva do Consumo Estratégico (print do BI)</h2>
+        <p class="sub">Cole (Ctrl+V) ou escolha o print do BI (tabela Executivo · Prioridade 1 · Prioridade 2 · Meta Prioridade · Prioridade Analisado · Delta · Produtividade % · Análise Geral · Delta Meta 150). A plataforma lê os números da imagem e mostra para você conferir — <b>a imagem não é guardada</b>, só os números confirmados. O ciclo da meta vai do dia 5 ao dia 4 do mês seguinte.</p>
+        <div class="upload-box" id="pm-box" tabindex="0"><input type="file" id="pm-file" accept="image/*"> <span class="muted" style="font-size:12.5px">ou clique aqui e cole a imagem (Ctrl+V)</span>
+          <div class="form-row"><div class="field"><label>Data do print</label><input type="date" id="pm-data"></div><button class="btn btn-ghost" id="btn-pm-ler" disabled>Ler números da imagem</button><button class="btn btn-ghost" id="btn-pm-manual">Preencher à mão</button></div></div>
+        <div class="log" id="pm-log"></div>
+        <div id="pm-grid"></div></div>
+      <div class="card"><h2>Configuração</h2><p class="sub">Vale para todo mundo que usa a plataforma.</p>
+        <div class="cfg-grid">
+          <div class="field"><label>Meta de análises do Consumo por ciclo (dia 5 ao dia 4, por executivo)</label><input type="number" id="cfg-cons" min="0"></div>
+          <div class="field"><label>Meta de acionamentos por dia útil (por executivo)</label><input type="number" id="cfg-acion" min="0"></div>
+          <div class="field"><label>Meta de pesquisas validadas por semana (por executivo)</label><input type="number" id="cfg-pesq" min="0"></div>
+          <div class="field"><label>Nota média alvo da pesquisa</label><input type="number" id="cfg-nota" step="0.1" min="0" max="5"></div>
+          <div class="field"><label>Meta de alterações cadastrais por semana (por executivo)</label><input type="number" id="cfg-alt" min="0"></div>
+          <div class="field" style="grid-column:span 2"><label>Pareceres de acionamento que NÃO contam (um por linha)</label><textarea id="cfg-excl" rows="2" class="cell-input" style="min-width:100%"></textarea></div>
+        </div>
+        <h3 style="margin-top:18px">Executivos considerados na meta do time</h3>
+        <div class="cfg-execs" id="cfg-execs"></div>
+        <details style="margin-top:16px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Fontes externas (Pesquisa de Satisfação e Atualização Cadastral)</summary>
+          <div class="cfg-grid" style="margin-top:12px">
+            <div class="field" style="grid-column:span 2"><label>Pesquisa — URL do projeto Supabase</label><input id="cfg-pq-url"></div>
+            <div class="field" style="grid-column:span 2"><label>Pesquisa — chave publishable</label><input id="cfg-pq-key"></div>
+            <div class="field" style="grid-column:span 2"><label>Alteração cadastral — URL do projeto Supabase</label><input id="cfg-al-url"></div>
+            <div class="field" style="grid-column:span 2"><label>Alteração cadastral — chave publishable</label><input id="cfg-al-key"></div>
+            <div class="field"><label>Alteração — tabela</label><input id="cfg-al-tab" placeholder="ex.: ordens_servico"></div>
+            <div class="field"><label>Coluna do executivo</label><input id="cfg-al-exec" placeholder="ex.: analista"></div>
+            <div class="field"><label>Coluna da data</label><input id="cfg-al-data" placeholder="ex.: data_validacao"></div>
+            <div class="field"><label>Filtro (opcional)</label><input id="cfg-al-filtro" placeholder="ex.: status=eq.validado"></div>
+          </div></details>
+        <div class="form-row"><button class="btn btn-primary" id="btn-cfg-salvar">Salvar configuração</button><button class="btn btn-ghost" id="btn-cfg-testar">Testar fontes externas</button><span class="msg" id="cfg-msg"></span></div></div>
+      <div class="card"><h2>Histórico de importações</h2>
+        <div class="tablewrap"><table><thead><tr><th>Quando</th><th>Tipo</th><th>Arquivo</th><th>Por</th><th class="num">Linhas</th><th>Detalhe</th></tr></thead><tbody id="p-hist"></tbody></table></div></div>
+    </section>
+  </div>
+
   <!-- ARRECADAÇÃO -->
   <div id="arr-area" style="display:none;">
     <nav class="tabs" id="tabs-arr">
@@ -779,6 +928,18 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 25/09 · produtividade</div>
+<div id="apres" class="apres">
+  <div class="ap-top">
+    <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
+    <div class="ap-ctrl">
+      <select id="ap-visao"></select>
+      <button id="ap-prev" title="Anterior (←)">‹</button><span id="ap-num"></span><button id="ap-next" title="Próximo (→)">›</button>
+      <button id="ap-sair" class="ap-sair">Sair (Esc)</button>
+    </div>
+  </div>
+  <div class="ap-stage" id="ap-stage"></div>
+</div>
 <div class="modal" id="modal-lupa">
   <div class="modal-box">
     <div class="modal-head">
@@ -933,20 +1094,21 @@ async function entrar(){
   catch(e){ msg.style.color='var(--rose)'; msg.textContent=e.message; }
 }
 function sair(){
-  salvarSessao(null); MODULO=null; VENC_OK=false; ARR_OK=false; CONS_OK=false;
-  ['main-area','arr-area','cons-area','home-area','hero-actions'].forEach(id=>$(id).style.display='none');
+  salvarSessao(null); MODULO=null; VENC_OK=false; ARR_OK=false; CONS_OK=false; PROD_OK=false; $('apres').classList.remove('on');
+  ['main-area','arr-area','cons-area','prod-area','home-area','hero-actions'].forEach(id=>$(id).style.display='none');
   $('login-area').style.display='block'; $('hero-meta').innerHTML=''; setHero(null);
 }
 $('btn-login').onclick = entrar;
 $('login-senha').addEventListener('keydown', e=>{ if(e.key==='Enter') entrar(); });
 $('btn-sair').onclick = sair;
-$('btn-recarregar').onclick = ()=>{ if(MODULO==='venc') carregarTudo(); else if(MODULO==='arr') carregarArrec(true); else if(MODULO==='cons') carregarConsumo(FC.mes); else carregarHome(); };
+$('btn-recarregar').onclick = ()=>{ if(MODULO==='venc') carregarTudo(); else if(MODULO==='arr') carregarArrec(true); else if(MODULO==='cons') carregarConsumo(FC.mes); else if(MODULO==='prod') carregarProd(); else carregarHome(); };
 $('btn-inicio').onclick = ()=>abrirHome();
 
 let MODULO = null, VENC_OK = false, ARR_OK = false;
 const HERO = {
   home:{ t:'Painel Grandes Clientes', p:'Escolha o módulo. A lupa consulta qualquer matrícula nos vencidos, na arrecadação e no consumo estratégico.' },
   venc:{ t:'Acompanhamento de Vencidos · Time GC', p:'Visão geral do saldo em aberto, status do TMP, ações de corte e pós corte, maiores saldos com status de cobrança e pagamentos agendados, e comparativo entre as bases importadas.' },
+  prod:{ t:'Produtividade do Setor', p:'Visão geral do desempenho do time: consumo estratégico, acionamentos, pesquisa de satisfação e alteração cadastral — meta × realizado por dia, semana e mês.' },
   cons:{ t:'Consumo Estratégico · Time GC', p:'Variações de consumo e faturamento do mês: análise por executivo, motivos, prioridade e situação de pagamento das faturas (cruzada automaticamente com a arrecadação).' },
   arr:{ t:'Arrecadação · Time GC', p:'Valor autenticado por carteira, por executivo, por dia de crédito e visão de qual vencimento foi pago em cada dia.' }
 };
@@ -959,7 +1121,7 @@ function abrirApp(){
 }
 function abrirHome(){
   MODULO='home'; setHero('home');
-  $('main-area').style.display='none'; $('arr-area').style.display='none'; $('cons-area').style.display='none'; $('home-area').style.display='block';
+  $('main-area').style.display='none'; $('arr-area').style.display='none'; $('cons-area').style.display='none'; $('prod-area').style.display='none'; $('home-area').style.display='block';
   $('hero-meta').innerHTML = `<span class="chip">Usuário: <b>${esc(SESSION&&SESSION.email)}</b></span>`;
   carregarHome();
 }
@@ -984,6 +1146,11 @@ async function carregarHome(){
     const an = rs.filter(r=>norm(r.analisado)==='sim').length, ve = rs.filter(r=>r.status_pagamento==='Vencido').length;
     $('home-cons-stats').innerHTML = `<div>${mesRefNome(cb[0].mes_ref)}<b>${nf0.format(rs.length)}</b></div><div>% atingido<b>${pct(an,rs.length)}</b></div><div>Vencidas<b>${nf0.format(ve)}</b></div>`;
   }catch(e){ $('home-cons-stats').innerHTML = '<div>Rode o supabase_consumo.sql</div>'; }
+  try{
+    const ph = await api('/prod_importacoes?select=tipo,importado_em&order=id.desc&limit=20');
+    const ult = t => { const x = ph.find(i=>i.tipo===t); return x ? new Date(x.importado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—'; };
+    $('home-prod-stats').innerHTML = `<div>Acionamentos<b>${ult('acionamentos')}</b></div><div>Forms<b>${ult('forms')}</b></div><div>Meta BI<b>${ult('meta_consumo')}</b></div>`;
+  }catch(e){ $('home-prod-stats').innerHTML = '<div>Rode o supabase_produtividade.sql</div>'; }
 }
 document.querySelectorAll('.mod-card').forEach(c=>c.onclick=()=>abrirModulo(c.dataset.mod));
 function abrirModulo(m){
@@ -991,6 +1158,8 @@ function abrirModulo(m){
   $('main-area').style.display = m==='venc' ? 'block' : 'none';
   $('arr-area').style.display  = m==='arr'  ? 'block' : 'none';
   $('cons-area').style.display = m==='cons' ? 'block' : 'none';
+  $('prod-area').style.display = m==='prod' ? 'block' : 'none';
+  if(m==='prod'){ if(!PROD_OK){ PROD_OK=true; carregarProd(); } else { heroProd(); renderProdTudo(); } }
   if(m==='cons'){ if(!CONS_OK){ CONS_OK=true; carregarConsumo(); } else heroCons(); }
   if(m==='venc'){ if(!VENC_OK){ VENC_OK=true; carregarTudo(); } else montarFiltros(); }
   if(m==='arr'){ if(!ARR_OK){ ARR_OK=true; carregarArrec(true); } else heroArr(); }
@@ -2346,6 +2515,509 @@ $('btn-cons-importar').onclick = async ()=>{
     toast('Erro na importação: ' + e.message, true);
   }finally{ $('btn-cons-importar').disabled = !CONS_LIDO; }
 };
+
+
+/* =====================================================================
+   MÓDULO PRODUTIVIDADE DO SETOR
+   ===================================================================== */
+const PROD_CFG_PADRAO = {
+  meta_cons_ciclo: 150, meta_acion_dia: 15, meta_pesq_semana: 15, nota_alvo: 4.5, meta_alt_semana: 15,
+  excluir_parecer: ['gc visita em campo'], executivos: null,
+  pesquisa: { url:'https://yidsjyfcuzytkejctqfp.supabase.co', key:'sb_publishable_dJWDHA-YGrM3jIXgFBuk1w_ZxZSaHBQ' },
+  alteracao: { url:'https://yidsjyfcuzytkejctqfp.supabase.co', key:'sb_publishable_dJWDHA-YGrM3jIXgFBuk1w_ZxZSaHBQ', tabela:'', col_exec:'', col_data:'', filtro:'' }
+};
+let PCFG = JSON.parse(JSON.stringify(PROD_CFG_PADRAO)), PROD_OK = false;
+const PD = { mes:'', visao:'', ev:{}, consMeta:[], fontes:{}, execsTodos:[] };
+const PIND = [
+  { k:'cons', t:'Consumo Estratégico', s:'Análises de consumo fora da curva (Forms)', c:'#1C63B0', cs:'#E7F0FA', icon:'<path d="M12 2.7s-6 6.3-6 11.3a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/>' },
+  { k:'acion', t:'Acionamentos', s:'Tratativas e interações registradas', c:'#1E8A5A', cs:'#E4F4EC', icon:'<path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5a2 2 0 0 0 4 0v-3"/>' },
+  { k:'pesq', t:'Pesquisa de Satisfação', s:'Pesquisas validadas e nota média', c:'#6A45B8', cs:'#EFEAFA', icon:'<path d="m12 2 2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8l-6.2 3.5L7 14.2 2 9.3l7.1-.7z"/>' },
+  { k:'alt', t:'Alteração Cadastral', s:'Atualizações e correções de cadastro', c:'#D0691C', cs:'#FCEFE3', icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M15 9h3M15 13h3M6 17c.8-1.6 2-2.4 3-2.4s2.2.8 3 2.4"/>' }
+];
+const PIND_BY = Object.fromEntries(PIND.map(i=>[i.k,i]));
+const isoLocal = d => new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+const addDias = (iso,n) => { const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return isoLocal(d); };
+const segundaDe = iso => { const d=new Date(iso+'T12:00:00'); const w=d.getDay(); d.setDate(d.getDate()+(w===0?-6:1-w)); return isoLocal(d); };
+const dusEntre = (ini,fim) => { const o=[]; for(let d=ini; d<=fim; d=addDias(d,1)) if(ehDU(d)) o.push(d); return o; };
+const pctN = (a,b) => b ? a/b*100 : 0;
+const fmtPct = v => (v==null||!isFinite(v)) ? '—' : v.toFixed(1).replace('.',',')+'%';
+const corPct = v => v>=100 ? 'var(--leaf)' : v>=80 ? 'var(--amber)' : 'var(--rose)';
+const mesmoNome = (a,b) => norm(a)===norm(b);
+
+function periodoDe(ind, ym){ // calendário; consumo = dia 5 até dia 4 do mês seguinte
+  if(ind==='cons') return { ini: ym+'-05', fim: addMes(ym,1)+'-04' };
+  return { ini: ym+'-01', fim: ultimoDiaMes(ym) };
+}
+function execsMeta(){ return PD.visao ? [PD.visao] : (PCFG.executivos && PCFG.executivos.length ? PCFG.executivos : PD.execsTodos); }
+
+async function carregarProdCfg(){
+  try{ const r = await api('/prod_config?select=*&chave=eq.geral'); if(r[0] && r[0].valor) PCFG = { ...JSON.parse(JSON.stringify(PROD_CFG_PADRAO)), ...r[0].valor,
+      pesquisa:{ ...PROD_CFG_PADRAO.pesquisa, ...(r[0].valor.pesquisa||{}) }, alteracao:{ ...PROD_CFG_PADRAO.alteracao, ...(r[0].valor.alteracao||{}) } }; }
+  catch(e){ if(/prod_config/.test(e.message)) throw new Error('Rode o arquivo supabase_produtividade.sql no Supabase.'); throw e; }
+}
+async function fetchExterno(url, key, path){ // lê de outro projeto Supabase (Pesquisa / Atualização Cadastral)
+  const out=[]; const sep = path.includes('?')?'&':'?';
+  for(let off=0; off<200000; off+=1000){
+    const res = await fetch(url.replace(/\/$/,'') + '/rest/v1' + path + sep + 'limit=1000&offset=' + off, { headers:{ apikey:key, Authorization:'Bearer '+key } });
+    if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0,160));
+    const p = await res.json(); out.push(...p); if(p.length<1000) break;
+  }
+  return out;
+}
+
+async function carregarProd(){
+  $('prod-loading').style.display='block';
+  try{
+    await carregarProdCfg();
+    if(!PD.mes){ const h=hojeISO(); PD.mes = (+h.slice(8,10) <= 4) ? addMes(h.slice(0,7),-1) : h.slice(0,7); }
+    // meses no filtro: 12 últimos
+    const base = hojeISO().slice(0,7); const meses = Array.from({length:12},(_,i)=>addMes(base,-i));
+    $('fp-mes').innerHTML = meses.map(m=>`<option value="${m}" ${m===PD.mes?'selected':''}>${mesNome(m)}</option>`).join('');
+    const ym = PD.mes, ant = addMes(ym,-1);
+    const ini = ant+'-01', fim = addMes(ym,1)+'-04', iniCons = ant+'-05';
+    const excl = (PCFG.excluir_parecer||[]).map(norm);
+    const [ac, fo, cm, execsVenc] = await Promise.all([
+      apiAll(`/prod_acionamentos?select=executivo,data,parecer&data=gte.${ini}&data=lte.${fim}&order=numero_solicitacao`),
+      apiAll(`/prod_forms?select=executivo,data&data=gte.${iniCons}&data=lte.${fim}&order=id`),
+      api(`/prod_consumo_meta?select=*&data_ref=gte.${iniCons}&data_ref=lte.${addMes(ym,1)}-04&order=data_ref.desc`),
+      apiAll('/vencidos_atual?select=executivo&status=eq.Vencido').catch(()=>[])
+    ]);
+    PD.ev.acion = ac.filter(r=>!excl.includes(norm(r.parecer))).map(r=>({ e:r.executivo, d:r.data, q:1 }));
+    PD.ev.cons  = fo.map(r=>({ e:r.executivo, d:r.data, q:1 }));
+    PD.consMeta = cm;
+    PD.fontes = { acion:'ok', cons:'ok' };
+    // Pesquisa de Satisfação (outra plataforma)
+    try{
+      const pq = PCFG.pesquisa;
+      const regs = await fetchExterno(pq.url, pq.key, `/registros?select=analista,status,data_validacao,nota_atendimento,matriculas_adicionais,tipo&status=eq.validado&data_validacao=gte.${ini}T00:00:00`);
+      PD.ev.pesq = regs.filter(r=>r.data_validacao).map(r=>({ e:r.analista, d:isoLocal(new Date(r.data_validacao)), q:contarMatsPesq(r), n:r.nota_atendimento }));
+      PD.fontes.pesq = 'ok';
+    }catch(e){ PD.ev.pesq = []; PD.fontes.pesq = 'Erro ao ler a Pesquisa: ' + e.message; }
+    // Atualização Cadastral (outra plataforma)
+    const al = PCFG.alteracao;
+    if(al.tabela && al.col_exec && al.col_data){
+      try{
+        const regs = await fetchExterno(al.url, al.key, `/${al.tabela}?select=${al.col_exec},${al.col_data}&${al.col_data}=gte.${ini}${al.filtro?'&'+al.filtro:''}`);
+        PD.ev.alt = regs.filter(r=>r[al.col_data]).map(r=>({ e:r[al.col_exec], d:isoLocal(new Date(String(r[al.col_data]).length<=10 ? r[al.col_data]+'T12:00:00' : r[al.col_data])), q:1 }));
+        PD.fontes.alt = 'ok';
+      }catch(e){ PD.ev.alt = []; PD.fontes.alt = 'Erro ao ler a Atualização Cadastral: ' + e.message; }
+    } else { PD.ev.alt = []; PD.fontes.alt = 'pendente'; }
+    PD.execsTodos = [...new Set(execsVenc.map(r=>r.executivo).filter(Boolean))].filter(n=>!['Alessandro Silveira','Fellipe Braga'].includes(n)).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    if(!PD.execsTodos.length) PD.execsTodos = [...new Set([...PD.ev.acion, ...PD.ev.cons].map(x=>x.e).filter(Boolean))].sort();
+    const lista = execsLista();
+    $('fp-visao').innerHTML = '<option value="">Geral (time)</option>' + lista.map(e=>`<option ${e===PD.visao?'selected':''}>${esc(e)}</option>`).join('');
+    heroProd(); renderProdTudo(); renderProdCfg(); renderProdHist();
+    $('prod-loading').style.display='none';
+  }catch(e){
+    $('prod-loading').textContent = 'Erro ao carregar: ' + e.message;
+    if(/JWT|expirad|Sessão/i.test(e.message)) sair();
+  }
+}
+function contarMatsPesq(r){ return 1 + (r.matriculas_adicionais ? String(r.matriculas_adicionais).split(/[,\s]+/).filter(Boolean).length : 0); }
+function execsLista(){ return (PCFG.executivos && PCFG.executivos.length ? PCFG.executivos : PD.execsTodos).slice().sort((a,b)=>a.localeCompare(b,'pt-BR')); }
+function heroProd(){
+  $('hero-meta').innerHTML = `<span class="chip">Macro mês <b>${mesNome(PD.mes)}</b></span><span class="chip">Visão <b>${esc(PD.visao||'Geral (time)')}</b></span><span class="chip">Atualizado <b>${new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</b></span><span class="chip">Usuário: <b>${esc(SESSION&&SESSION.email)}</b></span>`;
+  const c = periodoDe('cons', PD.mes);
+  $('fp-nota').innerHTML = `Dias úteis RJ. Consumo: ciclo de ${dBRc(c.ini)} a ${dBRc(c.fim)}. Metas comparadas com o proporcional até hoje.`;
+}
+$('fp-mes').onchange = e=>{ PD.mes = e.target.value; carregarProd(); };
+$('fp-visao').onchange = e=>{ PD.visao = e.target.value; heroProd(); renderProdTudo(); };
+
+/* ---------- cálculo de um indicador ---------- */
+function statInd(k, execs, ym){
+  ym = ym || PD.mes;
+  const p = periodoDe(k, ym), hoje = hojeISO(), corte = hoje < p.fim ? hoje : p.fim;
+  const dus = dusEntre(p.ini, p.fim), dusAte = dus.filter(d=>d<=corte);
+  const setE = new Set(execs.map(norm));
+  const ev = (PD.ev[k]||[]).filter(x=>x.e && setE.has(norm(x.e)));
+  const noPer = ev.filter(x=>x.d>=p.ini && x.d<=corte);
+  const real = noPer.reduce((s,x)=>s+x.q,0);
+  let metaDia = k==='acion' ? +PCFG.meta_acion_dia : k==='pesq' ? (+PCFG.meta_pesq_semana)/5 : k==='alt' ? (+PCFG.meta_alt_semana)/5 : null;
+  let metaMes, metaAte, metaFonte = '';
+  let bi = null;
+  if(k==='cons'){
+    // meta progressiva: meta do ciclo por executivo (BI "Delta Meta 150" → 150), acumulada pelos dias úteis do ciclo (fecha dia 4)
+    const ult = {}; PD.consMeta.filter(m=>m.data_ref>=p.ini && m.data_ref<=p.fim && setE.has(norm(m.executivo))).forEach(m=>{ const kk=norm(m.executivo); if(!ult[kk] || m.data_ref>ult[kk].data_ref) ult[kk]=m; });
+    const padrao = +PCFG.meta_cons_ciclo || 150;
+    metaMes = execs.reduce((s,e)=>{ const m = ult[norm(e)]; return s + (m && m.meta_ciclo ? +m.meta_ciclo : padrao); }, 0);
+    metaAte = metaMes * dusAte.length / Math.max(1,dus.length);
+    metaDia = metaMes / Math.max(1,dus.length) / Math.max(1,execs.length);
+    const ms = Object.values(ult);
+    if(ms.length){
+      const refDate = ms.reduce((a,m)=>m.data_ref>a?m.data_ref:a, ms[0].data_ref);
+      bi = { ref:refDate, metaPrio:ms.reduce((s,m)=>s+(+m.meta_prioridade||0),0), prioAnal:ms.reduce((s,m)=>s+(+m.prioridade_analisado||0),0), geral:ms.reduce((s,m)=>s+(+m.executado_bi||0),0), n:ms.length };
+    }
+    metaFonte = `${padrao} análises/executivo no ciclo · progressiva até ${dBRc(p.fim)}`;
+  } else {
+    metaMes = metaDia * dus.length * execs.length; metaAte = metaDia * dusAte.length * execs.length;
+  }
+  const fonteOk = !((k==='alt' || k==='pesq') && PD.fontes[k]!=='ok');
+  const ating = (metaAte && fonteOk) ? pctN(real, metaAte) : null;
+  // mesmo período do mês anterior (mesmo nº de dias úteis)
+  const pa = periodoDe(k, addMes(ym,-1)), dusA = dusEntre(pa.ini, pa.fim), corteA = dusA[Math.max(0,Math.min(dusAte.length,dusA.length)-1)] || pa.ini;
+  const realA = ev.filter(x=>x.d>=pa.ini && x.d<=corteA).reduce((s,x)=>s+x.q,0);
+  const metaAteA = k==='cons' ? null : metaDia * Math.min(dusAte.length,dusA.length) * execs.length;
+  const temAnt = ev.some(x=>x.d>=pa.ini && x.d<=pa.fim);
+  const atingA = (metaAteA && temAnt) ? pctN(realA, metaAteA) : null;
+  // semana atual × anterior (seg a dom) em torno da data de corte
+  const seg = segundaDe(corte), segA = addDias(seg,-7);
+  const serie = s0 => Array.from({length:7},(_,i)=>{ const d=addDias(s0,i); return d>corte ? null : ev.filter(x=>x.d===d).reduce((s,x)=>s+x.q,0); });
+  const semAt = serie(seg), semAnt = Array.from({length:7},(_,i)=>{ const d=addDias(segA,i); return ev.filter(x=>x.d===d).reduce((s,x)=>s+x.q,0); });
+  const dusSem = Array.from({length:7},(_,i)=>addDias(seg,i)).filter(d=>d<=corte && ehDU(d)).length;
+  const mediaSem = semAt.reduce((s,v)=>s+(v||0),0) / Math.max(1,dusSem);
+  const notas = k==='pesq' ? noPer.filter(x=>x.n!=null) : [];
+  const nota = notas.length ? notas.reduce((s,x)=>s+(+x.n),0)/notas.length : null;
+  return { k, p, corte, dus, dusAte, real, metaDia, metaMes, metaAte, metaFonte, bi, ating, realA, atingA, semAt, semAnt, mediaSem, nota, nNotas:notas.length, ev, noPer };
+}
+
+/* ---------- cards ---------- */
+function cardInd(st, opts={}){
+  const I = PIND_BY[st.k], big = opts.big;
+  const semFonte = (st.k==='alt' && PD.fontes.alt!=='ok') || (st.k==='pesq' && PD.fontes.pesq!=='ok');
+  const head = `<div class="pc-h"><div class="pc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I.icon}</svg></div><div><div class="pc-t">${PIND.indexOf(I)+1}. ${I.t.toUpperCase()}</div><div class="pc-s">${I.s}</div></div></div>`;
+  if(semFonte) return `<div class="pc" style="--c:${I.c};--cs:${I.cs}"><div class="pc-top">${head}</div><div class="pc-off">${st.k==='alt' && PD.fontes.alt==='pendente' ? 'Fonte da Atualização Cadastral ainda não configurada.<br>Importar e configurar → Fontes externas.' : esc(PD.fontes[st.k])}</div></div>`;
+  const delta = (st.ating!=null && st.atingA!=null) ? st.ating - st.atingA : null;
+  const trend = delta==null ? '' : `<div class="pc-trend" style="color:${delta>=0?'var(--leaf)':'var(--rose)'}">${delta>=0?'↗':'↘'} ${delta>=0?'+':''}${delta.toFixed(1).replace('.',',')} p.p. vs. ${MES_ABR[+addMes(PD.mes,-1).slice(5,7)-1]}/${addMes(PD.mes,-1).slice(2,4)} (mesmo período)</div>`;
+  const kpiReal = st.k==='pesq' ? `<div>Validadas<b>${nf0.format(st.real)}</b></div>` : `<div>Realizado<b>${nf0.format(st.real)}</b></div>`;
+  const hint = st.k==='cons' ? `Meta até hoje ${nf0.format(Math.round(st.metaAte||0))} · ${st.dusAte.length} de ${st.dus.length} dias úteis do ciclo · realizado pelo Forms`
+    + (st.bi ? `</div><div class="pc-hint" style="color:var(--c);font-weight:700">Prioridades (BI ${dBRc(st.bi.ref)}): ${nf0.format(st.bi.prioAnal)} de ${nf0.format(st.bi.metaPrio)} · ${fmtPct(pctN(st.bi.prioAnal,st.bi.metaPrio))}` : `</div><div class="pc-hint">Sem print do BI no ciclo`) : `Meta até hoje ${nf0.format(Math.round(st.metaAte||0))} · ${st.dusAte.length} de ${st.dus.length} dias úteis`;
+  const notaTxt = st.k==='pesq' ? `<div class="pc-hint" style="color:var(--c);font-weight:700">Nota média ${st.nota!=null?st.nota.toFixed(2).replace('.',','):'—'} · alvo ${String(PCFG.nota_alvo).replace('.',',')} (${st.nNotas} notas)</div>` : '';
+  const id = (opts.prefix||'pc') + '-' + st.k;
+  return `<div class="pc" style="--c:${I.c};--cs:${I.cs}">
+    <div class="pc-top">${head}
+      <div class="pc-kpis"><div>Meta mensal<b>${st.metaMes!=null?nf0.format(Math.round(st.metaMes)):'—'}</b></div>${kpiReal}<div class="at">Atingimento<b>${fmtPct(st.ating)}</b></div></div>
+      <div class="pc-bar"><div style="width:${Math.min(100,st.ating||0)}%"></div></div>
+      ${trend}<div class="pc-hint">${hint}</div>${notaTxt}</div>
+    <div class="pc-ch"><small>Comparativo semanal (quantidade)</small><div style="height:${big?200:140}px;position:relative"><canvas id="${id}"></canvas></div></div>
+    <div class="pc-foot">Média diária (semana atual)<b>${st.mediaSem.toFixed(st.mediaSem<10?1:0).replace('.',',')}</b></div></div>`;
+}
+function chartSemana(id, st){
+  if(!window.Chart || !$(id)) return;
+  const I = PIND_BY[st.k];
+  CHARTS[id] && CHARTS[id].destroy();
+  CHARTS[id] = new Chart($(id), { type:'line', data:{ labels:['SEG','TER','QUA','QUI','SEX','SÁB','DOM'], datasets:[
+    { label:'Semana atual', data:st.semAt, borderColor:I.c, backgroundColor:I.c, pointRadius:3.5, tension:.3, borderWidth:2.5 },
+    { label:'Semana anterior', data:st.semAnt, borderColor:I.c+'88', backgroundColor:'#fff', borderDash:[5,4], pointRadius:3, tension:.3, borderWidth:2 } ] },
+    options:{ animation:false, maintainAspectRatio:false, plugins:{ legend:{ position:'top', labels:{ boxWidth:18, boxHeight:2, font:{ size:10.5 } } },
+      datalabels:{ display:ctx=>ctx.datasetIndex===0 && ctx.dataset.data[ctx.dataIndex]!=null, align:'top', offset:2, color:I.c, font:{ size:10, weight:'700' }, formatter:v=>nf0.format(v) } },
+      scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }, y:{ beginAtZero:true, grace:'15%', grid:{ color:'#EEF3F6' }, ticks:{ font:{ size:10 } } } } } });
+}
+
+function renderProdTudo(){ renderPGeral(); renderPExec(); renderPDia(); }
+function renderPGeral(){
+  const ex = execsMeta();
+  const sts = PIND.map(I=>statInd(I.k, ex));
+  $('pg-cards').innerHTML = sts.map(st=>cardInd(st)).join('');
+  if($('view-pgeral').classList.contains('active')) sts.forEach(st=>chartSemana('pc-'+st.k, st));
+  const lista = execsLista();
+  $('pg-res-head').innerHTML = `<tr><th>Executivo</th>${PIND.map(I=>`<th class="num" style="color:${I.c}">${I.t}</th>`).join('')}<th class="num">Média</th></tr>`;
+  const linhas = lista.map(e=>{ const v = PIND.map(I=>statInd(I.k,[e]).ating); const vs = v.filter(x=>x!=null); return { e, v, m: vs.length ? vs.reduce((a,b)=>a+b,0)/vs.length : null }; }).sort((a,b)=>(b.m??-1)-(a.m??-1));
+  $('pg-res').innerHTML = linhas.map(l=>`<tr class="ap-exec-row" data-e="${esc(l.e)}"><td><b>${esc(l.e)}</b></td>${l.v.map(x=>`<td class="num pct-cell" style="color:${x==null?'var(--text-faint)':corPct(x)}">${fmtPct(x)}</td>`).join('')}<td class="num pct-cell" style="color:${l.m==null?'var(--text-faint)':corPct(l.m)}">${fmtPct(l.m)}</td></tr>`).join('');
+  document.querySelectorAll('#pg-res .ap-exec-row').forEach(tr=>tr.onclick=()=>{ PD.visao = tr.dataset.e; $('fp-visao').value = PD.visao; heroProd(); renderProdTudo(); window.scrollTo({top:0,behavior:'smooth'}); });
+}
+function renderPExec(){
+  const lista = execsLista();
+  $('pe-sub').textContent = `${mesNome(PD.mes)} · realizado / meta até hoje (proporcional aos dias úteis) e atingimento.`;
+  $('pe-head').innerHTML = `<tr><th>Executivo</th>${PIND.map(I=>`<th class="num" style="color:${I.c}">${I.t}</th><th class="num">%</th>`).join('')}</tr>`;
+  const rows = lista.map(e=>({ e, s:PIND.map(I=>statInd(I.k,[e])) }));
+  $('pe-tab').innerHTML = rows.map(r=>`<tr class="ap-exec-row" data-e="${esc(r.e)}"><td><b>${esc(r.e)}</b></td>${r.s.map(s=>`<td class="num">${nf0.format(s.real)} <span class="faint">/ ${s.metaAte!=null?nf0.format(Math.round(s.metaAte)):'—'}</span></td><td class="num pct-cell" style="color:${s.ating==null?'var(--text-faint)':corPct(s.ating)}">${fmtPct(s.ating)}</td>`).join('')}</tr>`).join('')
+    + (()=>{ const t = PIND.map(I=>statInd(I.k, execsLista())); return `<tr class="total"><td>Time</td>${t.map(s=>`<td class="num">${nf0.format(s.real)} / ${s.metaAte!=null?nf0.format(Math.round(s.metaAte)):'—'}</td><td class="num">${fmtPct(s.ating)}</td>`).join('')}</tr>`; })();
+  document.querySelectorAll('#pe-tab .ap-exec-row').forEach(tr=>tr.onclick=()=>{ PD.visao = tr.dataset.e; $('fp-visao').value = PD.visao; heroProd(); renderProdTudo(); document.querySelector('#tabs-prod button[data-view=pgeral]').click(); });
+  $('btn-xls-pexec').onclick = ()=>exportXLSX(rows.map(r=>{ const o={ Executivo:r.e }; r.s.forEach(s=>{ const t=PIND_BY[s.k].t; o[t+' realizado']=s.real; o[t+' meta até hoje']=s.metaAte!=null?Math.round(s.metaAte):''; o[t+' %']=s.ating!=null?+s.ating.toFixed(1):''; }); return o; }), `produtividade_executivos_${PD.mes}`);
+}
+function renderPDia(){
+  if(!$('pd-ind').options.length) $('pd-ind').innerHTML = PIND.map(I=>`<option value="${I.k}">${I.t}</option>`).join('');
+  const k = $('pd-ind').value || 'acion', I = PIND_BY[k], lista = PD.visao ? [PD.visao] : execsLista();
+  const p = periodoDe(k, PD.mes), dias = []; for(let d=p.ini; d<=p.fim; d=addDias(d,1)) dias.push(d);
+  const hoje = hojeISO();
+  const st0 = statInd(k, lista);
+  const metaDiaExec = k==='cons' ? (st0.metaMes!=null ? st0.metaMes/Math.max(1,st0.dus.length)/Math.max(1,lista.length) : null) : st0.metaDia;
+  $('pd-sub').textContent = `${I.t} · ${dBR(p.ini)} a ${dBR(p.fim)} · meta por executivo por dia útil: ${metaDiaExec!=null?String(+metaDiaExec.toFixed(1)).replace('.',','):'— (importe o print do BI)'}.`;
+  const cnt = {}; (PD.ev[k]||[]).forEach(x=>{ if(x.d>=p.ini && x.d<=p.fim){ const kk=norm(x.e)+'|'+x.d; cnt[kk]=(cnt[kk]||0)+x.q; } });
+  $('pd-head').innerHTML = `<tr><th>Executivo</th>${dias.map(d=>`<th style="${ehDU(d)?'':'color:var(--text-faint)'}">${d.slice(8,10)}<div style="font-size:9.5px;font-weight:600">${diaSem(d)}</div></th>`).join('')}<th>Total</th><th>Meta</th><th>%</th></tr>`;
+  const linhas = lista.map(e=>{ const vals = dias.map(d=>cnt[norm(e)+'|'+d]||0); const s = statInd(k,[e]); return { e, vals, s }; });
+  const cel = (v,d) => { if(d>hoje) return `<td class="faint">·</td>`; if(!ehDU(d)) return `<td style="background:#EEF3F6">${v||''}</td>`;
+    if(metaDiaExec==null) return `<td>${v}</td>`; const r = v/metaDiaExec; return `<td style="background:${r>=1?'#D8EFE2':r>=0.8?'#FBF1DE':'#FBE9E5'};font-weight:700">${v}</td>`; };
+  $('pd-body').innerHTML = linhas.map(l=>`<tr><td><b>${esc(l.e)}</b></td>${l.vals.map((v,i)=>cel(v,dias[i])).join('')}<td><b>${nf0.format(l.s.real)}</b></td><td class="muted">${l.s.metaAte!=null?nf0.format(Math.round(l.s.metaAte)):'—'}</td><td class="pct-cell" style="color:${l.s.ating==null?'var(--text-faint)':corPct(l.s.ating)}">${fmtPct(l.s.ating)}</td></tr>`).join('')
+    + `<tr class="total"><td>Total</td>${dias.map((d,i)=>`<td>${d>hoje?'':linhas.reduce((s,l)=>s+l.vals[i],0)}</td>`).join('')}<td>${nf0.format(st0.real)}</td><td>${st0.metaAte!=null?nf0.format(Math.round(st0.metaAte)):'—'}</td><td>${fmtPct(st0.ating)}</td></tr>`;
+  // semanas
+  const semanas = []; for(let s=segundaDe(p.ini); s<=p.fim; s=addDias(s,7)) semanas.push(s);
+  $('pw-head').innerHTML = `<tr><th>Executivo</th>${semanas.map(s=>{ const f=addDias(s,6); return `<th class="num">${dBRc(s<p.ini?p.ini:s)} a ${dBRc(f>p.fim?p.fim:f)}</th>`; }).join('')}</tr>`;
+  $('pw-body').innerHTML = linhas.map(l=>`<tr><td><b>${esc(l.e)}</b></td>${semanas.map(s=>{ const f=addDias(s,6); const ds=dias.filter(d=>d>=s&&d<=f&&d<=hoje); const v=ds.reduce((a,d)=>a+(cnt[norm(l.e)+'|'+d]||0),0); const m=metaDiaExec!=null?metaDiaExec*ds.filter(ehDU).length:null;
+      return ds.length ? `<td class="num">${v} <span class="faint">/ ${m!=null?Math.round(m):'—'}</span> <b style="color:${m?corPct(pctN(v,m)):'var(--text-faint)'}">${m?fmtPct(pctN(v,m)):''}</b></td>` : '<td class="num faint">—</td>'; }).join('')}</tr>`).join('');
+  $('btn-xls-pdia').onclick = ()=>exportXLSX(linhas.map(l=>{ const o={ Executivo:l.e }; dias.forEach((d,i)=>o[dBRc(d)]=l.vals[i]); o.Total=l.s.real; o['Meta até hoje']=l.s.metaAte!=null?Math.round(l.s.metaAte):''; o['%']=l.s.ating!=null?+l.s.ating.toFixed(1):''; return o; }), `produtividade_diaria_${k}_${PD.mes}`);
+}
+$('pd-ind').onchange = ()=>renderPDia();
+document.querySelectorAll('#tabs-prod button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs-prod button').forEach(x=>x.classList.toggle('active', x===b));
+  document.querySelectorAll('#prod-area .view').forEach(v=>v.classList.toggle('active', v.id==='view-'+b.dataset.view));
+  $('prod-filtros').style.display = b.dataset.view==='pimp' ? 'none' : 'flex';
+  if(b.dataset.view==='pgeral') renderPGeral();
+});
+
+/* ---------- IMPORTAÇÕES ---------- */
+async function logImportProd(tipo, arquivo, linhas, detalhe){ try{ await api('/prod_importacoes', { method:'POST', body:{ tipo, arquivo, importado_por:SESSION.email, linhas, detalhe }, prefer:'return=minimal' }); }catch(e){} }
+async function renderProdHist(){
+  try{ const h = await api('/prod_importacoes?select=*&order=id.desc&limit=30');
+    $('p-hist').innerHTML = h.map(i=>`<tr><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td><span class="badge b-water">${esc(i.tipo)}</span></td><td class="cli">${esc(i.arquivo||'')}</td><td>${esc(i.importado_por)}</td><td class="num">${nf0.format(i.linhas||0)}</td><td class="muted" style="font-size:12px">${esc(i.detalhe?Object.entries(i.detalhe).map(([k,v])=>k+': '+(Array.isArray(v)?v.join(', '):v)).join(' · '):'')}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="6">Nenhuma importação.</td></tr>';
+  }catch(e){}
+}
+function lerTabela(wb, testeHead){
+  for(const nome of wb.SheetNames){
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[nome], { header:1, raw:true, defval:null });
+    for(let h=0; h<Math.min(rows.length,30); h++){ const head=(rows[h]||[]).map(x=>normH(x==null?'':String(x))); const col = testeHead(head); if(col) return { aba:nome, rows:rows.slice(h+1), col }; }
+  }
+  return null;
+}
+$('pa-file').onchange = ()=>{ $('btn-pa').disabled = !$('pa-file').files[0]; $('pa-box').classList.toggle('has-file', !!$('pa-file').files[0]); $('pa-log').textContent=''; };
+$('btn-pa').onclick = async ()=>{
+  const f = $('pa-file').files[0]; if(!f) return; const log = t=>$('pa-log').textContent += t+'\n'; $('pa-log').textContent=''; $('btn-pa').disabled=true;
+  try{
+    const wb = XLSX.read(await f.arrayBuffer(), { type:'array', cellDates:false });
+    const t = lerTabela(wb, h=>{ const i=x=>h.findIndex(x); const c={ sol:i(x=>x.includes('solicitacao')), exec:i(x=>x.startsWith('nome reduzido')||x==='executivo'), parecer:i(x=>x.startsWith('parecer')), lig:i(x=>x.includes('ligacao')||x==='matricula'),
+      data:i(x=>/^(data|dt) (do )?pedido/.test(x)||x==='data'), val:i(x=>x.startsWith('validacao')), sem:i(x=>x==='semana'), cart:i(x=>x==='carteira'), cod:i(x=>x==='codigo') }; return (c.sol>=0 && c.exec>=0 && c.data>=0) ? c : null; });
+    if(!t) throw new Error('Não encontrei as colunas Nº da Solicitação, Nome Reduzido e Data Pedido.');
+    const g=(r,k)=>t.col[k]>=0?r[t.col[k]]:null, int=v=>{ const n=parseInt(String(v??'').replace(/\D/g,''),10); return isNaN(n)?null:n; };
+    const L = t.rows.filter(r=>r && int(g(r,'sol'))).map(r=>({ numero_solicitacao:int(g(r,'sol')), executivo:txt(g(r,'exec')), validacao:txt(g(r,'val')), parecer:txt(g(r,'parecer')),
+      matricula:int(g(r,'lig')), data_pedido:serialParaISO(g(r,'data'), true), semana:txt(g(r,'sem')), carteira:txt(g(r,'cart')), codigo:txt(g(r,'cod')) })).filter(r=>r.data_pedido);
+    const excl=(PCFG.excluir_parecer||[]).map(norm), naoConta = L.filter(r=>excl.includes(norm(r.parecer))).length;
+    const ds = L.map(r=>r.data_pedido.slice(0,10)).sort();
+    log(`Aba "${t.aba}": ${nf0.format(L.length)} solicitações de ${dBR(ds[0])} a ${dBR(ds[ds.length-1])} · ${naoConta} não contam (pareceres excluídos).`);
+    const r = await rpc('prod_importar_acionamentos', { p_linhas:L }); const tot=r.linhas, novos=r.novos;
+    log(`✓ Importado: ${nf0.format(tot)} solicitações de ${dBR(r.ini)} a ${dBR(r.fim)} (${nf0.format(novos)} novas). O período do arquivo substituiu o que já estava gravado nessas datas.`);
+    await logImportProd('acionamentos', f.name, L.length, { periodo:`${dBR(ds[0])} a ${dBR(ds[ds.length-1])}`, novos });
+    toast('Acionamentos importados'); $('pa-file').value=''; $('pa-box').classList.remove('has-file'); await carregarProd();
+  }catch(e){ log('✗ Erro: '+e.message+(/prod_/.test(e.message)?' — rode o supabase_produtividade.sql.':'')); toast('Erro na importação: '+e.message, true); }
+  finally{ $('btn-pa').disabled = !$('pa-file').files[0]; }
+};
+$('pf-ano').value = hojeISO().slice(0,4);
+$('pf-file').onchange = ()=>{ $('btn-pf').disabled = !$('pf-file').files[0]; $('pf-box').classList.toggle('has-file', !!$('pf-file').files[0]); $('pf-log').textContent=''; };
+$('btn-pf').onclick = async ()=>{
+  const f = $('pf-file').files[0]; if(!f) return; const log = t=>$('pf-log').textContent += t+'\n'; $('pf-log').textContent=''; $('btn-pf').disabled=true;
+  try{
+    const ano = +$('pf-ano').value || +hojeISO().slice(0,4);
+    const wb = XLSX.read(await f.arrayBuffer(), { type:'array', cellDates:false });
+    const t = lerTabela(wb, h=>{ const i=x=>h.findIndex(x); const c={ exec:i(x=>x.startsWith('nome reduzido')||x==='executivo'||x==='nome'), mat:i(x=>x.startsWith('matricula')), mes:i(x=>x==='mes'), dia:i(x=>x==='dia'), data:i(x=>x==='data'||x.startsWith('data da analise')||x.startsWith('hora de conclusao')) };
+      return (c.exec>=0 && ((c.mes>=0 && c.dia>=0) || c.data>=0)) ? c : null; });
+    if(!t) throw new Error('Não encontrei as colunas Nome Reduzido, Matrícula, Mês e Dia.');
+    const g=(r,k)=>t.col[k]>=0?r[t.col[k]]:null;
+    const L = []; let semData = 0;
+    t.rows.forEach(r=>{ if(!r) return; const e = txt(g(r,'exec')); if(!e) return; let d = null;
+      if(t.col.data>=0) d = serialParaISO(g(r,'data'));
+      if(!d){ const mv = g(r,'mes'), dv = parseInt(g(r,'dia'),10); let m = typeof mv==='number' ? mv : MESES.findIndex(x=>norm(x)===norm(mv))+1;
+        if(m>=1 && dv>=1 && dv<=31) d = `${ano}-${String(m).padStart(2,'0')}-${String(dv).padStart(2,'0')}`; }
+      if(!d){ semData++; return; }
+      L.push({ executivo:e, matricula:parseInt(String(g(r,'mat')??'').replace(/\D/g,''),10)||null, data:d }); });
+    const ds = L.map(x=>x.data).sort();
+    log(`Aba "${t.aba}": ${nf0.format(L.length)} análises de ${dBR(ds[0])} a ${dBR(ds[ds.length-1])}${semData?` · ${semData} linhas sem data ignoradas`:''}.`);
+    const r = await rpc('prod_importar_forms', { p_linhas:L });
+    log(`✓ Importado: ${nf0.format(r.linhas)} análises (meses ${r.meses.map(mesNome).join(', ')} substituídos).`);
+    await logImportProd('forms', f.name, r.linhas, { meses:r.meses.map(mesNome) });
+    toast('Forms importado'); $('pf-file').value=''; $('pf-box').classList.remove('has-file'); await carregarProd();
+  }catch(e){ log('✗ Erro: '+e.message+(/prod_/.test(e.message)?' — rode o supabase_produtividade.sql.':'')); toast('Erro na importação: '+e.message, true); }
+  finally{ $('btn-pf').disabled = !$('pf-file').files[0]; }
+};
+
+/* ---------- print do BI (OCR no navegador; imagem não é guardada) ---------- */
+let PM_IMG = null;
+$('pm-data').value = hojeISO();
+function setImgBI(file){ PM_IMG = file; $('btn-pm-ler').disabled = !file; $('pm-box').classList.toggle('has-file', !!file); $('pm-log').textContent = file ? `Imagem pronta (${Math.round(file.size/1024)} KB). Clique em "Ler números da imagem".` : ''; }
+$('pm-file').onchange = ()=>setImgBI($('pm-file').files[0]);
+$('pm-box').addEventListener('paste', e=>{ const it=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith('image/')); if(it){ setImgBI(it.getAsFile()); e.preventDefault(); } });
+document.addEventListener('paste', e=>{ if(MODULO!=='prod' || !$('view-pimp').classList.contains('active') || e.target.closest('input,textarea')) return; const it=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith('image/')); if(it) setImgBI(it.getAsFile()); });
+function carregarScript(src){ return new Promise((ok,err)=>{ if([...document.scripts].some(s=>s.src===src)) return ok(); const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=()=>err(new Error('não consegui carregar o leitor de imagem')); document.head.appendChild(s); }); }
+// semelhança entre nomes (tolera erros de leitura: "Dismsnte" ≈ "Diamante")
+function bigramas(t){ t=' '+t+' '; const o=[]; for(let i=0;i<t.length-1;i++) o.push(t.slice(i,i+2)); return o; }
+function semelhanca(a,b){ const A=bigramas(norm(a)), B=bigramas(norm(b)); let n=0; const bb=[...B]; A.forEach(x=>{ const i=bb.indexOf(x); if(i>=0){ n++; bb.splice(i,1); } }); return 2*n/(A.length+B.length); }
+// corrige letras que o leitor confunde com números
+function tokenNum(t){
+  let x = t.replace(/^[“”"'~—–_]+/, '-').replace(/[Ss$§]/g,'5').replace(/[&B]/g,'8').replace(/[oOQD]/g,'0').replace(/[lI|!]/g,'1').replace(/[Zz]/g,'2').replace(/[gq]/g,'9');
+  const pct = /%/.test(x); x = x.replace(/[^0-9.,\-]/g,'');
+  if(!/\d/.test(x)) return null;
+  x = x.replace(/\.(?=\d{3}\b)/g,'').replace(',','.');
+  const v = parseFloat(x); return isNaN(v) ? null : { v, pct };
+}
+// linha do BI: Executivo | Prioridade 1 | Prioridade 2 | Meta Prioridade | Prioridade Analisado | Delta Prioridade | Produtividade % | Análise Geral | Delta Meta 150
+const ehTokenNum = t => /\d/.test(t) ? /^[“”"'~—–\-]?[\dSs$§&BoO.,]+%?$/.test(t) : /^[“”"'~—–\-]?[Ss$§&B]{1,3}%?$/.test(t);
+function parseLinhaBI(tokens){
+  const M = +PCFG.meta_cons_ciclo || 150;
+  const T = tokens.map(tokenNum).filter(Boolean);
+  const r = { p1:null, p2:null, metaPrio:null, prioAnal:null, geral:null, delta150:null, metaCiclo:M, ok:true };
+  if(T.length<3 || T[0].pct || T[1].pct){ r.ok=false; return r; }
+  r.p1=T[0].v; r.p2=T[1].v; r.metaPrio = T[2].pct ? null : T[2].v;
+  const rest = T.slice(3), ip = rest.findIndex(t=>t.pct);
+  if(ip<0){ // sem produtividade: ninguém analisado (linhas em branco no BI)
+    r.prioAnal = 0; r.geral = 0; r.delta150 = -M;
+    if(r.metaPrio==null || r.p1 + r.p2 !== r.metaPrio){ if(rest[0] && Math.abs(rest[0].v) === r.p1 + r.p2) r.metaPrio = r.p1 + r.p2; else { r.metaPrio = r.p1 + r.p2; r.ok = false; } }
+    return r;
+  }
+  const antes = rest.slice(0,ip), depois = rest.slice(ip+1);
+  let delta = null;
+  if(antes.length>=2){ r.prioAnal = antes[0].v; delta = -Math.abs(antes[1].v); }
+  else if(antes.length===1){ r.prioAnal = antes[0].v; }
+  // conserta a Meta Prioridade com as contas do próprio BI
+  if(r.metaPrio==null || r.p1 + r.p2 !== r.metaPrio){
+    if(delta!=null && r.prioAnal - delta === r.p1 + r.p2) r.metaPrio = r.p1 + r.p2;
+    else { r.metaPrio = r.p1 + r.p2; r.ok = false; }
+  }
+  if(delta!=null && r.prioAnal - r.metaPrio !== delta) r.ok = false;
+  if(depois.length>=2){ r.geral = depois[0].v; const d = depois[1].v;
+    if(Math.abs(r.geral - M) === Math.abs(d)) r.delta150 = r.geral - M;
+    else { r.delta150 = -Math.abs(d); if(M + r.delta150 >= 0){ r.geral = M + r.delta150; } r.ok = false; } }
+  else if(depois.length===1){ r.geral = depois[0].v; r.delta150 = r.geral - M; }
+  if(r.prioAnal==null) r.prioAnal = 0;
+  return r;
+}
+function lerTextoBI(texto){
+  const lista = execsLista(), achados = {};
+  texto.split('\n').map(s=>s.trim()).filter(Boolean).forEach(l=>{
+    const tk = l.split(/\s+/); let i = tk.findIndex((t,ix)=>ix>0 && ehTokenNum(t) && tk[ix+1] && ehTokenNum(tk[ix+1]));
+    if(i<1) return;
+    const nome = tk.slice(0,i).join(' ');
+    let best=null, sc=0; lista.forEach(n=>{ const v = semelhanca(nome, n); if(v>sc){ sc=v; best=n; } });
+    if(!best || sc<0.55 || achados[best]) return;
+    achados[best] = { linha:l, ...parseLinhaBI(tk.slice(i)) };
+  });
+  return achados;
+}
+function preprocessarImagem(file){ // amplia 2,5x e passa para tons de cinza (melhora a leitura)
+  return new Promise((ok,err)=>{ const img=new Image(); img.onload=()=>{ const k = img.width<1400 ? 2.5 : 1.5; const c=document.createElement('canvas'); c.width=img.width*k; c.height=img.height*k;
+    const g=c.getContext('2d'); g.imageSmoothingQuality='high'; g.drawImage(img,0,0,c.width,c.height); const d=g.getImageData(0,0,c.width,c.height), a=d.data;
+    for(let i=0;i<a.length;i+=4){ const y=0.299*a[i]+0.587*a[i+1]+0.114*a[i+2]; a[i]=a[i+1]=a[i+2]=y; } g.putImageData(d,0,0); URL.revokeObjectURL(img.src); ok(c); };
+    img.onerror=()=>err(new Error('imagem inválida')); img.src=URL.createObjectURL(file); });
+}
+$('btn-pm-ler').onclick = async ()=>{
+  if(!PM_IMG) return; const log=t=>$('pm-log').textContent=t; $('btn-pm-ler').disabled=true;
+  try{
+    log('Carregando leitor de imagem (1ª vez pode levar ~20 s)…');
+    await carregarScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    const canvas = await preprocessarImagem(PM_IMG);
+    log('Lendo a imagem…');
+    const { data } = await Tesseract.recognize(canvas, 'por', { logger:m=>{ if(m.status==='recognizing text') log(`Lendo a imagem… ${Math.round(m.progress*100)}%`); } });
+    const achados = lerTextoBI(data.text), n = Object.keys(achados).length, dub = Object.values(achados).filter(a=>!a.ok).length;
+    log(`Leitura concluída: ${n} de ${execsLista().length} executivos encontrados${dub?` · ${dub} linha(s) em amarelo para conferir`:''}. Confira os números antes de salvar.`);
+    montarGridMeta(achados, data.text);
+  }catch(e){ log('✗ ' + e.message + ' — use "Preencher à mão".'); }
+  finally{ $('btn-pm-ler').disabled = !PM_IMG; }
+};
+$('btn-pm-manual').onclick = async ()=>{
+  const dr = $('pm-data').value, ex = {};
+  try{ const r = await api(`/prod_consumo_meta?select=*&data_ref=eq.${dr}`); r.forEach(m=>ex[m.executivo]={ linha:'(já salvo)', ok:true, metaPrio:m.meta_prioridade, prioAnal:m.prioridade_analisado, geral:m.executado_bi, metaCiclo:m.meta_ciclo }); }catch(e){}
+  montarGridMeta(ex, null, true);
+};
+function montarGridMeta(achados, textoOCR){
+  const lista = execsLista(), padrao = +PCFG.meta_cons_ciclo || 150, val = v => v==null ? '' : v;
+  $('pm-grid').innerHTML = `<div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Executivo</th><th>Linha lida</th><th class="num">Meta Prioridade</th><th class="num">Prioridade Analisado</th><th class="num">Análise Geral</th><th class="num">Meta do ciclo</th></tr></thead><tbody>
+    ${lista.map(e=>{ const a = achados[e]; const cor = !a ? '' : a.ok ? '' : 'background:#FFF6E0';
+      return `<tr class="pm-row" data-e="${esc(e)}" style="${cor}"><td><b>${esc(e)}</b>${a&&!a.ok?' <span class="badge b-amber">conferir</span>':''}</td><td class="muted" style="font-size:11.5px;max-width:320px;white-space:normal">${a?esc(a.linha):'<span class="faint">não encontrado</span>'}</td>
+        <td class="num"><input class="cell-input" style="min-width:90px" type="number" data-f="meta_prioridade" value="${a?val(a.metaPrio):''}"></td>
+        <td class="num"><input class="cell-input" style="min-width:90px" type="number" data-f="prioridade_analisado" value="${a?val(a.prioAnal):''}"></td>
+        <td class="num"><input class="cell-input" style="min-width:90px" type="number" data-f="executado_bi" value="${a?val(a.geral):''}"></td>
+        <td class="num"><input class="cell-input" style="min-width:80px" type="number" data-f="meta_ciclo" value="${a?val(a.metaCiclo ?? padrao):padrao}"></td></tr>`; }).join('')}
+    </tbody></table></div>
+    ${textoOCR?`<details style="margin-top:10px"><summary class="muted" style="cursor:pointer;font-size:12.5px">Ver texto lido da imagem</summary><pre style="white-space:pre-wrap;font-size:11.5px;background:var(--bg);padding:10px;border-radius:8px">${esc(textoOCR)}</pre></details>`:''}
+    <div class="form-row"><button class="btn btn-primary" id="btn-pm-salvar">Salvar números de ${dBR($('pm-data').value)}</button><span class="muted" style="font-size:12px">Linhas em amarelo: a soma não fechou (P1 + P2 ≠ Meta Prioridade ou Análise Geral − ${padrao} ≠ Delta) — confira com o print.</span></div>`;
+  $('btn-pm-salvar').onclick = async ()=>{
+    const dr = $('pm-data').value; if(!dr){ toast('Informe a data do print', true); return; }
+    const body = [...document.querySelectorAll('#pm-grid .pm-row')].map(tr=>{ const v=f=>{ const x=tr.querySelector(`[data-f="${f}"]`).value; return x===''?null:+x; };
+      return { data_ref:dr, executivo:tr.dataset.e, meta_prioridade:v('meta_prioridade'), prioridade_analisado:v('prioridade_analisado'), executado_bi:v('executado_bi'), meta_ciclo:v('meta_ciclo'), meta_prog:null }; })
+      .filter(r=>r.meta_prioridade!=null || r.prioridade_analisado!=null || r.executado_bi!=null);
+    if(!body.length){ toast('Nenhum número preenchido', true); return; }
+    try{ await api('/prod_consumo_meta?on_conflict=data_ref,executivo', { method:'POST', body, prefer:'resolution=merge-duplicates,return=minimal' });
+      await logImportProd('meta_consumo', 'print do BI', body.length, { data:dBR(dr) });
+      toast(`BI de ${dBR(dr)} salvo (${body.length} executivos)`); $('pm-grid').innerHTML=''; setImgBI(null); $('pm-file').value=''; await carregarProd();
+    }catch(e){ toast('Erro ao salvar: '+e.message+(/meta_prioridade|prioridade_analisado/.test(e.message)?' — rode de novo o supabase_produtividade.sql':''), true); }
+  };
+}
+
+/* ---------- configuração ---------- */
+function renderProdCfg(){
+  $('cfg-cons').value = PCFG.meta_cons_ciclo ?? 150; $('cfg-acion').value = PCFG.meta_acion_dia; $('cfg-pesq').value = PCFG.meta_pesq_semana; $('cfg-nota').value = PCFG.nota_alvo; $('cfg-alt').value = PCFG.meta_alt_semana;
+  $('cfg-excl').value = (PCFG.excluir_parecer||[]).join('\n');
+  const todos = [...new Set([...PD.execsTodos, ...(PCFG.executivos||[]), ...(PD.ev.acion||[]).map(x=>x.e), ...(PD.ev.cons||[]).map(x=>x.e)].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const sel = new Set(PCFG.executivos && PCFG.executivos.length ? PCFG.executivos : PD.execsTodos);
+  $('cfg-execs').innerHTML = todos.map(e=>`<label><input type="checkbox" value="${esc(e)}" ${sel.has(e)?'checked':''}>${esc(e)}</label>`).join('');
+  $('cfg-pq-url').value = PCFG.pesquisa.url; $('cfg-pq-key').value = PCFG.pesquisa.key;
+  const al = PCFG.alteracao; $('cfg-al-url').value = al.url; $('cfg-al-key').value = al.key; $('cfg-al-tab').value = al.tabela; $('cfg-al-exec').value = al.col_exec; $('cfg-al-data').value = al.col_data; $('cfg-al-filtro').value = al.filtro;
+}
+function lerCfgTela(){
+  return { meta_cons_ciclo:+$('cfg-cons').value||150, meta_acion_dia:+$('cfg-acion').value||0, meta_pesq_semana:+$('cfg-pesq').value||0, nota_alvo:+$('cfg-nota').value||0, meta_alt_semana:+$('cfg-alt').value||0,
+    excluir_parecer: $('cfg-excl').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    executivos: [...document.querySelectorAll('#cfg-execs input:checked')].map(i=>i.value),
+    pesquisa:{ url:$('cfg-pq-url').value.trim(), key:$('cfg-pq-key').value.trim() },
+    alteracao:{ url:$('cfg-al-url').value.trim(), key:$('cfg-al-key').value.trim(), tabela:$('cfg-al-tab').value.trim(), col_exec:$('cfg-al-exec').value.trim(), col_data:$('cfg-al-data').value.trim(), filtro:$('cfg-al-filtro').value.trim() } };
+}
+$('btn-cfg-salvar').onclick = async ()=>{
+  const v = lerCfgTela();
+  try{ await api('/prod_config?on_conflict=chave', { method:'POST', body:[{ chave:'geral', valor:v }], prefer:'resolution=merge-duplicates,return=minimal' });
+    $('cfg-msg').style.color='var(--leaf)'; $('cfg-msg').textContent='✓ Configuração salva.'; toast('Configuração salva'); await carregarProd(); }
+  catch(e){ $('cfg-msg').style.color='var(--rose)'; $('cfg-msg').textContent='Erro: '+e.message; }
+};
+$('btn-cfg-testar').onclick = async ()=>{
+  const v = lerCfgTela(), m = $('cfg-msg'); m.style.color='var(--text-mut)'; m.textContent='Testando…'; const r=[];
+  try{ const x = await fetchExterno(v.pesquisa.url, v.pesquisa.key, '/registros?select=analista&limit=1'); r.push('Pesquisa: OK'); }catch(e){ r.push('Pesquisa: ' + e.message); }
+  if(v.alteracao.tabela){ try{ await fetchExterno(v.alteracao.url, v.alteracao.key, `/${v.alteracao.tabela}?select=${v.alteracao.col_exec||'*'},${v.alteracao.col_data||''}`.replace(/,$/,'')); r.push('Alteração cadastral: OK'); }catch(e){ r.push('Alteração cadastral: ' + e.message); } }
+  else r.push('Alteração cadastral: tabela não informada');
+  m.textContent = r.join(' · ');
+};
+
+/* =====================================================================
+   APRESENTAÇÃO
+   ===================================================================== */
+const AP = { i:0, slides:[] };
+function slidesProd(){
+  const ex = execsMeta(), quem = PD.visao || 'Time GC';
+  const sts = PIND.map(I=>statInd(I.k, ex));
+  const s = [];
+  s.push({ tit:'Visão geral', html:()=>`<h2>Visão geral — ${esc(quem)}</h2><p class="sub">${mesNome(PD.mes)} · atingimento sobre a meta proporcional aos dias úteis até hoje.</p><div class="prod-grid">${sts.map(st=>cardInd(st,{ big:true, prefix:'ap' })).join('')}</div>`,
+    after:()=>sts.forEach(st=>chartSemana('ap-'+st.k, st)) });
+  if(!PD.visao){
+    const lista = execsLista();
+    const lin = lista.map(e=>{ const v = PIND.map(I=>statInd(I.k,[e]).ating); const vs=v.filter(x=>x!=null); return { e, v, m: vs.length? vs.reduce((a,b)=>a+b,0)/vs.length : null }; }).sort((a,b)=>(b.m??-1)-(a.m??-1));
+    s.push({ tit:'Por executivo', html:()=>`<h2>Por executivo</h2><p class="sub">Clique em um executivo para abrir a visão dele.</p><div class="card" style="margin-top:0"><div class="tablewrap"><table style="font-size:15px"><thead><tr><th>Executivo</th>${PIND.map(I=>`<th class="num" style="color:${I.c}">${I.t}</th>`).join('')}<th class="num">Média</th></tr></thead><tbody>
+      ${lin.map(l=>`<tr class="ap-exec-row" data-e="${esc(l.e)}"><td><b>${esc(l.e)}</b></td>${l.v.map(x=>`<td class="num pct-cell" style="color:${x==null?'var(--text-faint)':corPct(x)}">${fmtPct(x)}</td>`).join('')}<td class="num pct-cell" style="color:${l.m==null?'var(--text-faint)':corPct(l.m)}">${fmtPct(l.m)}</td></tr>`).join('')}</tbody></table></div></div>`,
+      after:()=>document.querySelectorAll('#ap-stage .ap-exec-row').forEach(tr=>tr.onclick=()=>{ PD.visao=tr.dataset.e; $('ap-visao').value=PD.visao; montarApresentacao(0); }) });
+  }
+  sts.forEach(st=>{
+    const I = PIND_BY[st.k];
+    s.push({ tit:I.t, html:()=>{
+      let rank = '';
+      if(!PD.visao){ const r = execsLista().map(e=>({ e, s:statInd(I.k,[e]) })).sort((a,b)=>(b.s.ating??-1)-(a.s.ating??-1));
+        rank = `<div class="card" style="margin-top:0"><h3>Atingimento por executivo</h3><div class="dist-bars ap-rank">${r.map(x=>`<div class="dist-row"><div>${esc(x.e)}</div><div class="dist-track"><div class="dist-fill" style="width:${Math.min(100,x.s.ating||0)}%;background:${I.c}"></div></div><div class="dist-val">${fmtPct(x.s.ating)} <small>${nf0.format(x.s.real)}</small></div></div>`).join('')}</div></div>`; }
+      else { const p=st.p; const dias=[]; for(let d=p.ini; d<=st.corte; d=addDias(d,1)) if(ehDU(d)) dias.push(d);
+        rank = `<div class="card" style="margin-top:0"><h3>Dia a dia</h3><div style="height:320px;position:relative"><canvas id="ap-dia-${st.k}"></canvas></div></div>`; }
+      return `<h2 style="color:${I.c}">${I.t} — ${esc(quem)}</h2><p class="sub">${I.s} · ${mesNome(PD.mes)}${st.k==='cons'?` (ciclo ${dBRc(st.p.ini)} a ${dBRc(st.p.fim)})`:''}</p><div class="ap-big"><div>${cardInd(st,{ big:true, prefix:'apx' })}</div>${rank}</div>`; },
+      after:()=>{ chartSemana('apx-'+st.k, st);
+        if(PD.visao && window.Chart && $('ap-dia-'+st.k)){ const dias = st.dusAte; const v = dias.map(d=>st.ev.filter(x=>x.d===d).reduce((a,x)=>a+x.q,0));
+          CHARTS['apd'] && CHARTS['apd'].destroy();
+          CHARTS['apd'] = new Chart($('ap-dia-'+st.k), { type:'bar', data:{ labels:dias.map(dBRc), datasets:[{ label:'Realizado', data:v, backgroundColor:I.c, borderRadius:5 }, ...(st.metaDia?[{ type:'line', label:'Meta do dia', data:dias.map(()=>+st.metaDia.toFixed(1)), borderColor:'#8CA0AF', borderDash:[5,4], pointRadius:0 }]:[])] },
+            options:{ animation:false, maintainAspectRatio:false, plugins:{ datalabels:{ display:ctx=>ctx.datasetIndex===0, anchor:'end', align:'end', color:I.c, font:{ weight:'700', size:11 } } }, scales:{ y:{ beginAtZero:true, grace:'15%', grid:{ color:'#EEF3F6' } }, x:{ grid:{ display:false } } } } }); } } });
+  });
+  return s;
+}
+function montarApresentacao(i){
+  AP.slides = slidesProd(); AP.i = Math.max(0, Math.min(i||0, AP.slides.length-1));
+  $('ap-visao').innerHTML = '<option value="">Visão geral (time)</option>' + execsLista().map(e=>`<option ${e===PD.visao?'selected':''}>${esc(e)}</option>`).join('');
+  mostrarSlide();
+}
+function mostrarSlide(){
+  const sl = AP.slides[AP.i];
+  $('ap-stage').innerHTML = `<div class="ap-slide">${sl.html()}</div>`; $('ap-num').textContent = `${AP.i+1} / ${AP.slides.length}`;
+  $('ap-sub').textContent = `${mesNome(PD.mes)} · ${PD.visao||'Visão geral do time'} · ${sl.tit}`;
+  sl.after && sl.after();
+}
+function abrirApresentacao(){ $('apres').classList.add('on'); document.body.style.overflow='hidden'; try{ document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }catch(e){} montarApresentacao(0); }
+function sairApresentacao(){ $('apres').classList.remove('on'); document.body.style.overflow=''; try{ document.fullscreenElement && document.exitFullscreen(); }catch(e){} $('fp-visao').value = PD.visao; heroProd(); renderProdTudo(); }
+$('btn-apresentar').onclick = abrirApresentacao;
+$('ap-sair').onclick = sairApresentacao;
+$('ap-prev').onclick = ()=>{ if(AP.i>0){ AP.i--; mostrarSlide(); } };
+$('ap-next').onclick = ()=>{ if(AP.i<AP.slides.length-1){ AP.i++; mostrarSlide(); } };
+$('ap-visao').onchange = e=>{ PD.visao = e.target.value; montarApresentacao(0); };
+document.addEventListener('keydown', e=>{ if(!$('apres').classList.contains('on')) return;
+  if(e.key==='ArrowRight' || e.key==='PageDown' || e.key===' '){ e.preventDefault(); $('ap-next').click(); }
+  if(e.key==='ArrowLeft' || e.key==='PageUp'){ e.preventDefault(); $('ap-prev').click(); }
+  if(e.key==='Escape') sairApresentacao(); });
+document.addEventListener('fullscreenchange', ()=>{ if(!document.fullscreenElement && $('apres').classList.contains('on')) sairApresentacao(); });
 
 /* ---------- início ---------- */
 (async function init(){
