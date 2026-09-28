@@ -262,6 +262,7 @@
   .dz-bar > div{ height:100%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:800; white-space:nowrap; overflow:hidden; }
   .dz-bar > div small{ font-weight:600; opacity:.85; margin-left:4px; }
   .dz-tot{ text-align:right; font-weight:800; color:var(--navy); } .dz-tot small{ display:block; font-weight:600; font-size:10px; color:var(--text-faint); }
+  .dz-row.ausente .dz-bar{ background:repeating-linear-gradient(135deg,#EEF3F6 0 8px,#E3E9EE 8px 16px); }
   .dz-vazio{ font-size:12px; color:var(--text-faint); }
   .dz-chips{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
   .dz-chip{ display:inline-flex; gap:8px; align-items:center; font-size:12px; color:var(--navy); background:#F4F7FA; border:1px solid var(--border); border-radius:8px; padding:6px 10px; }
@@ -976,7 +977,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 28/09b · produtividade</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 28/09c · produtividade</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -2759,6 +2760,7 @@ function tabelaQtdBody(){
 
 /* ---------- ausências (férias / atestado) e metas por executivo ---------- */
 function ausencia(e, d){ const n = norm(e); return (PD.aus||[]).find(a=>norm(a.executivo)===n && d>=a.ini && d<=a.fim) || null; }
+function ausenciasNoPeriodo(e, a, b){ const n = norm(e); return (PD.aus||[]).filter(x=>norm(x.executivo)===n && x.ini<=b && x.fim>=a && dusEntre(x.ini>a?x.ini:a, x.fim<b?x.fim:b).length>0); }
 function diasMeta(e, dias){ return dias.filter(d=>!ausencia(e,d)).length; }
 function metaDiaK(k){ return k==='acion' ? +PCFG.meta_acion_dia : k==='pesq' ? (+PCFG.meta_pesq_semana)/5 : k==='alt' ? (+PCFG.meta_alt_semana)/5 : null; }
 function metaJanela(k, execs, dias){ const md = metaDiaK(k); return md==null ? null : execs.reduce((s,e)=>s + md*diasMeta(e,dias), 0); }
@@ -3030,7 +3032,7 @@ function htmlDzEvol(ex, quem){
   const sel = s => PD.modo==='dia' && s.a===J.a ? 'sel' : '';
   return `<h3 style="margin:0">Onde ${esc(quem)} concentrou o tempo — ${PD.modo==='mes' ? mesNome(PD.mes)+' (por semana)' : 'semana de '+dBRc(segundaDe(PD.ref||hojeISO()))+' (por dia)'}</h3>
     <p class="sub" style="margin:4px 0 8px">${notaDz()}</p>${legDz()}
-    <div class="dz-rows" style="--dz-lab:${PD.modo==='mes'?'120px':'90px'}">${linhas.map(s=>barraDz(lab(s), s.o, { cls:sel(s), vazio: s.a>hojeISO()?'—':'sem registros' })).join('')}
+    <div class="dz-rows" style="--dz-lab:${PD.modo==='mes'?'120px':'90px'}">${linhas.map(s=>{ const au = ex.length===1 ? ausenciasNoPeriodo(ex[0], s.a, s.b) : []; return barraDz(lab(s), s.o, { cls:sel(s), vazio: au.length ? `<b style="color:var(--text-mut)">${esc(au[0].motivo)}</b>` : s.a>hojeISO()?'—':'sem registros' }); }).join('')}
       <div style="height:4px"></div>${barraDz(PD.modo==='mes'?'Mês':'Semana', PD.modo==='mes' ? tot : distrib(ex, segundaDe(PD.ref||hojeISO()), addDias(segundaDe(PD.ref||hojeISO()),6)), { cls:'tot' })}</div>
     <div class="dz-chips">${picosDz(linhas)}</div>`;
 }
@@ -3038,8 +3040,11 @@ function htmlDzExec(clicavel){
   const J = janelaAtual(), lista = execsLista();
   const linhas = lista.map(e=>({ e, o:distrib([e], J.a, J.b) }));
   return `<h3 style="margin:0">Distribuição por executivo — ${J.rot}</h3><p class="sub" style="margin:4px 0 8px">Quanto do esforço de cada um foi para cada frente (% e quantidade).${clicavel?' Clique para abrir a visão do executivo.':''}</p>${legDz()}
-    <div class="dz-rows" style="--dz-lab:170px">${linhas.map(l=>{ const au = PD.modo!=='mes' && J.a===J.b && ausencia(l.e, J.a);
-      return barraDz(esc(l.e), l.o, { cls:(clicavel?'click':'') + (PD.visao && mesmoNome(PD.visao,l.e)?' sel':''), attr:`data-e="${esc(l.e)}"`, vazio: au ? au.motivo : 'sem registros' }); }).join('')}
+    <div class="dz-rows" style="--dz-lab:170px">${linhas.map(l=>{ const aus = ausenciasNoPeriodo(l.e, J.a, J.b);
+      const txtAus = aus.map(a=>`${a.motivo} · ${dBRc(a.ini)} a ${dBRc(a.fim)}`).join(' | ');
+      const lab = esc(l.e) + (aus.length && l.o.tot ? ` <span class="aus-tag" title="${esc(txtAus)}">${esc(aus[0].motivo.toLowerCase())}</span>` : '');
+      return barraDz(lab, l.o, { cls:(clicavel?'click':'') + (PD.visao && mesmoNome(PD.visao,l.e)?' sel':'') + (aus.length && !l.o.tot ? ' ausente' : ''), attr:`data-e="${esc(l.e)}"`,
+        vazio: aus.length ? `<b style="color:var(--text-mut)">${esc(txtAus)}</b>` : 'sem registros' }); }).join('')}
       <div style="height:4px"></div>${barraDz('Time', distrib(lista, J.a, J.b), { cls:'tot' })}</div>`;
 }
 function htmlDzMes(ex, quem){
