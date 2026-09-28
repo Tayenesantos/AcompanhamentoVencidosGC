@@ -241,6 +241,11 @@
   .pc-ch small{ font-size:10px; font-weight:800; color:var(--text-mut); text-transform:uppercase; letter-spacing:.03em; }
   .pc-foot{ margin:6px 14px 14px; background:var(--cs); border-radius:10px; padding:9px 12px; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700; color:var(--c); text-transform:uppercase; }
   .pc-foot b{ font-family:var(--font-display); font-size:18px; color:var(--c); }
+  .vd-tab tr.fds td{ background:#FFF6E8; } .vd-tab tr.fer td{ background:#F3EEFB; }
+  .vd-tag{ font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:100px; margin-left:6px; }
+  .vd-tag.fds{ background:var(--amber-soft); color:var(--amber); } .vd-tag.fer{ background:#EFEAFA; color:#6A45B8; }
+  .vd-barra{ height:8px; background:#EEF3F6; border-radius:8px; overflow:hidden; min-width:90px; } .vd-barra div{ height:100%; background:var(--water); border-radius:8px; }
+  .vd-nota{ background:#FFF6E8; border:1px solid var(--amber-line); border-radius:12px; padding:12px 14px; font-size:13px; color:var(--navy); line-height:1.5; }
   .pc-off{ padding:30px 16px; text-align:center; color:var(--text-mut); font-size:12.5px; }
   .selo{ display:inline-block; margin-top:8px; font-size:11px; font-weight:800; padding:3px 9px; border-radius:100px; }
   .selo.ok{ background:var(--leaf-soft); color:var(--leaf); border:1px solid var(--leaf-line); }
@@ -450,6 +455,7 @@
   <div id="main-area" style="display:none;">
     <nav class="tabs" id="tabs">
       <button class="active" data-view="geral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Visão geral</span></button>
+      <button data-view="vdata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span class="lbl">Por vencimento</span></button>
       <button data-view="tmp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Status TMP</span></button>
       <button data-view="corte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7s-6 6.3-6 11.3a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/><path d="M4 20 20 4"/></svg><span class="lbl">Corte / pós corte</span></button>
       <button data-view="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Top 20</span></button>
@@ -492,6 +498,16 @@
     </section>
 
     <!-- 2. STATUS TMP -->
+    <section class="view" id="view-vdata">
+      <div class="card"><div class="card-head"><div><h2>Por data de vencimento</h2><p class="sub" id="vd-sub"></p></div>
+        <div class="filters"><div class="field"><label>Status</label><select id="vd-status"><option value="">(Tudo)</option><option>Vencido</option><option>Pagou</option><option>A vencer</option></select></div>
+          <button class="btn btn-ghost btn-sm" id="btn-xls-vd" style="margin-bottom:2px">Exportar Excel</button></div></div>
+        <div class="kpi-row" id="vd-kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:6px"></div>
+        <div class="vd-nota" id="vd-nota"></div></div>
+      <div class="card"><h2>Matrículas e faturamento por vencimento</h2><p class="sub">Linhas em destaque: vencimento em fim de semana ou feriado.</p>
+        <div class="tablewrap"><table class="vd-tab"><thead id="vd-head"></thead><tbody id="vd-body"></tbody></table></div></div>
+    </section>
+
     <section class="view" id="view-tmp">
       <div class="card">
         <h2>Saldo em Aberto por Status (TMP)</h2>
@@ -993,7 +1009,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 29/09c · produtividade</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 29/09d</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -1249,7 +1265,7 @@ async function carregarTudo(){
     const [venc, acomp, outros] = await Promise.all([
       apiAll('/vencidos_atual?select=*&status=eq.Vencido&order=matricula'),
       apiAll('/acompanhamento?select=matricula,status_cobranca,data_pagamento_agendado,observacao,atualizado_por,atualizado_em&order=matricula'),
-      apiAll('/vencidos_atual?select=matricula,status,faturamento,perfil_cliente,valor_pago_setembro&status=in.(Pagou,"A vencer")&order=matricula')
+      apiAll('/vencidos_atual?select=matricula,status,faturamento,perfil_cliente,valor_pago_setembro,vencimento,executivo,carteira&status=in.(Pagou,"A vencer")&order=matricula')
     ]);
     OUTROS = outros.map(r=>({ ...r, faturamento:+r.faturamento||0, valor_pago_setembro: r.valor_pago_setembro==null?null:+r.valor_pago_setembro }));
     VENC = venc.map(r=>({ ...r, faturamento:+r.faturamento||0, valor_pago_setembro: r.valor_pago_setembro==null?null:+r.valor_pago_setembro }));
@@ -1337,13 +1353,53 @@ $('top-n').onchange = e=>{ F.topN=+e.target.value; renderTop(); };
 function dados(){ // aplica filtros globais
   return VENC.filter(filtroOk);
 }
-function renderTudo(){ renderGeral(); renderTMP(); renderCorte(); renderTop(); renderFin(); renderPlano(); }
+function renderTudo(){ renderGeral(); renderVData(); renderTMP(); renderCorte(); renderTop(); renderFin(); renderPlano(); }
 
 function distBars(el, itens, total, corPadrao){
   const max = Math.max(...itens.map(i=>i.valor), 1);
   el.innerHTML = itens.map(i=>`<div class="dist-row"><div>${esc(i.nome)}</div><div class="dist-track"><div class="dist-fill" style="width:${i.valor/max*100}%;background:${i.cor||corPadrao||'var(--water)'}"></div></div><div class="dist-val">${brlC(i.valor)} <small>· ${nf0.format(i.qtd)} · ${pct(i.valor,total)}</small></div></div>`).join('') || '<div class="faint">Sem dados.</div>';
 }
 function grupo(arr, key){ const m={}; arr.forEach(r=>{ const k=(typeof key==='function'?key(r):r[key])||'—'; (m[k]=m[k]||[]).push(r); }); return m; }
+
+
+/* ---------- POR DATA DE VENCIMENTO ---------- */
+function tipoDia(iso){ const w = new Date(iso+'T12:00:00').getDay(); if(w===0||w===6) return 'fds'; return ehDU(iso) ? 'du' : 'fer'; }
+function proxDU(iso){ let d = iso; for(let i=0;i<10;i++){ d = addDias(d,1); if(ehDU(d)) return d; } return d; }
+function linhasVData(){
+  const st = $('vd-status').value;
+  const todos = [...VENC, ...OUTROS].filter(filtroOk).filter(r=>r.vencimento && (!st || r.status===st));
+  const g = {}; todos.forEach(r=>{ const k = String(r.vencimento).slice(0,10); const o = g[k] || (g[k] = { d:k, n:0, v:0, st:{} });
+    o.n++; o.v += +r.faturamento||0; const s = o.st[r.status] || (o.st[r.status] = { n:0, v:0 }); s.n++; s.v += +r.faturamento||0; });
+  return { todos, L: Object.values(g).sort((a,b)=>a.d.localeCompare(b.d)) };
+}
+function renderVData(){
+  if(!$('vd-body')) return;
+  const { todos, L } = linhasVData(), totN = todos.length, totV = todos.reduce((s,r)=>s+(+r.faturamento||0),0);
+  const nd = L.filter(l=>tipoDia(l.d)!=='du'), fds = L.filter(l=>tipoDia(l.d)==='fds'), fer = L.filter(l=>tipoDia(l.d)==='fer');
+  const sm = (arr,f) => arr.reduce((s,l)=>s+f(l),0);
+  const ndN = sm(nd,l=>l.n), ndV = sm(nd,l=>l.v);
+  const stN = (arr, s) => sm(arr, l=>(l.st[s]||{n:0}).n), stV = (arr, s) => sm(arr, l=>(l.st[s]||{v:0}).v);
+  const status = ['Vencido','Pagou','A vencer'].filter(s=>!$('vd-status').value || s===$('vd-status').value);
+  $('vd-sub').textContent = `Base atual · ${nf0.format(totN)} matrículas · ${brl(totV)} · filtros de perfil e "pagou algo" do topo aplicados.`;
+  $('vd-kpis').innerHTML = `<div class="kpi navy"><div class="label">Total</div><div class="value">${nf0.format(totN)}</div><div class="hint">${brlC(totV)}</div></div>
+    <div class="kpi amber"><div class="label">Venceram em fim de semana</div><div class="value amber">${nf0.format(sm(fds,l=>l.n))}</div><div class="hint">${brlC(sm(fds,l=>l.v))} · ${pct(sm(fds,l=>l.v), totV)} do valor</div></div>
+    <div class="kpi"><div class="label">Venceram em feriado</div><div class="value">${nf0.format(sm(fer,l=>l.n))}</div><div class="hint">${brlC(sm(fer,l=>l.v))} · ${pct(sm(fer,l=>l.v), totV)} do valor</div></div>
+    <div class="kpi rose"><div class="label">Desses (fim de semana + feriado), seguem vencidos</div><div class="value rose">${nf0.format(stN(nd,'Vencido'))}</div><div class="hint">${brlC(stV(nd,'Vencido'))} · ${pct(stV(nd,'Vencido'), ndV)} do valor que venceu em dia não útil</div></div>`;
+  $('vd-nota').innerHTML = ndN ? `<b>O que isso significa:</b> ${nf0.format(ndN)} matrículas (${pct(ndN,totN)} da base) e <b>${brl(ndV)}</b> (${pct(ndV,totV)} do faturamento) venceram em sábado, domingo ou feriado. Quando o vencimento cai em dia não útil, o cliente pode pagar no <b>próximo dia útil</b> sem ficar em atraso — por isso esse volume costuma aparecer como vencido por 1 a 3 dias e ser quitado no dia útil seguinte (a arrecadação dele cai toda na segunda-feira ou no dia após o feriado).
+      Situação hoje: ${status.map(s=>`<b>${s}</b> ${nf0.format(stN(nd,s))} (${brlC(stV(nd,s))})`).join(' · ')}.`
+    : 'Nenhum vencimento em fim de semana ou feriado com os filtros atuais.';
+  const mx = Math.max(1, ...L.map(l=>l.v));
+  $('vd-head').innerHTML = `<tr><th>Vencimento</th><th>Dia</th><th class="num">Matrículas</th><th class="num">Faturamento</th><th class="num">% valor</th><th></th>${status.map(s=>`<th class="num">${s}</th>`).join('')}</tr>`;
+  $('vd-body').innerHTML = L.map(l=>{ const t = tipoDia(l.d);
+    return `<tr class="${t==='du'?'':t}"><td><b>${dBR(l.d)}</b>${t==='fds'?'<span class="vd-tag fds">fim de semana</span>':t==='fer'?'<span class="vd-tag fer">feriado</span>':''}</td><td>${diaSem(l.d)}${t!=='du'?` <span class="faint" style="font-size:11px">→ paga até ${dBRc(proxDU(l.d))}</span>`:''}</td>
+      <td class="num"><b>${nf0.format(l.n)}</b></td><td class="num">${brl(l.v)}</td><td class="num">${pct(l.v,totV)}</td><td><div class="vd-barra"><div style="width:${l.v/mx*100}%;${t==='fds'?'background:var(--amber)':t==='fer'?'background:#6A45B8':''}"></div></div></td>
+      ${status.map(s=>{ const x = l.st[s]; return `<td class="num">${x?`${nf0.format(x.n)} <span class="faint">· ${brlC(x.v)}</span>`:'<span class="faint">—</span>'}</td>`; }).join('')}</tr>`; }).join('')
+    + `<tr class="total"><td>Total geral</td><td></td><td class="num">${nf0.format(totN)}</td><td class="num">${brl(totV)}</td><td class="num">100%</td><td></td>${status.map(s=>`<td class="num">${nf0.format(stN(L,s))} · ${brlC(stV(L,s))}</td>`).join('')}</tr>`
+    + (ndN ? `<tr class="total" style="background:#FFF6E8"><td>Fim de semana + feriado</td><td></td><td class="num">${nf0.format(ndN)}</td><td class="num">${brl(ndV)}</td><td class="num">${pct(ndV,totV)}</td><td></td>${status.map(s=>`<td class="num">${nf0.format(stN(nd,s))} · ${brlC(stV(nd,s))}</td>`).join('')}</tr>` : '');
+  $('btn-xls-vd').onclick = ()=>exportXLSX(L.map(l=>{ const o = { Vencimento:dBR(l.d), Dia:diaSem(l.d), 'Tipo de dia': ({du:'Dia útil',fds:'Fim de semana',fer:'Feriado'})[tipoDia(l.d)], Matrículas:l.n, Faturamento:+l.v.toFixed(2) };
+    status.forEach(s=>{ o[s+' qtd'] = (l.st[s]||{n:0}).n; o[s+' valor'] = +((l.st[s]||{v:0}).v).toFixed(2); }); return o; }), 'vencidos_por_vencimento');
+}
+$('vd-status').onchange = renderVData;
 
 /* ---------- 1. VISÃO GERAL ---------- */
 function renderGeral(){
