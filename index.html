@@ -851,13 +851,13 @@
           <div class="field"><label>Meta de acionamentos por dia útil (por executivo)</label><input type="number" id="cfg-acion" min="0"></div>
           <div class="field"><label>Meta de pesquisas validadas por semana (por executivo)</label><input type="number" id="cfg-pesq" min="0"></div>
           <div class="field"><label>Nota média alvo da pesquisa</label><input type="number" id="cfg-nota" step="0.1" min="0" max="5"></div>
-          <div class="field"><label>Meta de OSs abertas por semana (por executivo)</label><input type="number" id="cfg-alt" min="0"></div>
+          <div class="field"><label>Meta de OSs abertas + justificativas aprovadas por semana (por executivo)</label><input type="number" id="cfg-alt" min="0"></div>
           <div class="field" style="grid-column:span 2"><label>Pareceres de acionamento que NÃO contam (um por linha)</label><textarea id="cfg-excl" rows="2" class="cell-input" style="min-width:100%"></textarea></div>
         </div>
         <h3 style="margin-top:18px">Executivos considerados na meta do time</h3>
         <div class="cfg-execs" id="cfg-execs"></div>
         <details style="margin-top:16px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Fontes externas (Pesquisa de Satisfação e Atualização Cadastral) — já vêm preenchidas</summary>
-          <p class="sub" style="margin:10px 0 0">Não precisa mexer. A Pesquisa lê a tabela <b>registros</b> (validadas pela data de validação) e a Alteração Cadastral conta as <b>OSs abertas pelo time</b> por executivo e dia (função segura <b>prod_os_diaria</b>, que acha sozinha a tabela de OS — sem acesso aos dados pessoais). O botão "Testar fontes externas" mostra a tabela e as colunas encontradas. Só altere se a estrutura das outras plataformas mudar.</p>
+          <p class="sub" style="margin:10px 0 0">Não precisa mexer. A Pesquisa lê a tabela <b>registros</b> (validadas pela data de validação) e a Alteração Cadastral conta as <b>OSs abertas + justificativas aprovadas</b> por executivo e dia (mesma régua da plataforma de Atualização) (função segura <b>prod_os_diaria</b>, que acha sozinha a tabela de OS — sem acesso aos dados pessoais). O botão "Testar fontes externas" mostra a tabela e as colunas encontradas. Só altere se a estrutura das outras plataformas mudar.</p>
           <div class="cfg-grid" style="margin-top:12px">
             <div class="field" style="grid-column:span 2"><label>Pesquisa — URL do projeto Supabase</label><input id="cfg-pq-url"></div>
             <div class="field" style="grid-column:span 2"><label>Pesquisa — chave publishable</label><input id="cfg-pq-key"></div>
@@ -976,7 +976,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 28/09 · produtividade</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 28/09b · produtividade</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -2584,7 +2584,7 @@ const PIND = [
   { k:'cons', t:'Consumo Estratégico', s:'Análises de consumo fora da curva (Forms)', c:'#1C63B0', cs:'#E7F0FA', icon:'<path d="M12 2.7s-6 6.3-6 11.3a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/>' },
   { k:'acion', t:'Acionamentos', s:'Tratativas e interações registradas', c:'#1E8A5A', cs:'#E4F4EC', icon:'<path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5a2 2 0 0 0 4 0v-3"/>' },
   { k:'pesq', t:'Pesquisa de Satisfação', s:'Pesquisas validadas e nota média', c:'#6A45B8', cs:'#EFEAFA', icon:'<path d="m12 2 2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8l-6.2 3.5L7 14.2 2 9.3l7.1-.7z"/>' },
-  { k:'alt', t:'Alteração Cadastral', s:'OSs abertas pelo time', c:'#D0691C', cs:'#FCEFE3', icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M15 9h3M15 13h3M6 17c.8-1.6 2-2.4 3-2.4s2.2.8 3 2.4"/>' }
+  { k:'alt', t:'Alteração Cadastral', s:'OSs abertas + justificativas aprovadas', c:'#D0691C', cs:'#FCEFE3', icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M15 9h3M15 13h3M6 17c.8-1.6 2-2.4 3-2.4s2.2.8 3 2.4"/>' }
 ];
 const PIND_BY = Object.fromEntries(PIND.map(i=>[i.k,i]));
 const isoLocal = d => new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
@@ -2762,20 +2762,19 @@ function ausencia(e, d){ const n = norm(e); return (PD.aus||[]).find(a=>norm(a.e
 function diasMeta(e, dias){ return dias.filter(d=>!ausencia(e,d)).length; }
 function metaDiaK(k){ return k==='acion' ? +PCFG.meta_acion_dia : k==='pesq' ? (+PCFG.meta_pesq_semana)/5 : k==='alt' ? (+PCFG.meta_alt_semana)/5 : null; }
 function metaJanela(k, execs, dias){ const md = metaDiaK(k); return md==null ? null : execs.reduce((s,e)=>s + md*diasMeta(e,dias), 0); }
-// Consumo: a meta é a do último print do BI no ciclo ("Meta do ciclo" = Delta Meta NNN, progressiva). Sem print: meta da configuração proporcional aos dias úteis.
+// Consumo: meta = "Meta Prioridade" da planilha mais recente do ciclo (individual; a do time é a soma). É progressiva:
+// cada planilha nova substitui a anterior. Sem planilha no ciclo: meta da configuração proporcional aos dias úteis.
 function consMetaInfo(execs, p, nAte, nTot){
   const setE = new Set(execs.map(norm)), padrao = +PCFG.meta_cons_ciclo || 150;
   const prints = (PD.consMeta||[]).filter(m=>m.data_ref>=p.ini && m.data_ref<=p.fim);
   if(!prints.length) return { metaAte: padrao*execs.length*nAte/Math.max(1,nTot), metaCiclo: padrao*execs.length, bi:null,
     fonte:`sem planilha de prioridades no ciclo — usando ${padrao}/executivo proporcional aos dias úteis` };
   const ref = prints.reduce((a,m)=>m.data_ref>a?m.data_ref:a, prints[0].data_ref);
-  const doDia = prints.filter(m=>m.data_ref===ref);
-  const hdr = Math.max(0, ...doDia.map(m=>+m.meta_ciclo||0)) || padrao;
-  const ult = {}; prints.filter(m=>setE.has(norm(m.executivo))).forEach(m=>{ const kk=norm(m.executivo); if(!ult[kk] || m.data_ref>ult[kk].data_ref) ult[kk]=m; });
-  const metaAte = execs.reduce((s,e)=>{ const m = ult[norm(e)]; return s + (m && m.data_ref===ref && m.meta_ciclo!=null ? +m.meta_ciclo : hdr); }, 0);
+  const ult = {}; prints.filter(m=>setE.has(norm(m.executivo)) && m.meta_prioridade!=null).forEach(m=>{ const kk=norm(m.executivo); if(!ult[kk] || m.data_ref>ult[kk].data_ref) ult[kk]=m; });
   const ms = Object.values(ult);
-  return { metaAte, metaCiclo:metaAte, fonte:`meta progressiva da planilha de ${dBRc(ref)}`,
-    bi:{ ref, meta:hdr, metaPrio:ms.reduce((s,m)=>s+(+m.meta_prioridade||0),0), prioAnal:ms.reduce((s,m)=>s+(+m.prioridade_analisado||0),0), geral:ms.reduce((s,m)=>s+(+m.executado_bi||0),0), n:ms.length } };
+  const metaAte = ms.reduce((s,m)=>s+(+m.meta_prioridade||0),0);
+  return { metaAte, metaCiclo:metaAte, fonte:`meta = soma da Meta Prioridade (planilha de ${dBRc(ref)})`,
+    bi:{ ref, meta:metaAte, metaPrio:metaAte, prioAnal:ms.reduce((s,m)=>s+(+m.prioridade_analisado||0),0), geral:ms.reduce((s,m)=>s+(+m.executado_bi||0),0), n:ms.length } };
 }
 
 /* ---------- cálculo de um indicador ---------- */
@@ -2794,7 +2793,7 @@ function statInd(k, execs, ym, modoForcado){
   if(k==='cons'){
     const ci = consMetaInfo(execs, p, dusAte.length, dus.length);
     metaAte = ci.metaAte; metaMes = ci.bi ? ci.metaAte : ci.metaCiclo; bi = ci.bi; metaFonte = ci.fonte;
-    rotMeta = ci.bi ? `Meta (planilha ${dBRc(ci.bi.ref)})` : 'Meta do ciclo';
+    rotMeta = ci.bi ? `Meta prioridade (${dBRc(ci.bi.ref)})` : 'Meta do ciclo';
     metaDia = metaAte / Math.max(1,dusAte.length) / Math.max(1,execs.length);
     // comparação só no mensal: ciclo anterior fechado (realizado do Forms × última meta do BI daquele ciclo)
     const ca = consMetaInfo(execs, pa, dusA.length, dusA.length);
@@ -2929,7 +2928,7 @@ function cardInd(st, opts={}){
       <div class="pc-bar"><div style="width:${Math.min(100,st.ating||0)}%"></div></div>`;
     hint = st.k==='cons' ? `Realizado pelo Forms · ${st.metaFonte} · ${st.rotHint}` : `Meta até agora ${nf0.format(Math.round(st.metaAte||0))} · ${st.rotHint}`;
     if(st.k!=='cons' && st.metaRed>0.5) hint += ` · meta do time reduzida em ${nf0.format(Math.round(st.metaRed))} por férias/atestado`;
-    if(st.k==='cons') hint += st.bi ? `</div><div class="pc-hint" style="color:var(--c);font-weight:700">Prioridades (planilha ${dBRc(st.bi.ref)}): ${nf0.format(st.bi.prioAnal)} de ${nf0.format(st.bi.metaPrio)} · ${fmtPct(pctN(st.bi.prioAnal,st.bi.metaPrio))}` : `</div><div class="pc-hint">Sem planilha de prioridades no ciclo`;
+    if(st.k==='cons') hint += st.bi ? `</div><div class="pc-hint" style="color:var(--c);font-weight:700">Na planilha de ${dBRc(st.bi.ref)}: prioridade analisado ${nf0.format(st.bi.prioAnal)} de ${nf0.format(st.bi.metaPrio)} (${fmtPct(pctN(st.bi.prioAnal,st.bi.metaPrio))}) · análise geral ${nf0.format(st.bi.geral)}` : `</div><div class="pc-hint">Sem planilha de prioridades no ciclo`;
   }
   const notaTxt = st.k==='pesq' ? `<div class="pc-hint" style="color:var(--c);font-weight:700">Nota média ${st.nota!=null?st.nota.toFixed(2).replace('.',','):'—'} · alvo ${String(PCFG.nota_alvo).replace('.',',')} (${st.nNotas} notas)</div>` : '';
   let foraTime = '';
@@ -3274,7 +3273,7 @@ $('btn-cfg-testar').onclick = async ()=>{
         if(e.erro) r.push('OSs abertas: ' + e.erro);
         else { const r2 = await fetch(u + '/rest/v1/rpc/prod_os_diaria', { method:'POST', headers:h, body:JSON.stringify({ p_ini:hojeISO().slice(0,8)+'01', p_fim:hojeISO() }) });
           const tot = r2.ok ? (await r2.json()).reduce((s,x)=>s+(+x.qtd||0),0) : null;
-          r.push(`OSs abertas: tabela ${e.tabela}, data ${e.col_data||'?'}, executivo ${e.col_exec || 'da matrícula ('+(e.col_matricula||'?')+')'}` + (tot!==null ? ` — ${tot} OS no mês` : ' — erro ao contar (HTTP '+r2.status+')')); } } }
+          r.push(`OSs abertas: tabela ${e.tabela}, data ${e.col_data||'?'}, executivo ${e.col_exec || 'da matrícula ('+(e.col_matricula||'?')+')'}` + (tot!==null ? ` — ${tot} no mês (OSs + justificativas aprovadas)` : ' — erro ao contar (HTTP '+r2.status+')')); } } }
     catch(e){ r.push('OSs abertas: ' + e.message); } }
   else if(v.alteracao.tabela){ try{ await fetchExterno(v.alteracao.url, v.alteracao.key, `/${v.alteracao.tabela}?select=${v.alteracao.col_exec||'*'},${v.alteracao.col_data||''}`.replace(/,$/,'')); r.push('Alteração cadastral: OK'); }catch(e){ r.push('Alteração cadastral: ' + e.message); } }
   else r.push('Alteração cadastral: tabela não informada');
