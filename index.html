@@ -263,6 +263,16 @@
   .dz-bar > div small{ font-weight:600; opacity:.85; margin-left:4px; }
   .dz-tot{ text-align:right; font-weight:800; color:var(--navy); } .dz-tot small{ display:block; font-weight:600; font-size:10px; color:var(--text-faint); }
   .dz-row.ausente .dz-bar{ background:repeating-linear-gradient(135deg,#EEF3F6 0 8px,#E3E9EE 8px 16px); }
+  .hp-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-top:6px; }
+  @media (max-width:1200px){ .hp-grid{ grid-template-columns:repeat(2,1fr); } }
+  .hp-card{ border:1px solid var(--border); border-top:4px solid var(--c); border-radius:14px; padding:14px; background:#fff; }
+  .hp-t{ font-weight:800; color:var(--c); font-size:13px; margin-bottom:10px; }
+  .hp-row{ display:grid; grid-template-columns:78px 1fr 44px; gap:8px; align-items:center; font-size:12px; color:var(--text-mut); margin-top:6px; }
+  .hp-row b{ text-align:right; color:var(--navy); font-size:15px; font-family:var(--font-display); }
+  .hp-track{ height:12px; background:#EEF3F6; border-radius:8px; overflow:hidden; } .hp-track div{ height:100%; border-radius:8px; }
+  .hp-d{ margin-top:10px; font-size:12px; color:var(--text-mut); }
+  .ho-tab td, .ho-tab th{ padding:6px 10px; } .ho-tab input{ width:18px; height:18px; cursor:pointer; }
+  .ap-slide #btn-xls-dz{ display:none; }
   .dz-vazio{ font-size:12px; color:var(--text-faint); }
   .dz-chips{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
   .dz-chip{ display:inline-flex; gap:8px; align-items:center; font-size:12px; color:var(--navy); background:#F4F7FA; border:1px solid var(--border); border-radius:8px; padding:6px 10px; }
@@ -777,7 +787,7 @@
     <nav class="tabs" id="tabs-prod">
       <button class="active" data-view="pgeral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Visão geral</span></button>
       <button data-view="pdist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Distribuição do tempo</span></button>
-      <button data-view="pexec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/></svg><span class="lbl">Por executivo</span></button>
+      <button data-view="phome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span class="lbl">Home × Presencial</span></button>
       <button data-view="pdia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="lbl">Produtividade diária</span></button>
       <button data-view="pimp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span class="lbl">Importar e configurar</span></button>
     </nav>
@@ -798,19 +808,21 @@
 
     <section class="view active" id="view-pgeral">
       <div class="prod-grid" id="pg-cards"></div>
-      <div class="card"><h2>Resumo por executivo</h2><p class="sub">Realizado / meta até agora no período selecionado (quantidade). Consumo Estratégico: só quantidade no diário e semanal — a meta da planilha de prioridades é comparada no mensal. <span class="sup-ok" style="margin:0">✓ semana</span> = bateu a meta da semana (na visão diária conta como meta atingida no dia). Clique para abrir a visão do executivo.</p>
-        <div class="tablewrap"><table><thead id="pg-res-head"></thead><tbody id="pg-res"></tbody></table></div></div>
+      <div class="card"><h2>Resumo por executivo</h2><p class="sub">Realizado / meta até agora no período selecionado (quantidade). Consumo Estratégico: no mensal, analisados P1+P2 / meta do ciclo; no diário e semanal, todas as análises do dia. <span class="sup-ok" style="margin:0">✓ semana</span> = bateu a meta da semana (na visão diária conta como meta atingida no dia). Clique para abrir a visão do executivo.</p>
+        <div class="tablewrap"><table><thead id="pg-res-head"></thead><tbody id="pg-res"></tbody></table></div>
+        <div class="form-row"><button class="btn btn-ghost btn-sm" id="btn-xls-res">Exportar Excel</button></div></div>
+      <div class="card" id="pg-cons"></div>
     </section>
 
     <section class="view" id="view-pdist">
       <div class="card" id="dz-evol"></div>
       <div class="dz-grid"><div class="card" id="dz-exec"></div><div class="card" id="dz-mes"></div></div>
-      <div class="card" id="dz-tab"></div>
     </section>
 
-    <section class="view" id="view-pexec">
-      <div class="card"><div class="card-head"><div><h2>Por executivo</h2><p class="sub" id="pe-sub"></p></div><button class="btn btn-ghost btn-sm" id="btn-xls-pexec">Exportar Excel</button></div>
-        <div class="tablewrap"><table><thead id="pe-head"></thead><tbody id="pe-tab"></tbody></table></div></div>
+
+    <section class="view" id="view-phome">
+      <div class="card" id="ph-cards"></div>
+      <div class="card" id="ph-tab"></div>
     </section>
 
     <section class="view" id="view-pdia">
@@ -831,12 +843,11 @@
           <div class="upload-box" id="pf-box"><input type="file" id="pf-file" accept=".xlsx,.xls,.xlsm,.csv"><div class="form-row"><div class="field"><label>Ano</label><input type="number" id="pf-ano" style="width:100px"></div><button class="btn btn-primary" id="btn-pf" disabled>Importar Forms</button></div></div>
           <div class="log" id="pf-log"></div></div>
       </div>
-      <div class="card"><h2>Meta progressiva do Consumo Estratégico (planilha de prioridades)</h2>
-        <p class="sub">Suba a planilha <b>PRIORIDADES 1 E 2</b> do dia (Executivo · Meta Prioridade · Prioridade Analisado · Análise Geral · Delta Meta 150). A plataforma lê só <b>Meta Prioridade, Prioridade Analisado, Análise Geral</b> e a <b>meta do ciclo</b> (o número do cabeçalho "Delta Meta"). Cada planilha nova atualiza a meta. O ciclo vai do dia 5 ao dia 4 do mês seguinte.</p>
+      <div class="card"><h2>Base de prioridades do Consumo Estratégico (diária)</h2>
+        <p class="sub">Suba a base do dia (Matrícula · Data de Leitura · … · Prioridade · Carteira · Executivo). Ela é a <b>fonte oficial da prioridade</b> de cada cliente e substitui a base anterior do ciclo (dia 5 ao dia 4). A plataforma cruza automaticamente com o Forms pela <b>matrícula</b> e calcula analisados, pendentes e atingimento. Meta: 100% de P1+P2 por executivo; se P1+P2 for menor que <span id="pm-min">150</span>, completa com P3 até chegar lá.</p>
         <div class="upload-box" id="pm-box"><input type="file" id="pm-file" accept=".xlsx,.xls,.xlsm,.csv">
-          <div class="form-row"><div class="field"><label>Data da planilha</label><input type="date" id="pm-data"></div><button class="btn btn-primary" id="btn-pm-ler" disabled>Importar planilha</button><button class="btn btn-ghost" id="btn-pm-manual">Conferir / corrigir à mão</button></div></div>
-        <div class="log" id="pm-log"></div>
-        <div id="pm-grid"></div></div>
+          <div class="form-row"><div class="field"><label>Data da base</label><input type="date" id="pm-data"></div><button class="btn btn-primary" id="btn-pm-ler" disabled>Importar base de prioridades</button><span class="muted" id="pm-ciclo" style="font-size:12.5px"></span></div></div>
+        <div class="log" id="pm-log"></div></div>
       <div class="card"><h2>Férias, atestados e ausências</h2><p class="sub">Os dias úteis dentro do período informado <b>não contam na meta</b> do executivo (Acionamentos, Pesquisa e Alteração Cadastral). Vale para todas as visões e para a apresentação.</p>
         <div class="form-row" style="align-items:flex-end;flex-wrap:wrap">
           <div class="field"><label>Executivo</label><select id="au-exec" style="min-width:220px"></select></div>
@@ -846,9 +857,14 @@
           <div class="field" style="flex:1;min-width:200px"><label>Justificativa (opcional)</label><input id="au-obs" placeholder="ex.: férias programadas"></div>
           <button class="btn btn-primary" id="btn-au-add">Adicionar</button></div>
         <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Executivo</th><th>Motivo</th><th>De</th><th>Até</th><th>Justificativa</th><th></th></tr></thead><tbody id="au-lista"></tbody></table></div></div>
+      <div class="card"><h2>Dias de home office</h2><p class="sub">Marque os dias em que cada executivo fica em home office (os demais dias úteis contam como presencial). Preencha toda sexta para a semana seguinte e clique em Salvar semana.</p>
+        <div class="form-row" style="align-items:flex-end"><div class="field"><label>Semana (segunda-feira)</label><input type="date" id="ho-sem"></div>
+          <button class="btn btn-ghost btn-sm" id="ho-ant">‹ semana anterior</button><button class="btn btn-ghost btn-sm" id="ho-prox">próxima semana ›</button>
+          <button class="btn btn-ghost btn-sm" id="ho-copiar">Copiar da semana anterior</button><button class="btn btn-primary" id="ho-salvar">Salvar semana</button><span class="msg" id="ho-msg"></span></div>
+        <div class="tablewrap" style="margin-top:10px"><table class="ho-tab"><thead id="ho-head"></thead><tbody id="ho-body"></tbody></table></div></div>
       <div class="card"><h2>Configuração</h2><p class="sub">Vale para todo mundo que usa a plataforma.</p>
         <div class="cfg-grid">
-          <div class="field"><label>Meta de análises do Consumo por ciclo (dia 5 ao dia 4, por executivo)</label><input type="number" id="cfg-cons" min="0"></div>
+          <div class="field"><label>Mínimo de análises do Consumo por executivo no ciclo (completa P1+P2 com P3)</label><input type="number" id="cfg-cons" min="0"></div>
           <div class="field"><label>Meta de acionamentos por dia útil (por executivo)</label><input type="number" id="cfg-acion" min="0"></div>
           <div class="field"><label>Meta de pesquisas validadas por semana (por executivo)</label><input type="number" id="cfg-pesq" min="0"></div>
           <div class="field"><label>Nota média alvo da pesquisa</label><input type="number" id="cfg-nota" step="0.1" min="0" max="5"></div>
@@ -977,7 +993,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 28/09c · produtividade</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 29/09 · produtividade</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -2580,7 +2596,7 @@ const PROD_CFG_PADRAO = {
   alteracao: { url:'https://yidsjyfcuzytkejctqfp.supabase.co', key:'sb_publishable_dJWDHA-YGrM3jIXgFBuk1w_ZxZSaHBQ', tabela:'matriculas', col_exec:'executivo', col_data:'atualizado_em', filtro:'status_fluxo=eq.cadastro_atualizado&atualizado_em=gte.2026-08-07' }
 };
 let PCFG = JSON.parse(JSON.stringify(PROD_CFG_PADRAO)), PROD_OK = false;
-const PD = { mes:'', visao:'', modo:'mes', ref:'', ev:{}, consMeta:[], fontes:{}, execsTodos:[] };
+const PD = { mes:'', visao:'', modo:'mes', ref:'', ev:{}, consMeta:[], consRes:{}, home:[], homeSet:new Set(), fontes:{}, execsTodos:[] };
 const PIND = [
   { k:'cons', t:'Consumo Estratégico', s:'Análises de consumo fora da curva (Forms)', c:'#1C63B0', cs:'#E7F0FA', icon:'<path d="M12 2.7s-6 6.3-6 11.3a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/>' },
   { k:'acion', t:'Acionamentos', s:'Tratativas e interações registradas', c:'#1E8A5A', cs:'#E4F4EC', icon:'<path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5a2 2 0 0 0 4 0v-3"/>' },
@@ -2638,11 +2654,14 @@ async function carregarProd(){
     // janela: 6 meses (comparativo mensal da distribuição do esforço) até o dia 4 do mês seguinte
     const ini = addMes(ym,-5)+'-01', fim = addMes(ym,1)+'-04', iniCons = addMes(ym,-6)+'-05';
     const excl = (PCFG.excluir_parecer||[]).map(norm);
-    const [cont, cm, execsVenc, aus] = await Promise.all([
+    const [cont, cm, execsVenc, aus, crAt, crAnt, home] = await Promise.all([
       api('/rpc/prod_contagem', { method:'POST', body:{ p_ini:iniCons, p_fim:fim, p_excluir:excl } }).catch(e=>{ if(/prod_contagem|PGRST202|404/.test(e.message)) return null; throw e; }),
       api(`/prod_consumo_meta?select=*&data_ref=gte.${addMes(ym,-1)}-05&data_ref=lte.${addMes(ym,1)}-04&order=data_ref.desc`),
       apiAll('/vencidos_atual?select=executivo&status=eq.Vencido').catch(()=>[]),
-      api('/prod_ausencias?select=*&order=ini.desc').catch(()=>null)
+      api('/prod_ausencias?select=*&order=ini.desc').catch(()=>null),
+      api('/rpc/prod_consumo_resumo', { method:'POST', body:{ p_ciclo:ym, p_ate:hojeISO() } }).catch(()=>null),
+      api('/rpc/prod_consumo_resumo', { method:'POST', body:{ p_ciclo:ant, p_ate:hojeISO() } }).catch(()=>null),
+      apiAll(`/prod_home?select=executivo,data&data=gte.${addMes(ym,-5)}-01&order=data`).catch(()=>null)
     ]);
     if(cont){ // contagem agregada no banco (rápido)
       PD.ev.acion = cont.filter(r=>r.f==='acion').map(r=>({ e:r.e, d:r.d, q:+r.q }));
@@ -2656,6 +2675,9 @@ async function carregarProd(){
       PD.ev.cons  = fo.map(r=>({ e:r.executivo, d:r.data, q:1 }));
     }
     PD.aus = aus || []; PD.ausOk = aus!==null; PD.contOk = !!cont;
+    PD.home = home || []; PD.homeOk = home!==null; PD.homeSet = new Set(PD.home.map(h=>norm(h.executivo)+'|'+h.data));
+    PD.consRes = {}; PD.consResOk = crAt!==null;
+    [[ym,crAt],[ant,crAnt]].forEach(([c,r])=>{ if(r && r.execs && r.execs.length) PD.consRes[c] = r; });
     PD.consMeta = cm;
     PD.fontes = { acion:'ok', cons:'ok' };
     // Pesquisa de Satisfação (outra plataforma)
@@ -2694,10 +2716,13 @@ async function carregarProd(){
     { const alvo = [...new Set([...execsLista(), ...PD.execsTodos])], setA = new Set(alvo.map(norm)); PD.naoId = {};
       ['pesq','alt'].forEach(k=>{ PD.ev[k] = (PD.ev[k]||[]).map(x=>({ ...x, e: casarExec(x.e, alvo) }));
         PD.naoId[k] = PD.ev[k].filter(x=>!setA.has(norm(x.e))); }); }
+    { const alvo = [...new Set([...execsLista(), ...PD.execsTodos])];
+      Object.values(PD.consRes).forEach(r=>{ const m = {}; r.execs.forEach(x=>{ const e = casarExec(x.e, alvo), k = norm(e); const o = m[k] || (m[k] = { e, p1:0,p2:0,p3:0,a1:0,a2:0,a3:0 });
+        ['p1','p2','p3','a1','a2','a3'].forEach(f=>o[f] += +x[f]||0); }); r.porE = m; }); }
     montarIndice();
     const lista = execsLista();
     $('fp-visao').innerHTML = '<option value="">Geral (time)</option>' + lista.map(e=>`<option ${e===PD.visao?'selected':''}>${esc(e)}</option>`).join('');
-    heroProd(); renderProdTudo(); renderProdCfg(); renderProdHist(); renderAusencias();
+    heroProd(); renderProdTudo(); renderProdCfg(); renderProdHist(); renderAusencias(); renderHomeEditor(); $('pm-min').textContent = CONS_MIN();
     $('prod-loading').style.display='none';
   }catch(e){
     $('prod-loading').textContent = 'Erro ao carregar: ' + e.message;
@@ -2764,19 +2789,21 @@ function ausenciasNoPeriodo(e, a, b){ const n = norm(e); return (PD.aus||[]).fil
 function diasMeta(e, dias){ return dias.filter(d=>!ausencia(e,d)).length; }
 function metaDiaK(k){ return k==='acion' ? +PCFG.meta_acion_dia : k==='pesq' ? (+PCFG.meta_pesq_semana)/5 : k==='alt' ? (+PCFG.meta_alt_semana)/5 : null; }
 function metaJanela(k, execs, dias){ const md = metaDiaK(k); return md==null ? null : execs.reduce((s,e)=>s + md*diasMeta(e,dias), 0); }
-// Consumo: meta = "Meta Prioridade" da planilha mais recente do ciclo (individual; a do time é a soma). É progressiva:
-// cada planilha nova substitui a anterior. Sem planilha no ciclo: meta da configuração proporcional aos dias úteis.
-function consMetaInfo(execs, p, nAte, nTot){
-  const setE = new Set(execs.map(norm)), padrao = +PCFG.meta_cons_ciclo || 150;
-  const prints = (PD.consMeta||[]).filter(m=>m.data_ref>=p.ini && m.data_ref<=p.fim);
-  if(!prints.length) return { metaAte: padrao*execs.length*nAte/Math.max(1,nTot), metaCiclo: padrao*execs.length, bi:null,
-    fonte:`sem planilha de prioridades no ciclo — usando ${padrao}/executivo proporcional aos dias úteis` };
-  const ref = prints.reduce((a,m)=>m.data_ref>a?m.data_ref:a, prints[0].data_ref);
-  const ult = {}; prints.filter(m=>setE.has(norm(m.executivo)) && m.meta_prioridade!=null).forEach(m=>{ const kk=norm(m.executivo); if(!ult[kk] || m.data_ref>ult[kk].data_ref) ult[kk]=m; });
-  const ms = Object.values(ult);
-  const metaAte = ms.reduce((s,m)=>s+(+m.meta_prioridade||0),0);
-  return { metaAte, metaCiclo:metaAte, fonte:`meta = soma da Meta Prioridade (planilha de ${dBRc(ref)})`,
-    bi:{ ref, meta:metaAte, metaPrio:metaAte, prioAnal:ms.reduce((s,m)=>s+(+m.prioridade_analisado||0),0), geral:ms.reduce((s,m)=>s+(+m.executado_bi||0),0), n:ms.length } };
+// Consumo: base de prioridades do ciclo × Forms (pela matrícula).
+// Meta do executivo = 100% dos clientes P1+P2; se P1+P2 < 150, completa com P3 até 150.
+// Realizado = analisados P1+P2. Atingimento = (P1+P2 analisados + P3 analisados até o limite do complemento) ÷ meta.
+// Férias não reduzem a meta do Consumo.
+const CONS_MIN = () => +PCFG.meta_cons_ciclo || 150;
+function consExec(r){ // r = linha da base por executivo
+  const p12 = r.p1 + r.p2, a12 = r.a1 + r.a2, comp = p12 >= CONS_MIN() ? 0 : Math.min(CONS_MIN() - p12, r.p3);
+  const c3 = Math.min(r.a3, comp);
+  return { ...r, p12, a12, comp, c3, meta: p12 + comp, cred: a12 + c3, pend12: p12 - a12, pendComp: comp - c3 };
+}
+function consMetaInfo(execs, ciclo){
+  const r = PD.consRes[ciclo]; if(!r) return null;
+  const t = { p1:0,p2:0,p3:0,a1:0,a2:0,a3:0,p12:0,a12:0,comp:0,c3:0,meta:0,cred:0,pend12:0,pendComp:0, n:0 };
+  execs.forEach(e=>{ const x = r.porE[norm(e)]; if(!x) return; const c = consExec(x); t.n++; Object.keys(t).forEach(k=>{ if(k!=='n') t[k] += c[k]; }); });
+  return { ...t, ref:r.data_base };
 }
 
 /* ---------- cálculo de um indicador ---------- */
@@ -2792,16 +2819,17 @@ function statInd(k, execs, ym, modoForcado){
   const fonteOk = !((k==='alt' || k==='pesq') && PD.fontes[k]!=='ok');
   const pa = periodoDe(k, addMes(ym,-1)), dusA = dusEntre(pa.ini, pa.fim);
   let metaDia = metaDiaK(k), metaMes, metaAte, metaFonte = '', bi = null, realA, atingA = null, rotComp, rotMeta = 'Meta do mês';
+  let consInfo = null, realM = null, credM = null;
   if(k==='cons'){
-    const ci = consMetaInfo(execs, p, dusAte.length, dus.length);
-    metaAte = ci.metaAte; metaMes = ci.bi ? ci.metaAte : ci.metaCiclo; bi = ci.bi; metaFonte = ci.fonte;
-    rotMeta = ci.bi ? `Meta prioridade (${dBRc(ci.bi.ref)})` : 'Meta do ciclo';
-    metaDia = metaAte / Math.max(1,dusAte.length) / Math.max(1,execs.length);
-    // comparação só no mensal: ciclo anterior fechado (realizado do Forms × última meta do BI daquele ciclo)
-    const ca = consMetaInfo(execs, pa, dusA.length, dusA.length);
-    realA = soma(pa.ini, pa.fim);
-    atingA = (ca.bi && realA) ? pctN(realA, ca.metaAte) : null;
-    rotComp = `vs. ciclo anterior fechado (${dBRc(pa.ini)} a ${dBRc(pa.fim)})`;
+    consInfo = consMetaInfo(execs, ym);
+    if(consInfo){ metaAte = metaMes = consInfo.meta; realM = consInfo.a12; credM = consInfo.cred; bi = consInfo;
+      metaFonte = `base de prioridades de ${consInfo.ref?dBRc(consInfo.ref):'—'} × Forms`; rotMeta = 'Meta (P1+P2, mín. '+CONS_MIN()+')'; }
+    else { const padrao = CONS_MIN(); metaMes = padrao*execs.length; metaAte = metaMes*dusAte.length/Math.max(1,dus.length);
+      metaFonte = `sem base de prioridades no ciclo — usando ${padrao}/executivo proporcional aos dias úteis e todas as análises do Forms`; rotMeta = 'Meta do ciclo'; }
+    metaDia = null;
+    const ca = consMetaInfo(execs, addMes(ym,-1));
+    realA = ca ? ca.a12 : null; atingA = (ca && ca.meta) ? pctN(ca.cred, ca.meta) : null;
+    rotComp = `vs. ciclo anterior (${dBRc(pa.ini)} a ${dBRc(pa.fim)})`;
   } else {
     metaMes = metaJanela(k, execs, dus); metaAte = metaJanela(k, execs, dusAte);
     const n = Math.min(dusAte.length, dusA.length), corteA = dusA[Math.max(0,n-1)] || pa.ini;
@@ -2810,7 +2838,8 @@ function statInd(k, execs, ym, modoForcado){
     atingA = (mA && ev.some(x=>x.d>=pa.ini && x.d<=pa.fim)) ? pctN(realA, mA) : null;
     rotComp = `vs. ${MES_ABR[+addMes(ym,-1).slice(5,7)-1]}/${addMes(ym,-1).slice(2,4)} (mesmo período)`;
   }
-  const ating = (metaAte && fonteOk) ? pctN(real, metaAte) : null;
+  const realCard = realM!=null ? realM : real;
+  const ating = (metaAte && fonteOk) ? pctN(credM!=null ? credM : real, metaAte) : null;
   // semana atual × anterior (seg a dom) em torno da data de corte
   const seg = segundaDe(corte), segA = addDias(seg,-7);
   const serie = s0 => Array.from({length:7},(_,i)=>{ const d=addDias(s0,i); return d>corte ? null : soma(d,d); });
@@ -2820,9 +2849,9 @@ function statInd(k, execs, ym, modoForcado){
   const notas = k==='pesq' ? noPer.filter(x=>x.n!=null) : [];
   const nota = notas.length ? notas.reduce((s,x)=>s+(+x.n),0)/notas.length : null;
   const ausM = execs.length>0 && dusAte.length>0 && execs.every(e=>diasMeta(e,dusAte)===0);
-  const base = { k, execs, p, corte, dus, dusAte, real, metaDia, metaMes, metaAte, metaFonte, bi, ating, realA, atingA, semAt, semAnt, mediaSem, nota, nNotas:notas.length, ev, noPer, modo:'mes',
+  const base = { k, execs, p, corte, dus, dusAte, real:realCard, realForms:real, cons:consInfo, metaDia, metaMes, metaAte, metaFonte, bi, ating, realA, atingA, semAt, semAnt, mediaSem, nota, nNotas:notas.length, ev, noPer, modo:'mes',
     ausente: ausM, ...(k==='cons' ? { nSup:0 } : (()=>{ const sw = supSemanal(k, execs, ev, segundaDe(corte)), sp = supSemanal(k, execs, ev, addDias(segundaDe(corte),-7)); return { nSup:sw.n, nEleg:sw.eleg, semSup:sw.sem0, supTipo:'semanal', supAnt:{ n:sp.n, eleg:sp.eleg, sem0:sp.sem0 } }; })()),
-    metaRed: k==='cons' ? 0 : metaDiaK(k)*execs.length*dus.length - (metaMes||0), rotMeta: k==='cons' && !bi ? 'Meta do ciclo' : rotMeta, rotComp,
+    metaRed: k==='cons' ? 0 : metaDiaK(k)*execs.length*dus.length - (metaMes||0), rotMeta, rotComp,
     rotHint: `${dusAte.length} de ${dus.length} dias úteis${k==='cons'?' do ciclo':''}`,
     janela:{ ini:(k==='cons'? ym+'-01' : p.ini), fim:(k==='cons'? ultimoDiaMes(ym) : p.fim) } };
   if(modo==='mes') return base;
@@ -2928,9 +2957,11 @@ function cardInd(st, opts={}){
     const atTxt = (st.nSup && st.modo!=='mes' && st.execs.length===1) ? `${fmtPct(st.ating)}` : fmtPct(st.ating);
     kpis = `<div class="pc-kpis"><div>${st.rotMeta}<b>${st.metaMes!=null?nf0.format(Math.round(st.metaMes)):'—'}</b></div>${kpiReal}<div class="at">Atingimento<b>${atTxt}</b></div></div>
       <div class="pc-bar"><div style="width:${Math.min(100,st.ating||0)}%"></div></div>`;
-    hint = st.k==='cons' ? `Realizado pelo Forms · ${st.metaFonte} · ${st.rotHint}` : `Meta até agora ${nf0.format(Math.round(st.metaAte||0))} · ${st.rotHint}`;
+    hint = st.k==='cons' ? `${st.metaFonte} · ${st.rotHint}` : `Meta até agora ${nf0.format(Math.round(st.metaAte||0))} · ${st.rotHint}`;
     if(st.k!=='cons' && st.metaRed>0.5) hint += ` · meta do time reduzida em ${nf0.format(Math.round(st.metaRed))} por férias/atestado`;
-    if(st.k==='cons') hint += st.bi ? `</div><div class="pc-hint" style="color:var(--c);font-weight:700">Na planilha de ${dBRc(st.bi.ref)}: prioridade analisado ${nf0.format(st.bi.prioAnal)} de ${nf0.format(st.bi.metaPrio)} (${fmtPct(pctN(st.bi.prioAnal,st.bi.metaPrio))}) · análise geral ${nf0.format(st.bi.geral)}` : `</div><div class="pc-hint">Sem planilha de prioridades no ciclo`;
+    if(st.k==='cons'){ const c = st.cons;
+      hint += c ? `</div><div class="pc-hint" style="color:var(--c);font-weight:700">Realizado = analisados P1 ${nf0.format(c.a1)}/${nf0.format(c.p1)} + P2 ${nf0.format(c.a2)}/${nf0.format(c.p2)}${c.comp?` · complemento P3 ${nf0.format(c.c3)}/${nf0.format(c.comp)} (conta no atingimento)`:''}</div><div class="pc-hint">Pendentes: ${nf0.format(c.pend12)} de P1+P2${c.pendComp?` + ${nf0.format(c.pendComp)} de P3 para completar ${CONS_MIN()}`:''} · análises do Forms no ciclo (todas as prioridades): ${nf0.format(st.realForms)}`
+        : `</div><div class="pc-hint">Suba a base de prioridades do dia em Importar e configurar`; }
   }
   const notaTxt = st.k==='pesq' ? `<div class="pc-hint" style="color:var(--c);font-weight:700">Nota média ${st.nota!=null?st.nota.toFixed(2).replace('.',','):'—'} · alvo ${String(PCFG.nota_alvo).replace('.',',')} (${st.nNotas} notas)</div>` : '';
   let foraTime = '';
@@ -2959,7 +2990,7 @@ function chartSemana(id, st){
       scales:{ x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }, y:{ beginAtZero:true, grace:'15%', grid:{ color:'#EEF3F6' }, ticks:{ font:{ size:10 } } } } } });
 }
 
-function renderProdTudo(){ renderPGeral(); renderPExec(); renderPDia(); renderPDist(); }
+function renderProdTudo(){ renderPGeral(); renderPDia(); renderPDist(); renderPHome(); }
 function renderPGeral(){
   const ex = execsMeta();
   const sts = PIND.map(I=>statInd(I.k, ex));
@@ -2968,16 +2999,8 @@ function renderPGeral(){
   $('pg-res-head').innerHTML = tabelaQtdHead();
   $('pg-res').innerHTML = tabelaQtdBody();
   document.querySelectorAll('#pg-res .ap-exec-row').forEach(tr=>tr.onclick=()=>{ PD.visao = tr.dataset.e; $('fp-visao').value = PD.visao; heroProd(); renderProdTudo(); window.scrollTo({top:0,behavior:'smooth'}); });
-}
-function renderPExec(){
-  const lista = execsLista();
-  $('pe-sub').textContent = `${rotPeriodo()} · realizado / meta até agora e atingimento. Férias/atestados não contam na meta; quem já bateu a meta semanal/mensal aparece como atingido.`;
-  $('pe-head').innerHTML = `<tr><th>Executivo</th>${PIND.map(I=>`<th class="num" style="color:${I.c}">${I.t}</th><th class="num">%</th>`).join('')}</tr>`;
-  const rows = lista.map(e=>({ e, s:PIND.map(I=>statInd(I.k,[e])) }));
-  $('pe-tab').innerHTML = rows.map(r=>`<tr class="ap-exec-row" data-e="${esc(r.e)}"><td><b>${esc(r.e)}</b></td>${r.s.map(s=>`${celQtd(s)}<td class="num pct-cell" style="color:${s.ating==null?'var(--text-faint)':corPct(s.ating)}">${fmtPct(s.ating)}</td>`).join('')}</tr>`).join('')
-    + (()=>{ const t = PIND.map(I=>statInd(I.k, execsLista())); return `<tr class="total"><td>Time</td>${t.map(s=>`<td class="num">${nf0.format(s.real)} / ${s.metaAte!=null?nf0.format(Math.round(s.metaAte)):'—'}</td><td class="num">${fmtPct(s.ating)}</td>`).join('')}</tr>`; })();
-  document.querySelectorAll('#pe-tab .ap-exec-row').forEach(tr=>tr.onclick=()=>{ PD.visao = tr.dataset.e; $('fp-visao').value = PD.visao; heroProd(); renderProdTudo(); document.querySelector('#tabs-prod button[data-view=pgeral]').click(); });
-  $('btn-xls-pexec').onclick = ()=>exportXLSX(rows.map(r=>{ const o={ Executivo:r.e }; r.s.forEach(s=>{ const t=PIND_BY[s.k].t; o[t+' realizado']=s.real; o[t+' meta até hoje']=s.metaAte!=null?Math.round(s.metaAte):''; o[t+' %']=s.ating!=null?+s.ating.toFixed(1):''; }); return o; }), `produtividade_executivos_${PD.mes}`);
+  $('btn-xls-res').onclick = ()=>exportXLSX(execsLista().map(e=>{ const o = { Executivo:e }; PIND.forEach(I=>{ const st = statInd(I.k,[e]); o[I.t+' realizado'] = st.real; o[I.t+' meta'] = st.metaAte!=null?Math.round(st.metaAte):''; o[I.t+' %'] = st.ating!=null?+st.ating.toFixed(1):''; }); return o; }), `produtividade_resumo_${PD.modo}_${PD.ref||PD.mes}`);
+  renderConsTab();
 }
 function renderPDia(){
   if(!$('pd-ind').options.length) $('pd-ind').innerHTML = PIND.map(I=>`<option value="${I.k}">${I.t}</option>`).join('');
@@ -2986,14 +3009,15 @@ function renderPDia(){
   const hoje = hojeISO();
   const st0 = statInd(k, lista);
   const metaDiaExec = k==='cons' ? (st0.metaMes!=null ? st0.metaMes/Math.max(1,st0.dus.length)/Math.max(1,lista.length) : null) : st0.metaDia;
-  $('pd-sub').textContent = `${I.t} · ${dBR(p.ini)} a ${dBR(p.fim)} · meta por executivo por dia útil: ${metaDiaExec!=null?String(+metaDiaExec.toFixed(1)).replace('.',','):'— (importe a planilha de prioridades)'}.`;
+  const notaCons = k==='cons' ? ' Consumo: as células e o Total mostram todas as análises do Forms (qualquer prioridade); o % é o atingimento da meta (P1+P2, completando com P3). F/A = férias/atestado.' : '';
+  $('pd-sub').textContent = `${I.t} · ${dBR(p.ini)} a ${dBR(p.fim)} · meta por executivo por dia útil: ${metaDiaExec!=null?String(+metaDiaExec.toFixed(1)).replace('.',','):'— (importe a base de prioridades)'}.${notaCons}`;
   const cnt = {}; (PD.ev[k]||[]).forEach(x=>{ if(x.d>=p.ini && x.d<=p.fim){ const kk=norm(x.e)+'|'+x.d; cnt[kk]=(cnt[kk]||0)+x.q; } });
   $('pd-head').innerHTML = `<tr><th>Executivo</th>${dias.map(d=>`<th style="${ehDU(d)?'':'color:var(--text-faint)'}">${d.slice(8,10)}<div style="font-size:9.5px;font-weight:600">${diaSem(d)}</div></th>`).join('')}<th>Total</th><th>Meta</th><th>%</th></tr>`;
   const linhas = lista.map(e=>{ const vals = dias.map(d=>cnt[norm(e)+'|'+d]||0); const s = statInd(k,[e]); return { e, vals, s }; });
   const cel = (v,d,e) => { if(d>hoje) return `<td class="faint">·</td>`; const au = ehDU(d) && ausencia(e,d); if(au) return `<td style="background:#E3E9EE;color:var(--text-mut);font-weight:700" title="${esc(au.motivo)}">${v||au.motivo.slice(0,1)}</td>`; if(!ehDU(d)) return `<td style="background:#EEF3F6">${v||''}</td>`;
     if(metaDiaExec==null) return `<td>${v}</td>`; const r = v/metaDiaExec; return `<td style="background:${r>=1?'#D8EFE2':r>=0.8?'#FBF1DE':'#FBE9E5'};font-weight:700">${v}</td>`; };
-  $('pd-body').innerHTML = linhas.map(l=>`<tr><td><b>${esc(l.e)}</b></td>${l.vals.map((v,i)=>cel(v,dias[i],l.e)).join('')}<td><b>${nf0.format(l.s.real)}</b></td><td class="muted">${l.s.metaAte!=null?nf0.format(Math.round(l.s.metaAte)):'—'}</td><td class="pct-cell" style="color:${l.s.ating==null?'var(--text-faint)':corPct(l.s.ating)}">${fmtPct(l.s.ating)}</td></tr>`).join('')
-    + `<tr class="total"><td>Total</td>${dias.map((d,i)=>`<td>${d>hoje?'':linhas.reduce((s,l)=>s+l.vals[i],0)}</td>`).join('')}<td>${nf0.format(st0.real)}</td><td>${st0.metaAte!=null?nf0.format(Math.round(st0.metaAte)):'—'}</td><td>${fmtPct(st0.ating)}</td></tr>`;
+  $('pd-body').innerHTML = linhas.map(l=>`<tr><td><b>${esc(l.e)}</b></td>${l.vals.map((v,i)=>cel(v,dias[i],l.e)).join('')}<td><b>${nf0.format(k==='cons' ? l.vals.reduce((a,b)=>a+b,0) : l.s.real)}</b></td><td class="muted">${l.s.metaAte!=null?nf0.format(Math.round(l.s.metaAte)):'—'}</td><td class="pct-cell" style="color:${l.s.ating==null?'var(--text-faint)':corPct(l.s.ating)}">${fmtPct(l.s.ating)}</td></tr>`).join('')
+    + `<tr class="total"><td>Total</td>${dias.map((d,i)=>`<td>${d>hoje?'':linhas.reduce((s,l)=>s+l.vals[i],0)}</td>`).join('')}<td>${nf0.format(k==='cons' ? linhas.reduce((a,l)=>a+l.vals.reduce((x,y)=>x+y,0),0) : st0.real)}</td><td>${st0.metaAte!=null?nf0.format(Math.round(st0.metaAte)):'—'}</td><td>${fmtPct(st0.ating)}</td></tr>`;
   // semanas
   const semanas = []; for(let s=segundaDe(p.ini); s<=p.fim; s=addDias(s,7)) semanas.push(s);
   $('pw-head').innerHTML = `<tr><th>Executivo</th>${semanas.map(s=>{ const f=addDias(s,6); return `<th class="num">${dBRc(s<p.ini?p.ini:s)} a ${dBRc(f>p.fim?p.fim:f)}</th>`; }).join('')}</tr>`;
@@ -3039,7 +3063,7 @@ function htmlDzEvol(ex, quem){
 function htmlDzExec(clicavel){
   const J = janelaAtual(), lista = execsLista();
   const linhas = lista.map(e=>({ e, o:distrib([e], J.a, J.b) }));
-  return `<h3 style="margin:0">Distribuição por executivo — ${J.rot}</h3><p class="sub" style="margin:4px 0 8px">Quanto do esforço de cada um foi para cada frente (% e quantidade).${clicavel?' Clique para abrir a visão do executivo.':''}</p>${legDz()}
+  return `<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><h3 style="margin:0">Distribuição por executivo — ${J.rot}</h3>${clicavel?'<button class="btn btn-ghost btn-sm" id="btn-xls-dz">Exportar Excel</button>':''}</div><p class="sub" style="margin:4px 0 8px">Quanto do esforço de cada um foi para cada frente (% e quantidade).${clicavel?' Clique para abrir a visão do executivo.':''}</p>${legDz()}
     <div class="dz-rows" style="--dz-lab:170px">${linhas.map(l=>{ const aus = ausenciasNoPeriodo(l.e, J.a, J.b);
       const txtAus = aus.map(a=>`${a.motivo} · ${dBRc(a.ini)} a ${dBRc(a.fim)}`).join(' | ');
       const lab = esc(l.e) + (aus.length && l.o.tot ? ` <span class="aus-tag" title="${esc(txtAus)}">${esc(aus[0].motivo.toLowerCase())}</span>` : '');
@@ -3080,7 +3104,6 @@ function renderPDist(){
   $('dz-evol').innerHTML = htmlDzEvol(ex, quem);
   $('dz-exec').innerHTML = htmlDzExec(true);
   $('dz-mes').innerHTML = htmlDzMes(ex, PD.visao || 'Time GC');
-  $('dz-tab').innerHTML = htmlDzTab();
   document.querySelectorAll('#dz-exec .dz-row.click').forEach(r=>r.onclick=()=>{ PD.visao = r.dataset.e; $('fp-visao').value = PD.visao; heroProd(); renderProdTudo(); window.scrollTo({top:0,behavior:'smooth'}); });
   $('btn-xls-dz').onclick = ()=>exportXLSX(linhasDzTab().map(l=>{ const o = { Executivo:l.e }; PIND.filter(I=>frenteOk(I.k)).forEach(I=>{ o[I.t] = l.o[I.k]; o[I.t+' %'] = l.o.tot ? +(l.o[I.k]/l.o.tot*100).toFixed(1) : ''; }); o.Total = l.o.tot; return o; }), `distribuicao_esforco_${janelaAtual().a}`);
 }
@@ -3099,6 +3122,108 @@ $('btn-au-add').onclick = async ()=>{
   if(r.fim < r.ini){ toast('A data final é antes da inicial', true); return; }
   try{ await api('/prod_ausencias', { method:'POST', body:r, prefer:'return=minimal' }); toast(`${r.motivo} de ${r.executivo} cadastrada — metas ajustadas`); $('au-obs').value=''; await carregarProd(); }
   catch(e){ toast('Erro ao salvar: '+e.message+(/prod_ausencias/.test(e.message)?' — rode de novo o supabase_produtividade.sql':''), true); }
+};
+
+/* ---------- Consumo: base de prioridades × Forms por executivo ---------- */
+function linhasConsTab(){
+  const r = PD.consRes[PD.mes]; if(!r) return null;
+  const lista = PD.visao ? [PD.visao] : execsLista();
+  const L = lista.map(e=>{ const x = r.porE[norm(e)]; return { e, c: x ? consExec(x) : null }; });
+  const t = consMetaInfo(lista, PD.mes);
+  return { L, t, r };
+}
+function renderConsTab(){
+  const el = $('pg-cons'); if(!el) return;
+  const d = linhasConsTab(), c = periodoDe('cons', PD.mes);
+  if(!d){ el.innerHTML = `<h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)}: ainda não há base de prioridades. Suba a base do dia em <b>Importar e configurar</b>.</p>`; return; }
+  const pc = x => x.meta ? fmtPct(pctN(x.cred, x.meta)) : '—';
+  const row = (nome, x, cls='') => x ? `<tr class="${cls}"><td>${cls?nome:`<b>${esc(nome)}</b>`}</td><td class="num">${nf0.format(x.a1)} <span class="faint">/ ${nf0.format(x.p1)}</span></td><td class="num">${nf0.format(x.a2)} <span class="faint">/ ${nf0.format(x.p2)}</span></td>
+      <td class="num"><b>${nf0.format(x.a12)}</b> <span class="faint">/ ${nf0.format(x.p12)}</span></td><td class="num" style="color:var(--rose);font-weight:700">${nf0.format(x.pend12)}</td>
+      <td class="num">${x.comp ? `${nf0.format(x.c3)} <span class="faint">/ ${nf0.format(x.comp)}</span>` : '<span class="faint">—</span>'}</td><td class="num"><b>${nf0.format(x.meta)}</b></td>
+      <td class="num pct-cell" style="color:${x.meta?corPct(pctN(x.cred,x.meta)):'var(--text-faint)'}">${pc(x)}</td></tr>`
+    : `<tr><td><b>${esc(nome)}</b></td><td colspan="7" class="faint">sem clientes na base de prioridades</td></tr>`;
+  el.innerHTML = `<div class="card-head"><div><h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)} · base de prioridades de ${d.r.data_base?dBR(d.r.data_base):'—'} cruzada com o Forms pela matrícula (analisado = cliente com análise no Forms dentro do ciclo). Meta = 100% de P1+P2; abaixo de ${CONS_MIN()}, completa com P3. Férias não reduzem esta meta.</p></div>
+      <button class="btn btn-ghost btn-sm" id="btn-xls-cons">Exportar clientes (analisados e pendentes)</button></div>
+    <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">P1 analisados / base</th><th class="num">P2 analisados / base</th><th class="num">Realizado P1+P2</th><th class="num">Pendentes P1+P2</th><th class="num">Complemento P3</th><th class="num">Meta</th><th class="num">Atingimento</th></tr></thead>
+    <tbody>${d.L.map(l=>row(l.e, l.c)).join('')}${d.L.length>1 ? row('Time', d.t, 'total') : ''}</tbody></table></div>`;
+  $('btn-xls-cons').onclick = async ()=>{
+    try{ toast('Preparando a lista…');
+      const rows = await apiAll(`/vw_prod_prioridade_status?select=matricula,prioridade,executivo,carteira,data_leitura,ocorrencia,condicional,delta,variacao,status,qtd_analises,primeira_analise,ultima_analise,analisado_por&ciclo=eq.${PD.mes}&order=executivo,prioridade,matricula`);
+      const alvo = new Set((PD.visao ? [PD.visao] : execsLista()).map(norm)), lista = [...new Set([...execsLista(), ...PD.execsTodos])];
+      exportXLSX(rows.filter(r=>alvo.has(norm(casarExec(r.executivo, lista)))).map(r=>({ Matrícula:r.matricula, Prioridade:'Prioridade '+r.prioridade, Executivo:r.executivo, Carteira:r.carteira, 'Data de leitura':r.data_leitura?dBR(r.data_leitura):'', Ocorrência:r.ocorrencia, Condicional:r.condicional, Delta:r.delta, '%':r.variacao,
+        Status:r.status, 'Qtd. análises':r.qtd_analises, 'Primeira análise':r.primeira_analise?dBR(r.primeira_analise):'', 'Última análise':r.ultima_analise?dBR(r.ultima_analise):'', 'Analisado por':r.analisado_por||'' })), `consumo_prioridades_status_${PD.mes}`);
+    }catch(e){ toast('Erro: '+e.message, true); } };
+}
+
+/* ---------- Home office × presencial ---------- */
+function ehHome(e, d){ return PD.homeSet.has(norm(e)+'|'+d); }
+function statHome(e, a, b){ // produção média por dia útil em home e presencial (sem férias/atestado)
+  const hoje = hojeISO(), dias = dusEntre(a, b<hoje?b:hoje).filter(d=>!ausencia(e,d));
+  const H = dias.filter(d=>ehHome(e,d)), P = dias.filter(d=>!ehHome(e,d));
+  if(!PD.ix) montarIndice();
+  const soma = (k, ds) => { const m = PD.ix[k][norm(e)] || {}; return ds.reduce((s,d)=>s+(m[d]||0),0); };
+  const o = { e, nH:H.length, nP:P.length, fr:{} };
+  PIND.filter(I=>frenteOk(I.k)).forEach(I=>{ const h = soma(I.k,H), p = soma(I.k,P); o.fr[I.k] = { h, p, mh: H.length ? h/H.length : null, mp: P.length ? p/P.length : null }; });
+  const tH = Object.values(o.fr).reduce((s,x)=>s+x.h,0), tP = Object.values(o.fr).reduce((s,x)=>s+x.p,0);
+  o.tot = { h:tH, p:tP, mh: H.length ? tH/H.length : null, mp: P.length ? tP/P.length : null };
+  return o;
+}
+function somaHome(lst){ // time: soma de produção e de dias-executivo
+  const o = { nH:0, nP:0, fr:{}, tot:{ h:0, p:0 } };
+  lst.forEach(x=>{ o.nH += x.nH; o.nP += x.nP; o.tot.h += x.tot.h; o.tot.p += x.tot.p;
+    Object.entries(x.fr).forEach(([k,v])=>{ const f = o.fr[k] || (o.fr[k] = { h:0, p:0 }); f.h += v.h; f.p += v.p; }); });
+  Object.values(o.fr).concat([o.tot]).forEach(f=>{ f.mh = o.nH ? f.h/o.nH : null; f.mp = o.nP ? f.p/o.nP : null; });
+  return o;
+}
+const fmt1 = v => v==null ? '—' : v.toFixed(1).replace('.',',');
+function difHP(h, p){ if(h==null || p==null || !p) return ''; const d = (h/p-1)*100; return `<span style="font-weight:800;color:${d>=0?'var(--leaf)':'var(--rose)'}">${d>=0?'+':''}${Math.round(d)}%</span>`; }
+function htmlHomeCards(t, rot){
+  const fr = PIND.filter(I=>frenteOk(I.k));
+  const card = (tit, c, f) => { const mx = Math.max(f.mh||0, f.mp||0, 0.0001);
+    return `<div class="hp-card" style="--c:${c}"><div class="hp-t">${tit}</div>
+      <div class="hp-row"><span>Home</span><div class="hp-track"><div style="width:${(f.mh||0)/mx*100}%;background:${c}"></div></div><b>${fmt1(f.mh)}</b></div>
+      <div class="hp-row"><span>Presencial</span><div class="hp-track"><div style="width:${(f.mp||0)/mx*100}%;background:${c};opacity:.45"></div></div><b>${fmt1(f.mp)}</b></div>
+      <div class="hp-d">Home vs. presencial: ${difHP(f.mh, f.mp) || '—'}</div></div>`; };
+  return `<h2 style="margin:0">Home office × presencial — ${rot}</h2><p class="sub">Média de registros por executivo por dia útil (férias/atestado ficam de fora). ${nf0.format(t.nH)} dias-executivo em home · ${nf0.format(t.nP)} presenciais.${PD.home.length?'':' <b>Nenhum dia de home cadastrado ainda — use Importar e configurar → Dias de home office.</b>'}</p>
+    <div class="hp-grid">${card('Total (4 frentes)', 'var(--navy)', t.tot)}${fr.map(I=>card(I.t, I.c, t.fr[I.k])).join('')}</div>`;
+}
+function renderPHome(){
+  if(!$('ph-cards')) return;
+  const J = janelaAtual(), lista = PD.visao ? [PD.visao] : execsLista(), fr = PIND.filter(I=>frenteOk(I.k));
+  const L = lista.map(e=>statHome(e, J.a, J.b)), t = somaHome(L);
+  $('ph-cards').innerHTML = htmlHomeCards(t, J.rot + (PD.visao ? ' · ' + esc(PD.visao) : ' · time'));
+  $('ph-tab').innerHTML = `<div class="card-head"><div><h2>Por executivo</h2><p class="sub">${J.rot} · média por dia útil em home (H) e presencial (P) e diferença.</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-home">Exportar Excel</button></div>
+    <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">Dias H / P</th><th class="num">Total H</th><th class="num">Total P</th><th class="num">Dif.</th>${fr.map(I=>`<th class="num" style="color:${I.c}">${({cons:'Consumo',acion:'Acionam.',pesq:'Pesquisa',alt:'Alteração'})[I.k]} H / P</th>`).join('')}</tr></thead>
+    <tbody>${L.map(x=>`<tr><td><b>${esc(x.e)}</b></td><td class="num">${x.nH} / ${x.nP}</td><td class="num"><b>${fmt1(x.tot.mh)}</b></td><td class="num"><b>${fmt1(x.tot.mp)}</b></td><td class="num">${difHP(x.tot.mh,x.tot.mp)}</td>${fr.map(I=>`<td class="num">${fmt1(x.fr[I.k].mh)} <span class="faint">/ ${fmt1(x.fr[I.k].mp)}</span></td>`).join('')}</tr>`).join('')}
+      ${L.length>1?`<tr class="total"><td>Time</td><td class="num">${t.nH} / ${t.nP}</td><td class="num">${fmt1(t.tot.mh)}</td><td class="num">${fmt1(t.tot.mp)}</td><td class="num">${difHP(t.tot.mh,t.tot.mp)}</td>${fr.map(I=>`<td class="num">${fmt1(t.fr[I.k].mh)} / ${fmt1(t.fr[I.k].mp)}</td>`).join('')}</tr>`:''}</tbody></table></div>`;
+  $('btn-xls-home').onclick = ()=>exportXLSX(L.map(x=>{ const o = { Executivo:x.e, 'Dias home':x.nH, 'Dias presencial':x.nP, 'Total/dia home':x.tot.mh!=null?+x.tot.mh.toFixed(2):'', 'Total/dia presencial':x.tot.mp!=null?+x.tot.mp.toFixed(2):'' };
+    fr.forEach(I=>{ o[I.t+' home/dia'] = x.fr[I.k].mh!=null?+x.fr[I.k].mh.toFixed(2):''; o[I.t+' presencial/dia'] = x.fr[I.k].mp!=null?+x.fr[I.k].mp.toFixed(2):''; }); return o; }), `home_presencial_${J.a}`);
+}
+// editor semanal
+function semanaPadraoHome(){ const h = hojeISO(), w = new Date(h+'T12:00:00').getDay(); return (w===5||w===6||w===0) ? addDias(segundaDe(h),7) : segundaDe(h); }
+function renderHomeEditor(){
+  if(!$('ho-sem')) return;
+  if(!$('ho-sem').value) $('ho-sem').value = semanaPadraoHome();
+  const s0 = segundaDe($('ho-sem').value); $('ho-sem').value = s0;
+  const dias = Array.from({length:5},(_,i)=>addDias(s0,i)), nomes = ['SEG','TER','QUA','QUI','SEX'];
+  if(!PD.homeOk){ $('ho-body').innerHTML = '<tr class="empty-row"><td>Rode de novo o arquivo supabase_produtividade.sql no Supabase para liberar o cadastro de home office.</td></tr>'; $('ho-head').innerHTML=''; return; }
+  $('ho-head').innerHTML = `<tr><th>Executivo</th>${dias.map((d,i)=>`<th style="text-align:center">${nomes[i]}<div style="font-size:10px;font-weight:600">${dBRc(d)}${ehDU(d)?'':' · feriado'}</div></th>`).join('')}</tr>`;
+  $('ho-body').innerHTML = execsLista().map(e=>`<tr><td><b>${esc(e)}</b></td>${dias.map(d=>{ const au = ausencia(e,d);
+    return `<td style="text-align:center">${au ? `<span class="faint" style="font-size:11px">${esc(au.motivo)}</span>` : `<input type="checkbox" class="ho-chk" data-e="${esc(e)}" data-d="${d}" ${ehHome(e,d)?'checked':''} ${ehDU(d)?'':'disabled'}>`}</td>`; }).join('')}</tr>`).join('');
+}
+$('ho-sem').onchange = renderHomeEditor;
+$('ho-ant').onclick = ()=>{ $('ho-sem').value = addDias(segundaDe($('ho-sem').value||hojeISO()),-7); renderHomeEditor(); };
+$('ho-prox').onclick = ()=>{ $('ho-sem').value = addDias(segundaDe($('ho-sem').value||hojeISO()),7); renderHomeEditor(); };
+$('ho-copiar').onclick = ()=>{ document.querySelectorAll('.ho-chk').forEach(c=>{ if(!c.disabled) c.checked = ehHome(c.dataset.e, addDias(c.dataset.d,-7)); }); $('ho-msg').textContent = 'Copiado da semana anterior — confira e salve.'; };
+$('ho-salvar').onclick = async ()=>{
+  const s0 = segundaDe($('ho-sem').value), s1 = addDias(s0,6), m = $('ho-msg');
+  const linhas = [...document.querySelectorAll('.ho-chk')].filter(c=>c.checked).map(c=>({ executivo:c.dataset.e, data:c.dataset.d, criado_por:SESSION && SESSION.email }));
+  try{ m.style.color='var(--text-mut)'; m.textContent='Salvando…';
+    await api(`/prod_home?data=gte.${s0}&data=lte.${s1}`, { method:'DELETE', prefer:'return=minimal' });
+    if(linhas.length) await api('/prod_home', { method:'POST', body:linhas, prefer:'return=minimal' });
+    m.style.color='var(--leaf)'; m.textContent = `✓ Semana de ${dBRc(s0)} salva (${linhas.length} dias de home).`; toast('Home office salvo');
+    await carregarProd(); }
+  catch(e){ m.style.color='var(--rose)'; m.textContent = 'Erro: ' + e.message + (/prod_home/.test(e.message)?' — rode de novo o supabase_produtividade.sql':''); }
 };
 
 /* ---------- IMPORTAÇÕES ---------- */
@@ -3164,86 +3289,67 @@ $('btn-pf').onclick = async ()=>{
   finally{ $('btn-pf').disabled = !$('pf-file').files[0]; }
 };
 
-/* ---------- planilha de prioridades (meta progressiva do Consumo) ---------- */
+/* ---------- base diária de prioridades (Consumo Estratégico) ---------- */
 let PM_ARQ = null;
-$('pm-data').value = hojeISO();
+function cicloDe(iso){ return +iso.slice(8,10) >= 5 ? iso.slice(0,7) : addMes(iso.slice(0,7), -1); }
+function mostrarCicloPM(){ const d = $('pm-data').value; if(!d){ $('pm-ciclo').textContent=''; return; } const c = cicloDe(d); $('pm-ciclo').textContent = `Ciclo ${dBRc(c+'-05')} a ${dBRc(addMes(c,1)+'-04')}`; }
+$('pm-data').value = hojeISO(); mostrarCicloPM(); $('pm-data').onchange = mostrarCicloPM;
 function bigramas(t){ t=' '+t+' '; const o=[]; for(let i=0;i<t.length-1;i++) o.push(t.slice(i,i+2)); return o; }
 function semelhanca(a,b){ const A=bigramas(norm(a)), B=bigramas(norm(b)); let n=0; const bb=[...B]; A.forEach(x=>{ const i=bb.indexOf(x); if(i>=0){ n++; bb.splice(i,1); } }); return 2*n/(A.length+B.length); }
 $('pm-file').onchange = ()=>{
-  PM_ARQ = $('pm-file').files[0] || null; $('btn-pm-ler').disabled = !PM_ARQ; $('pm-box').classList.toggle('has-file', !!PM_ARQ); $('pm-grid').innerHTML='';
+  PM_ARQ = $('pm-file').files[0] || null; $('btn-pm-ler').disabled = !PM_ARQ; $('pm-box').classList.toggle('has-file', !!PM_ARQ);
   if(!PM_ARQ){ $('pm-log').textContent=''; return; }
   const m = PM_ARQ.name.match(/(\d{1,2})[.\-_ ](\d{1,2})(?:[.\-_ ](\d{2,4}))?/); // "28.09" no nome → data
   if(m){ const d=+m[1], mm=+m[2]; let y = m[3] ? +m[3] : +hojeISO().slice(0,4); if(y<100) y+=2000;
     if(d>=1 && d<=31 && mm>=1 && mm<=12) $('pm-data').value = `${y}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
-  $('pm-log').textContent = `Planilha: ${PM_ARQ.name}. Confira a data e clique em "Importar planilha".`;
+  mostrarCicloPM(); $('pm-log').textContent = `Base: ${PM_ARQ.name}. Confira a data e clique em "Importar base de prioridades".`;
 };
-async function lerPlanilhaPrioridades(file){
+async function lerBasePrioridades(file){
   const wb = XLSX.read(await file.arrayBuffer(), { type:'array', cellDates:true });
   for(const nomeAba of wb.SheetNames){
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[nomeAba], { header:1, defval:null, raw:true });
     for(let h=0; h<Math.min(rows.length,15); h++){
       const cab = (rows[h]||[]).map(c=>norm(c==null?'':String(c)));
-      const ix = n => cab.findIndex(c=>c===n);
-      const iE = cab.findIndex(c=>c==='executivo' || c==='nome'), iMP = ix('meta prioridade'), iPA = ix('prioridade analisado'), iAG = ix('analise geral');
-      if(iE<0 || (iMP<0 && iAG<0)) continue;
-      const iDM = cab.findIndex(c=>/^delta meta\s*\d+/.test(c)); const metaCiclo = iDM>=0 ? +cab[iDM].match(/(\d+)/)[1] : null;
+      const ix = (...ns) => cab.findIndex(c=>ns.includes(c));
+      const iM = ix('matricula','matrícula','n ligacao','nº ligacao','ligacao'), iP = ix('prioridade'), iE = ix('executivo');
+      if(iM<0 || iP<0 || iE<0) continue;
+      const iC = ix('carteira'), iL = ix('data de leitura','data leitura'), iO = ix('ocorrencia'), iCo = ix('condicional'), iD = ix('delta'), iV = ix('%','variacao');
       const num = v => v==null || v==='' ? null : (typeof v==='number' ? v : (isNaN(+String(v).replace(/\./g,'').replace(',','.')) ? null : +String(v).replace(/\./g,'').replace(',','.')));
-      const linhas = rows.slice(h+1).filter(r=>r && r[iE]).map(r=>({ nome:String(r[iE]).trim(), metaPrio:iMP>=0?num(r[iMP]):null, prioAnal:iPA>=0?num(r[iPA]):null, geral:iAG>=0?num(r[iAG]):null, metaCiclo }))
-        .filter(l=>!/^total/i.test(l.nome));
-      return { aba:nomeAba, metaCiclo, linhas };
+      const dt = v => v instanceof Date ? isoLocal(v) : (typeof v==='number' ? isoLocal(new Date(Math.round((v-25569)*86400000)+43200000)) : (v && /^\d{2}\/\d{2}\/\d{4}/.test(v) ? v.slice(6,10)+'-'+v.slice(3,5)+'-'+v.slice(0,2) : null));
+      const linhas = rows.slice(h+1).filter(r=>r && r[iM]!=null && r[iM]!=='').map(r=>{ const pr = String(r[iP]||'').match(/(\d)/);
+        return { matricula: Math.round(num(r[iM])), prioridade: pr ? +pr[1] : null, executivo: r[iE]!=null ? String(r[iE]).trim() : null,
+          carteira: iC>=0 && r[iC]!=null ? String(r[iC]).trim() : null, data_leitura: iL>=0 ? dt(r[iL]) : null, ocorrencia: iO>=0 && r[iO]!=null ? String(r[iO]) : null,
+          condicional: iCo>=0 && r[iCo]!=null ? String(r[iCo]) : null, delta: iD>=0 ? num(r[iD]) : null, variacao: iV>=0 ? num(r[iV]) : null }; })
+        .filter(l=>l.matricula);
+      return { aba:nomeAba, linhas };
     }
   }
-  throw new Error('não encontrei as colunas Executivo / Meta Prioridade / Análise Geral na planilha');
+  throw new Error('não encontrei as colunas Matrícula / Prioridade / Executivo na planilha');
 }
 $('btn-pm-ler').onclick = async ()=>{
   if(!PM_ARQ) return; const log=t=>$('pm-log').textContent=t; const dr = $('pm-data').value;
-  if(!dr){ toast('Informe a data da planilha', true); return; }
+  if(!dr){ toast('Informe a data da base', true); return; }
+  const ciclo = cicloDe(dr), lote = 'L' + Date.now() + Math.random().toString(36).slice(2,7);
   $('btn-pm-ler').disabled = true;
   try{
-    const r = await lerPlanilhaPrioridades(PM_ARQ), lista = execsLista(), achados = {}, fora = [];
-    r.linhas.forEach(l=>{ let nome = lista.find(n=>norm(n)===norm(l.nome)) || (()=>{ const c = casarExec(l.nome, lista); return lista.includes(c) ? c : null; })();
-      if(!nome){ let best=null, sc=0; lista.forEach(n=>{ const v=semelhanca(l.nome,n); if(v>sc){ sc=v; best=n; } }); if(sc>=0.8) nome = best; }
-      if(nome && !achados[nome]) achados[nome] = l; else if(!nome) fora.push(l.nome); });
-    const body = Object.entries(achados).map(([e,a])=>({ data_ref:dr, executivo:e, meta_prioridade:a.metaPrio, prioridade_analisado:a.prioAnal, executado_bi:a.geral, meta_ciclo:a.metaCiclo, meta_prog:null }));
-    if(!body.length) throw new Error('nenhum executivo da lista foi encontrado na planilha');
-    await api('/prod_consumo_meta?on_conflict=data_ref,executivo', { method:'POST', body, prefer:'resolution=merge-duplicates,return=minimal' });
-    await logImportProd('meta_consumo', PM_ARQ.name, body.length, { data:dBR(dr), meta_ciclo:r.metaCiclo });
-    toast(`Planilha de ${dBR(dr)} importada (${body.length} executivos)`);
-    const aviso = `✓ ${body.length} executivos gravados para ${dBR(dr)} · meta do ciclo ${r.metaCiclo ?? '— (cabeçalho "Delta Meta" não encontrado)'}` + (fora.length ? ` · fora da lista de executivos (não gravados): ${fora.join(', ')}` : '');
+    log('Lendo a planilha…');
+    const r = await lerBasePrioridades(PM_ARQ);
+    const cont = { 1:0, 2:0, 3:0 }; r.linhas.forEach(l=>{ if(cont[l.prioridade]!=null) cont[l.prioridade]++; });
+    for(let i=0; i<r.linhas.length; i+=2000){
+      log(`Enviando ${Math.min(i+2000, r.linhas.length)} de ${r.linhas.length}…`);
+      await api('/prod_prioridades_stg', { method:'POST', body:r.linhas.slice(i,i+2000).map(l=>({ lote, ...l })), prefer:'return=minimal' });
+    }
+    log('Cruzando com o Forms…');
+    const res = await api('/rpc/prod_processar_prioridades', { method:'POST', body:{ p_lote:lote, p_ciclo:ciclo, p_data:dr } });
+    await logImportProd('prioridades', PM_ARQ.name, res.linhas, { data:dBR(dr), ciclo:`${dBRc(ciclo+'-05')} a ${dBRc(addMes(ciclo,1)+'-04')}`, P1:cont[1], P2:cont[2], P3:cont[3] });
+    toast(`Base de prioridades de ${dBR(dr)} importada (${nf0.format(res.linhas)} clientes)`);
     PM_ARQ = null; $('pm-file').value=''; $('pm-box').classList.remove('has-file');
-    await carregarProd(); log(aviso);
-  }catch(e){ log('✗ ' + e.message + (/meta_prioridade|prioridade_analisado/.test(e.message)?' — rode de novo o supabase_produtividade.sql':'')); }
+    if(PD.mes !== ciclo) PD.mes = ciclo;
+    await carregarProd();
+    log(`✓ ${nf0.format(res.linhas)} clientes gravados (P1 ${nf0.format(cont[1])} · P2 ${nf0.format(cont[2])} · P3 ${nf0.format(cont[3])}) para o ciclo ${dBRc(ciclo+'-05')} a ${dBRc(addMes(ciclo,1)+'-04')} — substituiu a base anterior do ciclo.`);
+  }catch(e){ log('✗ ' + e.message + (/prod_prioridades/.test(e.message)?' — rode de novo o supabase_produtividade.sql':'')); }
   finally{ $('btn-pm-ler').disabled = !PM_ARQ; }
 };
-$('btn-pm-manual').onclick = async ()=>{
-  const dr = $('pm-data').value, ex = {};
-  try{ const r = await api(`/prod_consumo_meta?select=*&data_ref=eq.${dr}`); r.forEach(m=>ex[m.executivo]={ metaPrio:m.meta_prioridade, prioAnal:m.prioridade_analisado, geral:m.executado_bi, metaCiclo:m.meta_ciclo }); }catch(e){}
-  montarGridMeta(ex, null, true);
-};
-function montarGridMeta(achados){
-  const lista = execsLista(), val = v => v==null ? '' : v;
-  const metaPadrao = Object.values(achados).map(a=>a.metaCiclo).find(v=>v!=null) ?? '';
-  $('pm-grid').innerHTML = `<div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Executivo</th><th class="num">Meta Prioridade</th><th class="num">Prioridade Analisado</th><th class="num">Análise Geral</th><th class="num">Meta do ciclo</th></tr></thead><tbody>
-    ${lista.map(e=>{ const a = achados[e] || {};
-      return `<tr class="pm-row" data-e="${esc(e)}"><td><b>${esc(e)}</b></td>
-        <td class="num"><input class="cell-input" style="min-width:90px" type="number" data-f="meta_prioridade" value="${val(a.metaPrio)}"></td>
-        <td class="num"><input class="cell-input" style="min-width:90px" type="number" data-f="prioridade_analisado" value="${val(a.prioAnal)}"></td>
-        <td class="num"><input class="cell-input" style="min-width:90px" type="number" data-f="executado_bi" value="${val(a.geral)}"></td>
-        <td class="num"><input class="cell-input" style="min-width:80px" type="number" data-f="meta_ciclo" value="${val(a.metaCiclo ?? metaPadrao)}"></td></tr>`; }).join('')}
-    </tbody></table></div>
-    <div class="form-row"><button class="btn btn-primary" id="btn-pm-salvar">Salvar números de ${dBR($('pm-data').value)}</button></div>`;
-  $('btn-pm-salvar').onclick = async ()=>{
-    const dr = $('pm-data').value; if(!dr){ toast('Informe a data', true); return; }
-    const body = [...document.querySelectorAll('#pm-grid .pm-row')].map(tr=>{ const v=f=>{ const x=tr.querySelector(`[data-f="${f}"]`).value; return x===''?null:+x; };
-      return { data_ref:dr, executivo:tr.dataset.e, meta_prioridade:v('meta_prioridade'), prioridade_analisado:v('prioridade_analisado'), executado_bi:v('executado_bi'), meta_ciclo:v('meta_ciclo'), meta_prog:null }; })
-      .filter(r=>r.meta_prioridade!=null || r.prioridade_analisado!=null || r.executado_bi!=null || r.meta_ciclo!=null);
-    if(!body.length){ toast('Nenhum número preenchido', true); return; }
-    try{ await api('/prod_consumo_meta?on_conflict=data_ref,executivo', { method:'POST', body, prefer:'resolution=merge-duplicates,return=minimal' });
-      await logImportProd('meta_consumo', 'correção manual', body.length, { data:dBR(dr) });
-      toast(`Números de ${dBR(dr)} salvos (${body.length} executivos)`); $('pm-grid').innerHTML=''; await carregarProd();
-    }catch(e){ toast('Erro ao salvar: '+e.message+(/meta_prioridade|prioridade_analisado/.test(e.message)?' — rode de novo o supabase_produtividade.sql':''), true); }
-  };
-}
 
 /* ---------- configuração ---------- */
 function renderProdCfg(){
@@ -3319,6 +3425,8 @@ function slidesProd(){
   });
   if(!PD.visao) s.push({ tit:'Por executivo', html:()=>`<h2>Por executivo</h2><p class="sub">${rotPeriodo()} · realizado / meta até agora (quantidade). ✓ = bateu a meta da semana. Clique em um executivo para abrir a visão dele.</p><div class="card" style="margin-top:0"><div class="tablewrap"><table style="font-size:15px"><thead>${tabelaQtdHead()}</thead><tbody>${tabelaQtdBody()}</tbody></table></div></div>`,
     after:()=>document.querySelectorAll('#ap-stage .ap-exec-row').forEach(tr=>tr.onclick=()=>{ PD.visao=tr.dataset.e; $('ap-visao').value=PD.visao; montarApresentacao(0); }) });
+  s.push({ tit:'Home × presencial', html:()=>{ const J = janelaAtual(), L = (PD.visao ? [PD.visao] : execsLista()).map(e=>statHome(e, J.a, J.b));
+    return `<div class="card" style="margin-top:0">${htmlHomeCards(somaHome(L), J.rot + ' · ' + esc(quem))}</div>`; } });
   s.push({ tit:'Comparativo mensal do tempo', html:()=>`<h2>Comparativo mensal da distribuição do tempo</h2><p class="sub">${esc(quem)} · últimos 6 meses</p><div class="card" style="margin-top:0">${htmlDzMes(ex, quem)}</div>` });
   return s;
 }
