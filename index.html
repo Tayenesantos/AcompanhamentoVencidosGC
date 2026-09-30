@@ -699,7 +699,7 @@
 
     <!-- 1. VISÃO GERAL -->
     <section class="view active" id="view-cgeral">
-      <div class="card"><h2>Visão geral</h2><p class="sub" id="cg-sub"></p><div class="kpi-row" id="cg-kpis"></div></div>
+      <div class="card"><h2>Visão geral</h2><p class="sub" id="cg-sub"></p><div class="kpi-row" id="cg-kpis"></div><div id="cg-aus"></div></div>
       <div class="card">
         <div class="card-head"><div><h2>Top 10 — Aumento e Redução</h2><p class="sub">Maiores variações do mês (faturamento atual × mês anterior).</p></div>
           <div class="filters"><div class="field"><label>Ordenar por</label><select id="cg-ord"><option value="delta">Maior Δ em R$</option><option value="pct">Maior variação %</option></select></div></div></div>
@@ -727,7 +727,8 @@
     <!-- 2. POR EXECUTIVO -->
     <section class="view" id="view-cexec">
       <div class="card"><div class="card-head"><div><h2>Por executivo</h2><p class="sub">Clique no executivo para ver os motivos (consumo, desdobro e faturamento) dele.</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-cexec">Exportar Excel</button></div>
-        <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">Total</th><th class="num">Analisado</th><th class="num">Pendente</th><th style="min-width:200px">% atingido</th><th class="num">Prioridade 1</th><th class="num">Vencidas</th></tr></thead><tbody id="ce-tab"></tbody></table></div></div>
+        <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">Total</th><th class="num">Analisado</th><th class="num">Pendente</th><th style="min-width:200px">% atingido</th><th class="num">Prioridade 1</th><th class="num">Vencidas</th></tr></thead><tbody id="ce-tab"></tbody></table></div>
+        <div id="ce-aus"></div></div>
     </section>
 
     <!-- 3. ANALÍTICO -->
@@ -933,6 +934,7 @@
 
     <section class="view active" id="view-ageral">
       <div class="card"><h2>Visão geral da arrecadação</h2><p class="sub" id="ag-sub"></p><div class="kpi-row" id="ag-kpis"></div></div>
+      <div class="card" id="ag-meta"></div>
       <div class="two-col">
         <div class="card"><h2>Por carteira</h2><div class="dist-bars" id="ag-cart"></div>
           <div class="tablewrap" style="margin-top:16px;"><table><thead><tr><th>Carteira</th><th class="num">Matrículas</th><th class="num">Pagamentos</th><th class="num">Valor autenticado</th><th class="num">%</th></tr></thead><tbody id="ag-cart-tab"></tbody></table></div></div>
@@ -999,6 +1001,12 @@
         <div class="upload-box" id="arr-upload-box"><input type="file" id="arr-file" accept=".xlsx,.xls,.xlsm">
           <div class="form-row"><button class="btn btn-primary" id="btn-arr-importar" disabled>Importar base</button></div></div>
         <div class="progress" id="arr-prog"><div></div></div><div class="log" id="arr-log"></div></div>
+      <div class="card"><h2>Meta individual dos executivos (mensal)</h2>
+        <p class="sub">Suba a planilha de metas do mês (colunas <b>Executivo</b> e <b>Meta</b>; Carteira e Código são opcionais). Cada importação substitui as metas do mês escolhido.</p>
+        <div class="upload-box" id="am-box"><input type="file" id="am-file" accept=".xlsx,.xls,.xlsm,.csv">
+          <div class="form-row"><div class="field"><label>Mês da meta</label><input type="month" id="am-mes"></div><button class="btn btn-primary" id="btn-am" disabled>Importar metas</button></div></div>
+        <div class="log" id="am-log"></div>
+        <div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Mês</th><th class="num">Executivos</th><th class="num">Meta total</th><th>Importado em</th><th>Por</th></tr></thead><tbody id="am-hist"></tbody></table></div></div>
             <div class="card"><h2>Fechamento mensal</h2>
         <p class="sub">Ao <b>fechar</b> um mês, a arrecadação daquele mês de referência é consolidada e passa a ser a base do comparativo. O mês fechado fica travado para importação e exclusão; se precisar corrigir, clique em <b>Reabrir</b>, importe de novo e feche outra vez.</p>
         <div class="tablewrap"><table><thead><tr><th>Mês de referência</th><th>Situação</th><th class="num">Dias úteis</th><th class="num">Pagamentos</th><th class="num">Matrículas</th><th class="num">Arrecadado</th><th></th></tr></thead><tbody id="fech-tab"></tbody></table></div></div>
@@ -1009,7 +1017,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 29/09e</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 30/09</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -1782,7 +1790,7 @@ async function carregarArrec(resetPeriodo){
   try{
     ARR_IMPS = await api('/arrec_importacoes?select=*&order=id.desc');
     const ok = ARR_IMPS.filter(i=>i.status==='ok');
-    renderArrHist(); await carregarFechamentos();
+    renderArrHist(); await Promise.all([carregarFechamentos(), carregarArrMetas()]);
     if(!ok.length){ ARR=[]; $('arr-loading').style.display='none'; $('arr-sem-base').style.display='block'; heroArr(); renderArr(); return; }
     if(resetPeriodo || !FA.de){
       const fim = ok.reduce((m,i)=>i.data_fim>m?i.data_fim:m, ok[0].data_fim);
@@ -1815,7 +1823,7 @@ document.querySelectorAll('#tabs-arr button').forEach(b=>b.onclick=()=>{
   if(b.dataset.view==='acomp') renderComp();
 });
 const dadosA = () => ARR.filter(r => (!FA.cart || r.carteira===FA.cart) && (!FA.exec || r.executivo===FA.exec));
-function renderArr(){ renderAGeral(); renderADia(); renderAVenc(); renderAMat(); }
+function renderArr(){ renderAGeral(); renderAMeta(); renderADia(); renderAVenc(); renderAMat(); }
 
 function renderAGeral(){
   const d = dadosA(), tot = somaA(d), mats = nMat(d);
@@ -1843,6 +1851,73 @@ function renderAGeral(){
     + (le.length?`<tr class="total"><td>Total</td><td class="num">${nf0.format(mats)}</td><td class="num">${nf0.format(d.length)}</td>${carts.map(c=>`<td class="num">${brl(somaA(gc[c]))}</td>`).join('')}<td class="num">${brl(tot)}</td><td class="num">100%</td></tr>`:'<tr class="empty-row"><td colspan="6">Sem dados.</td></tr>');
   $('btn-csv-aexec').onclick = ()=>csvGen(['Executivo','Matrículas','Pagamentos',...carts,'Total'], le.map(l=>{ const gcx=grupo(l.g,'carteira'); return [l.k, nMat(l.g), l.g.length, ...carts.map(c=>nf2.format(gcx[c]?somaA(gcx[c]):0)), nf2.format(l.v)]; }), 'arrecadacao_por_executivo');
 }
+
+
+/* ---------- meta individual (arrecadação) ---------- */
+let ARR_METAS = [];
+async function carregarArrMetas(){
+  try{ ARR_METAS = await apiAll('/arrec_metas?select=*&order=mes_ref.desc,executivo'); }catch(e){ ARR_METAS = null; }
+  renderArrMetasHist();
+}
+function renderArrMetasHist(){
+  if(!$('am-hist')) return;
+  if(ARR_METAS===null){ $('am-hist').innerHTML = '<tr class="empty-row"><td colspan="5">Rode o arquivo supabase_metas_arrecadacao.sql no Supabase para liberar as metas.</td></tr>'; return; }
+  const g = {}; ARR_METAS.forEach(m=>{ const o = g[m.mes_ref] || (g[m.mes_ref] = { n:0, v:0, em:m.importado_em, por:m.importado_por }); o.n++; o.v += +m.meta||0; });
+  $('am-hist').innerHTML = Object.entries(g).map(([k,o])=>`<tr><td><b>${mesNome(k)}</b></td><td class="num">${o.n}</td><td class="num">${brl(o.v)}</td><td>${o.em?new Date(o.em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):''}</td><td>${esc(o.por||'')}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="5">Nenhuma meta importada.</td></tr>';
+}
+function renderAMeta(){
+  const el = $('ag-meta'); if(!el) return;
+  const ym = (FA.ate || hojeISO()).slice(0,7), ini = ym+'-01', fim = ultimoDiaMes(ym), antYm = addMes(ym,-1);
+  const metas = (ARR_METAS||[]).filter(m=>m.mes_ref===ym);
+  if(!metas.length){ el.innerHTML = `<h2>Meta individual — ${mesNome(ym)}</h2><p class="sub">${ARR_METAS===null ? 'Rode o arquivo supabase_metas_arrecadacao.sql no Supabase.' : 'Nenhuma meta importada para este mês. Suba a planilha em <b>Importar → Meta individual dos executivos</b>.'}</p>`; return; }
+  const d = dadosA().filter(r=>r.data_credito>=ini && r.data_credito<=fim);
+  const nomesArr = [...new Set(ARR.map(r=>r.executivo).filter(Boolean))];
+  const porE = {}; d.forEach(r=>{ const k = norm(r.executivo); (porE[k] = porE[k] || []).push(r); });
+  const L = metas.filter(m=>!FA.exec || norm(casarExec(m.executivo, nomesArr))===norm(FA.exec)).filter(m=>!FA.cart || !m.carteira || m.carteira===FA.cart).map(m=>{
+    const g = porE[norm(casarExec(m.executivo, nomesArr))] || [], v = somaA(g), vs = somaA(g.filter(r=>!(r.vencimento && String(r.vencimento).slice(0,7)===antYm)));
+    const meta = +m.meta; return { e:m.executivo, cart:m.carteira, meta, v, vs, pc:pctN(v,meta), pcs:pctN(vs,meta), bateu:v>=meta, falta:Math.max(0,meta-v) }; }).sort((a,b)=>b.pc-a.pc);
+  const tM = L.reduce((s,l)=>s+l.meta,0), tV = L.reduce((s,l)=>s+l.v,0), tVs = L.reduce((s,l)=>s+l.vs,0), nB = L.filter(l=>l.bateu).length;
+  const dus = dusEntre(ini, fim), dusAte = dus.filter(x=>x<=(hojeISO()<fim?hojeISO():fim)), prop = dusAte.length/Math.max(1,dus.length);
+  const parcial = FA.de > ini ? ` <b style="color:var(--amber)">Atenção: o período carregado começa em ${dBR(FA.de)} — ajuste "Crédito de" para ${dBR(ini)} para comparar o mês inteiro.</b>` : '';
+  const aN = mesNome(antYm).split('/')[0];
+  el.innerHTML = `<div class="card-head"><div><h2>Meta individual — ${mesNome(ym)}</h2><p class="sub">Arrecadado (valor autenticado, crédito de ${dBRc(ini)} a ${dBRc(fim)}) × meta do mês. "Sem ${aN}" desconta os pagamentos de faturas com vencimento em ${aN}. ${dusAte.length} de ${dus.length} dias úteis corridos (${Math.round(prop*100)}% do mês).${parcial}</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-ameta">Exportar Excel</button></div>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+      <div class="kpi leaf"><div class="label">Bateram a meta</div><div class="value leaf">${nB} de ${L.length}</div><div class="hint">executivos com arrecadado ≥ meta</div></div>
+      <div class="kpi navy"><div class="label">Meta do time</div><div class="value">${brlC(tM)}</div><div class="hint">soma das metas individuais</div></div>
+      <div class="kpi"><div class="label">Arrecadado</div><div class="value water">${brlC(tV)}</div><div class="hint">${fmtPct(pctN(tV,tM))} da meta · sem ${aN}: ${brlC(tVs)} (${fmtPct(pctN(tVs,tM))})</div></div>
+      <div class="kpi amber"><div class="label">Falta para a meta do time</div><div class="value amber">${brlC(Math.max(0,tM-tV))}</div><div class="hint">esperado até hoje (proporcional): ${brlC(tM*prop)}</div></div></div>
+    <div class="tablewrap"><table><thead><tr><th>Executivo</th><th>Carteira</th><th class="num">Meta</th><th class="num">Arrecadado</th><th style="min-width:170px">% da meta</th><th class="num">Sem ${aN}</th><th class="num">%</th><th class="num">Falta</th><th>Situação</th></tr></thead><tbody>
+    ${L.map(l=>{ const cor = l.pc>=100?'var(--leaf)':l.pc>=prop*100?'var(--amber)':'var(--rose)';
+      return `<tr><td><b>${esc(l.e)}</b></td><td class="muted">${esc(l.cart||'')}</td><td class="num">${brl(l.meta)}</td><td class="num"><b>${brl(l.v)}</b></td>
+        <td><div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${Math.min(100,l.pc)}%;background:${cor}"></div></div><b style="color:${cor};min-width:56px;text-align:right">${fmtPct(l.pc)}</b></div></td>
+        <td class="num">${brl(l.vs)}</td><td class="num">${fmtPct(l.pcs)}</td><td class="num">${l.falta?brl(l.falta):'—'}</td>
+        <td>${l.bateu?'<span class="badge b-leaf">✓ Bateu a meta</span>':l.pc>=prop*100?'<span class="badge b-amber">No ritmo</span>':'<span class="badge b-rose">Abaixo do ritmo</span>'}</td></tr>`; }).join('')}
+    <tr class="total"><td>Time</td><td></td><td class="num">${brl(tM)}</td><td class="num">${brl(tV)}</td><td><b>${fmtPct(pctN(tV,tM))}</b></td><td class="num">${brl(tVs)}</td><td class="num">${fmtPct(pctN(tVs,tM))}</td><td class="num">${brl(Math.max(0,tM-tV))}</td><td>${nB} bateram</td></tr></tbody></table></div>`;
+  $('btn-xls-ameta').onclick = ()=>exportXLSX(L.map(l=>({ Executivo:l.e, Carteira:l.cart||'', Meta:+l.meta.toFixed(2), Arrecadado:+l.v.toFixed(2), '% da meta':+l.pc.toFixed(1), ['Sem '+aN]:+l.vs.toFixed(2), ['% sem '+aN]:+l.pcs.toFixed(1), Falta:+l.falta.toFixed(2), Situação:l.bateu?'Bateu':'Não bateu' })), `arrecadacao_meta_${ym}`);
+}
+$('am-mes').value = hojeISO().slice(0,7);
+$('am-file').onchange = ()=>{ $('btn-am').disabled = !$('am-file').files[0]; $('am-box').classList.toggle('has-file', !!$('am-file').files[0]); };
+$('btn-am').onclick = async ()=>{
+  const f = $('am-file').files[0], mes = $('am-mes').value, log = t=>$('am-log').textContent = t;
+  if(!f || !mes){ toast('Escolha o arquivo e o mês', true); return; }
+  $('btn-am').disabled = true;
+  try{
+    const wb = XLSX.read(await f.arrayBuffer(), { type:'array' }); let linhas = null;
+    for(const nome of wb.SheetNames){ const rows = XLSX.utils.sheet_to_json(wb.Sheets[nome], { header:1, defval:null, raw:true });
+      for(let h=0; h<Math.min(rows.length,10) && !linhas; h++){ const cab = (rows[h]||[]).map(c=>norm(c==null?'':String(c)));
+        const iE = cab.findIndex(c=>c==='executivo'||c==='analista'||c==='nome'), iM = cab.findIndex(c=>c==='meta'), iC = cab.findIndex(c=>c==='carteira'), iK = cab.findIndex(c=>c==='codigo');
+        if(iE<0 || iM<0) continue;
+        linhas = rows.slice(h+1).filter(r=>r && r[iE] && r[iM]!=null && r[iM]!=='').map(r=>({ executivo:String(r[iE]).trim(), meta: typeof r[iM]==='number' ? +r[iM].toFixed(2) : +String(r[iM]).replace(/[R$\s.]/g,'').replace(',','.'), carteira: iC>=0 && r[iC] ? String(r[iC]).trim() : null, codigo: iK>=0 && r[iK] ? String(r[iK]).trim() : null }))
+          .filter(l=>isFinite(l.meta) && !/^total/i.test(l.executivo)); }
+      if(linhas) break; }
+    if(!linhas || !linhas.length) throw new Error('não encontrei as colunas Executivo e Meta na planilha');
+    const r = await api('/rpc/importar_arrec_metas', { method:'POST', body:{ p_mes:mes, p_linhas:linhas, p_usuario:SESSION && SESSION.email } });
+    log(`✓ Metas de ${mesNome(mes)} importadas: ${r.linhas} executivos · total ${brl(linhas.reduce((s,l)=>s+l.meta,0))}${r.substituidas?` (substituiu ${r.substituidas} metas anteriores do mês)`:''}.`);
+    toast('Metas importadas'); $('am-file').value=''; $('am-box').classList.remove('has-file');
+    await carregarArrMetas(); renderAMeta();
+  }catch(e){ log('✗ ' + e.message + (/arrec_metas/.test(e.message)?' — rode o arquivo supabase_metas_arrecadacao.sql no Supabase.':'')); }
+  finally{ $('btn-am').disabled = !$('am-file').files[0]; }
+};
 
 function renderADia(){
   const d = dadosA(), tot = somaA(d), gd = grupo(d,'data_credito'), dias = Object.keys(gd).sort();
@@ -2314,7 +2389,8 @@ async function carregarConsumo(mes){
     if(!ok.length){ CONS=[]; FC.mes=''; $('fc-mes').innerHTML=''; $('cons-loading').style.display='none'; $('cons-sem-base').style.display='block'; heroCons(); renderConsTudo(); return; }
     FC.mes = (mes && ok.some(b=>b.mes_ref===mes)) ? mes : (ok.some(b=>b.mes_ref===FC.mes) ? FC.mes : ok[0].mes_ref);
     $('fc-mes').innerHTML = ok.map(b=>`<option value="${b.mes_ref}" ${b.mes_ref===FC.mes?'selected':''}>${mesRefNome(b.mes_ref)}</option>`).join('');
-    const rows = await apiAll(`/vw_consumo?select=*&mes_ref=eq.${FC.mes}&order=matricula`);
+    const [rows, aus] = await Promise.all([apiAll(`/vw_consumo?select=*&mes_ref=eq.${FC.mes}&order=matricula`), api('/prod_ausencias?select=*&order=ini').catch(()=>[])]);
+    CONS_AUS = aus || [];
     CONS = rows.map(r=>{ const o={...r}; CONS_NUM.forEach(k=>{ if(o[k]!=null) o[k]=+o[k]; }); if(o.valor_pago_ref!=null) o.valor_pago_ref=+o.valor_pago_ref; return o; });
     const execs = [...new Set(CONS.map(r=>r.executivo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
     FC.execs = new Set([...FC.execs].filter(e=>execs.includes(e)));
@@ -2348,7 +2424,17 @@ function montarMultiGen(id, lista, set, txtTodos, txtPlural, onChange){
 }
 
 const dadosCons = () => CONS.filter(r => !FC.execs.size || FC.execs.has(r.executivo));
-function renderConsTudo(){ renderCGeral(); renderCExec(); renderCAnal(); renderCFin(); renderCLeg(); }
+// férias / atestados: vêm do cadastro da Produtividade do Setor (não precisa lançar de novo)
+let CONS_AUS = [];
+function janelaAusCons(){ const ini = FC.mes+'-01', f1 = ultimoDiaMes(addMes(FC.mes,1)), h = hojeISO(); return { ini, fim: h < f1 ? (h > ultimoDiaMes(FC.mes) ? h : ultimoDiaMes(FC.mes)) : f1 }; }
+function ausCons(exec){ const j = janelaAusCons(), n = norm(exec), nomes = [...new Set(CONS.map(r=>r.executivo).filter(Boolean))];
+  return CONS_AUS.filter(a=>a.ini<=j.fim && a.fim>=j.ini && (norm(a.executivo)===n || norm(casarExec(a.executivo, nomes))===n)); }
+function tagAusCons(exec){ const a = ausCons(exec); return a.map(x=>`<span class="badge b-amber" style="margin-left:6px;font-size:10.5px" title="${esc(x.obs||'')}">${esc(x.motivo)} ${dBRc(x.ini)}–${dBRc(x.fim)}</span>`).join(''); }
+function htmlAusCons(){ const j = janelaAusCons(), nomes = [...new Set(CONS.map(r=>r.executivo).filter(Boolean))];
+  const l = CONS_AUS.filter(a=>a.ini<=j.fim && a.fim>=j.ini);
+  if(!l.length) return '';
+  return `<div class="vd-nota" style="margin-top:14px"><b>Férias e atestados no período</b> (cadastro da Produtividade do Setor): ${l.map(a=>`<b>${esc(casarExec(a.executivo, nomes))}</b> — ${esc(a.motivo)} de ${dBRc(a.ini)} a ${dBRc(a.fim)}`).join(' · ')}. Considere esses períodos ao avaliar os pendentes de cada executivo.</div>`; }
+function renderConsTudo(){ if($('cg-aus')) $('cg-aus').innerHTML = htmlAusCons(); renderCGeral(); renderCExec(); renderCAnal(); renderCFin(); renderCLeg(); }
 
 document.querySelectorAll('#tabs-cons button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#tabs-cons button').forEach(x=>x.classList.toggle('active', x===b));
@@ -2427,6 +2513,7 @@ $('cg-cart').onchange = ()=>renderCGeral();
 function renderCExec(){
   const d = dadosCons(), g = {}; d.forEach(r=>{ (g[r.executivo||'—']=g[r.executivo||'—']||[]).push(r); });
   const ls = Object.keys(g).map(k=>{ const x=g[k], a=x.filter(analisadoOk).length; return { k, x, t:x.length, a, p:x.length-a, pc:a/x.length }; }).sort((a,b)=>a.pc-b.pc || b.p-a.p);
+  $('ce-aus').innerHTML = htmlAusCons();
   $('ce-tab').innerHTML = ls.map(l=>{
     const cor = l.pc>=0.9?'var(--leaf)':l.pc>=0.7?'var(--amber)':'var(--rose)', aberto = FC.aberto.has(l.k);
     let det = '';
@@ -2435,7 +2522,7 @@ function renderCExec(){
       const mini = (k,tit) => `<div><h3 ${tipAttr(k)}>${tit}</h3><div class="dist-bars">${contar(an,k).map(i=>`<div class="dist-row"><div title="${esc(i.nome)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.nome)}</div><div class="dist-track"><div class="dist-fill" style="width:${i.q/Math.max(1,an.length)*100}%;background:${k==='motivo_consumo'?'var(--water)':k==='acao_desdobro'?'var(--navy-3)':'var(--leaf)'}"></div></div><div class="dist-val">${i.q} <small>${pct(i.q,an.length)}</small></div></div>`).join('')||'<div class="faint">—</div>'}</div></div>`;
       det = `<tr class="ce-det"><td colspan="7"><p class="sub" style="margin:0 0 12px">Motivos dos ${an.length} registros analisados de ${esc(l.k)}${l.p?` · <b style="color:var(--amber)">${l.p} pendentes</b>`:''}.</p><div class="mot-grid">${mini('motivo_consumo','Motivo de Consumo')}${mini('acao_desdobro','Ação de Desdobro')}${mini('motivo_faturamento','Motivo de Faturamento')}</div></td></tr>`;
     }
-    return `<tr class="ce-row" data-k="${esc(l.k)}"><td><b>${aberto?'▾':'▸'} ${esc(l.k)}</b></td><td class="num">${l.t}</td><td class="num">${l.a}</td><td class="num">${l.p?`<span class="badge b-amber">${l.p}</span>`:'0'}</td>
+    return `<tr class="ce-row" data-k="${esc(l.k)}"><td><b>${aberto?'▾':'▸'} ${esc(l.k)}</b>${tagAusCons(l.k)}</td><td class="num">${l.t}</td><td class="num">${l.a}</td><td class="num">${l.p?`<span class="badge b-amber">${l.p}</span>`:'0'}</td>
       <td><div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${l.pc*100}%;background:${cor}"></div></div><b style="color:${cor};min-width:52px;text-align:right">${pct(l.a,l.t)}</b></div></td>
       <td class="num">${l.x.filter(r=>r.prioridade_calc==='Prioridade 1').length}</td><td class="num">${l.x.filter(r=>r.status_pagamento==='Vencido').length}</td></tr>${det}`; }).join('')
     + (ls.length ? `<tr class="total"><td>Total</td><td class="num">${d.length}</td><td class="num">${d.filter(analisadoOk).length}</td><td class="num">${d.length-d.filter(analisadoOk).length}</td><td><b>${pct(d.filter(analisadoOk).length,d.length)}</b></td><td class="num">${d.filter(r=>r.prioridade_calc==='Prioridade 1').length}</td><td class="num">${d.filter(r=>r.status_pagamento==='Vencido').length}</td></tr>` : '<tr class="empty-row"><td colspan="7">—</td></tr>');
@@ -3475,11 +3562,9 @@ function slidesProd(){
   const ex = execsMeta(), quem = PD.visao || 'Time GC';
   const sts = PIND.map(I=>statInd(I.k, ex));
   const s = [];
-  // 1. como o time (ou o executivo) distribuiu o tempo entre as frentes
-  s.push({ tit:'Distribuição do tempo', html:()=>`<h2>Como ${PD.visao?esc(PD.visao):'o time'} distribuiu o tempo entre as frentes</h2><p class="sub">${rotPeriodo()} · ${notaDz()}</p>
-    <div class="card" style="margin-top:0">${htmlDzEvol(ex, PD.visao || 'o time')}</div>` });
-  if(!PD.visao) s.push({ tit:'Tempo por executivo', html:()=>`<h2>Distribuição do tempo por executivo</h2><p class="sub">${rotPeriodo()} · clique em um executivo para abrir a visão dele.</p><div class="card" style="margin-top:0">${htmlDzExec(true)}</div>`,
-    after:()=>document.querySelectorAll('#ap-stage .dz-row.click').forEach(r=>r.onclick=()=>{ PD.visao = r.dataset.e; $('ap-visao').value = PD.visao; montarApresentacao(0); }) });
+  // 1. resumo: os 4 cards juntos
+  s.push({ tit:'Resumo', html:()=>`<h2>Resumo — ${esc(quem)}</h2><p class="sub">${rotPeriodo()} · os 4 indicadores lado a lado.</p><div class="prod-grid">${sts.map(st=>cardInd(st,{ big:true, prefix:'ap' })).join('')}</div>`,
+    after:()=>sts.forEach(st=>chartSemana('ap-'+st.k, st)) });
   // 2. um slide por indicador: card + tempo dedicado + ranking (time) ou dia a dia (executivo)
   sts.forEach(st=>{
     const I = PIND_BY[st.k];
@@ -3498,6 +3583,11 @@ function slidesProd(){
           CHARTS['apd'] = new Chart($('ap-dia-'+st.k), { type:'bar', data:{ labels:dias.map(dBRc), datasets:[{ label:'Realizado', data:v, backgroundColor:dias.map(d=>ausencia(PD.visao,d)?'#C9D4DC':I.c), borderRadius:5 }, ...(md?[{ type:'line', label:'Meta do dia', data:dias.map(d=>ausencia(PD.visao,d)?0:+md.toFixed(1)), borderColor:'#8CA0AF', borderDash:[5,4], pointRadius:0 }]:[])] },
             options:{ animation:false, maintainAspectRatio:false, plugins:{ datalabels:{ display:ctx=>ctx.datasetIndex===0, anchor:'end', align:'end', color:I.c, font:{ weight:'700', size:11 } } }, scales:{ y:{ beginAtZero:true, grace:'15%', grid:{ color:'#EEF3F6' } }, x:{ grid:{ display:false } } } } }); } } });
   });
+  // 3. demais visões: como o time (ou o executivo) distribuiu o tempo entre as frentes
+  s.push({ tit:'Distribuição do tempo', html:()=>`<h2>Como ${PD.visao?esc(PD.visao):'o time'} distribuiu o tempo entre as frentes</h2><p class="sub">${rotPeriodo()} · ${notaDz()}</p>
+    <div class="card" style="margin-top:0">${htmlDzEvol(ex, PD.visao || 'o time')}</div>` });
+  if(!PD.visao) s.push({ tit:'Tempo por executivo', html:()=>`<h2>Distribuição do tempo por executivo</h2><p class="sub">${rotPeriodo()} · clique em um executivo para abrir a visão dele.</p><div class="card" style="margin-top:0">${htmlDzExec(true)}</div>`,
+    after:()=>document.querySelectorAll('#ap-stage .dz-row.click').forEach(r=>r.onclick=()=>{ PD.visao = r.dataset.e; $('ap-visao').value = PD.visao; montarApresentacao(0); }) });
   if(!PD.visao) s.push({ tit:'Por executivo', html:()=>`<h2>Por executivo</h2><p class="sub">${rotPeriodo()} · realizado / meta até agora (quantidade). ✓ = bateu a meta da semana. Clique em um executivo para abrir a visão dele.</p><div class="card" style="margin-top:0"><div class="tablewrap"><table style="font-size:15px"><thead>${tabelaQtdHead()}</thead><tbody>${tabelaQtdBody()}</tbody></table></div></div>`,
     after:()=>document.querySelectorAll('#ap-stage .ap-exec-row').forEach(tr=>tr.onclick=()=>{ PD.visao=tr.dataset.e; $('ap-visao').value=PD.visao; montarApresentacao(0); }) });
   s.push({ tit:'Home × presencial', html:()=>{ const J = janelaAtual(), L = (PD.visao ? [PD.visao] : execsLista()).map(e=>statHome(e, J.a, J.b));
