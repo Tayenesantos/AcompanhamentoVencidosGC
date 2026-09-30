@@ -1017,7 +1017,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 30/09c</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 30/09d</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -1855,6 +1855,7 @@ function renderAGeral(){
 
 /* ---------- meta individual (arrecadação) ---------- */
 let ARR_METAS = [];
+const ARR_META_MIN = 0.95; // o executivo bate a meta ao chegar em 95% do valor da meta
 async function carregarArrMetas(){
   try{ ARR_METAS = await apiAll('/arrec_metas?select=*&order=mes_ref.desc,executivo'); }catch(e){ ARR_METAS = null; }
   renderArrMetasHist();
@@ -1875,25 +1876,25 @@ function renderAMeta(){
   const porE = {}; d.forEach(r=>{ const k = norm(r.executivo); (porE[k] = porE[k] || []).push(r); });
   const L = metas.filter(m=>!FA.exec || norm(casarExec(m.executivo, nomesArr))===norm(FA.exec)).filter(m=>!FA.cart || !m.carteira || m.carteira===FA.cart).map(m=>{
     const g = porE[norm(casarExec(m.executivo, nomesArr))] || [], v = somaA(g), vs = somaA(g.filter(r=>!(r.vencimento && String(r.vencimento).slice(0,7)===antYm)));
-    const meta = +m.meta; return { e:m.executivo, cart:m.carteira, meta, v, vs, pc:pctN(v,meta), pcs:pctN(vs,meta), bateu:v>=meta, falta:Math.max(0,meta-v) }; }).sort((a,b)=>b.pc-a.pc);
-  const tM = L.reduce((s,l)=>s+l.meta,0), tV = L.reduce((s,l)=>s+l.v,0), tVs = L.reduce((s,l)=>s+l.vs,0), nB = L.filter(l=>l.bateu).length;
+    const meta = +m.meta; return { e:m.executivo, cart:m.carteira, meta, v, vs, pc:pctN(v,meta), pcs:pctN(vs,meta), bateu:v>=meta*ARR_META_MIN, falta:Math.max(0,meta*ARR_META_MIN-v) }; }).sort((a,b)=>b.pc-a.pc);
+  const tM = L.reduce((s,l)=>s+l.meta,0), tV = L.reduce((s,l)=>s+l.v,0), tVs = L.reduce((s,l)=>s+l.vs,0), nB = L.filter(l=>l.bateu).length, alvo = ARR_META_MIN*100;
   const dus = dusEntre(ini, fim), dusAte = dus.filter(x=>x<=(hojeISO()<fim?hojeISO():fim)), prop = dusAte.length/Math.max(1,dus.length);
   const parcial = FA.de > ini ? ` <b style="color:var(--amber)">Atenção: o período carregado começa em ${dBR(FA.de)} — ajuste "Crédito de" para ${dBR(ini)} para comparar o mês inteiro.</b>` : '';
   const aN = mesNome(antYm).split('/')[0];
-  el.innerHTML = `<div class="card-head"><div><h2>Meta individual — ${mesNome(ym)}</h2><p class="sub">Arrecadado (valor autenticado, crédito de ${dBRc(ini)} a ${dBRc(fim)}) × meta do mês. "Sem ${aN}" desconta os pagamentos de faturas com vencimento em ${aN}. ${dusAte.length} de ${dus.length} dias úteis corridos (${Math.round(prop*100)}% do mês).${parcial}</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-ameta">Exportar Excel</button></div>
+  el.innerHTML = `<div class="card-head"><div><h2>Meta individual — ${mesNome(ym)}</h2><p class="sub">Arrecadado (valor autenticado, crédito de ${dBRc(ini)} a ${dBRc(fim)}) × meta do mês — <b>bate a meta quem chega a ${alvo}%</b>. "Sem ${aN}" desconta os pagamentos de faturas com vencimento em ${aN}. ${dusAte.length} de ${dus.length} dias úteis corridos (${Math.round(prop*100)}% do mês).${parcial}</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-ameta">Exportar Excel</button></div>
     <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
-      <div class="kpi leaf"><div class="label">Bateram a meta</div><div class="value leaf">${nB} de ${L.length}</div><div class="hint">executivos com arrecadado ≥ meta</div></div>
+      <div class="kpi leaf"><div class="label">Bateram a meta (≥ ${alvo}%)</div><div class="value leaf">${nB} de ${L.length}</div><div class="hint">executivos com arrecadado ≥ ${alvo}% da meta</div></div>
       <div class="kpi navy"><div class="label">Meta do time</div><div class="value">${brlC(tM)}</div><div class="hint">soma das metas individuais</div></div>
       <div class="kpi"><div class="label">Arrecadado</div><div class="value water">${brlC(tV)}</div><div class="hint">${fmtPct(pctN(tV,tM))} da meta · sem ${aN}: ${brlC(tVs)} (${fmtPct(pctN(tVs,tM))})</div></div>
-      <div class="kpi amber"><div class="label">Falta para a meta do time</div><div class="value amber">${brlC(Math.max(0,tM-tV))}</div><div class="hint">esperado até hoje (proporcional): ${brlC(tM*prop)}</div></div></div>
-    <div class="tablewrap"><table><thead><tr><th>Executivo</th><th>Carteira</th><th class="num">Meta</th><th class="num">Arrecadado</th><th style="min-width:170px">% da meta</th><th class="num">Sem ${aN}</th><th class="num">%</th><th class="num">Falta</th><th>Situação</th></tr></thead><tbody>
-    ${L.map(l=>{ const cor = l.pc>=100?'var(--leaf)':l.pc>=prop*100?'var(--amber)':'var(--rose)';
+      <div class="kpi amber"><div class="label">Falta para ${alvo}% da meta do time</div><div class="value amber">${brlC(Math.max(0,tM*ARR_META_MIN-tV))}</div><div class="hint">${alvo}% da meta = ${brlC(tM*ARR_META_MIN)} · esperado até hoje: ${brlC(tM*ARR_META_MIN*prop)}</div></div></div>
+    <div class="tablewrap"><table><thead><tr><th>Executivo</th><th>Carteira</th><th class="num">Meta</th><th class="num">Arrecadado</th><th style="min-width:170px">% da meta</th><th class="num">Sem ${aN}</th><th class="num">%</th><th class="num">Falta p/ ${alvo}%</th><th>Situação</th></tr></thead><tbody>
+    ${L.map(l=>{ const cor = l.pc>=alvo?'var(--leaf)':l.pc>=prop*alvo?'var(--amber)':'var(--rose)';
       return `<tr><td><b>${esc(l.e)}</b></td><td class="muted">${esc(l.cart||'')}</td><td class="num">${brl(l.meta)}</td><td class="num"><b>${brl(l.v)}</b></td>
         <td><div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${Math.min(100,l.pc)}%;background:${cor}"></div></div><b style="color:${cor};min-width:56px;text-align:right">${fmtPct(l.pc)}</b></div></td>
         <td class="num">${brl(l.vs)}</td><td class="num">${fmtPct(l.pcs)}</td><td class="num">${l.falta?brl(l.falta):'—'}</td>
-        <td>${l.bateu?'<span class="badge b-leaf">✓ Bateu a meta</span>':l.pc>=prop*100?'<span class="badge b-amber">No ritmo</span>':'<span class="badge b-rose">Abaixo do ritmo</span>'}</td></tr>`; }).join('')}
-    <tr class="total"><td>Time</td><td></td><td class="num">${brl(tM)}</td><td class="num">${brl(tV)}</td><td><b>${fmtPct(pctN(tV,tM))}</b></td><td class="num">${brl(tVs)}</td><td class="num">${fmtPct(pctN(tVs,tM))}</td><td class="num">${brl(Math.max(0,tM-tV))}</td><td>${nB} bateram</td></tr></tbody></table></div>`;
-  $('btn-xls-ameta').onclick = ()=>exportXLSX(L.map(l=>({ Executivo:l.e, Carteira:l.cart||'', Meta:+l.meta.toFixed(2), Arrecadado:+l.v.toFixed(2), '% da meta':+l.pc.toFixed(1), ['Sem '+aN]:+l.vs.toFixed(2), ['% sem '+aN]:+l.pcs.toFixed(1), Falta:+l.falta.toFixed(2), Situação:l.bateu?'Bateu':'Não bateu' })), `arrecadacao_meta_${ym}`);
+        <td>${l.bateu?'<span class="badge b-leaf">✓ Bateu a meta</span>':l.pc>=prop*alvo?'<span class="badge b-amber">No ritmo</span>':'<span class="badge b-rose">Abaixo do ritmo</span>'}</td></tr>`; }).join('')}
+    <tr class="total"><td>Time</td><td></td><td class="num">${brl(tM)}</td><td class="num">${brl(tV)}</td><td><b>${fmtPct(pctN(tV,tM))}</b></td><td class="num">${brl(tVs)}</td><td class="num">${fmtPct(pctN(tVs,tM))}</td><td class="num">${brl(Math.max(0,tM*ARR_META_MIN-tV))}</td><td>${nB} bateram</td></tr></tbody></table></div>`;
+  $('btn-xls-ameta').onclick = ()=>exportXLSX(L.map(l=>({ Executivo:l.e, Carteira:l.cart||'', Meta:+l.meta.toFixed(2), Arrecadado:+l.v.toFixed(2), '% da meta':+l.pc.toFixed(1), ['Sem '+aN]:+l.vs.toFixed(2), ['% sem '+aN]:+l.pcs.toFixed(1), ['Falta p/ 95%']:+l.falta.toFixed(2), Situação:l.bateu?'Bateu (≥95%)':'Não bateu' })), `arrecadacao_meta_${ym}`);
 }
 $('am-mes').value = hojeISO().slice(0,7);
 $('am-file').onchange = ()=>{ $('btn-am').disabled = !$('am-file').files[0]; $('am-box').classList.toggle('has-file', !!$('am-file').files[0]); };
