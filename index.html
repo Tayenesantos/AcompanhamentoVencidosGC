@@ -865,6 +865,7 @@
         <div class="upload-box" id="pm-box"><input type="file" id="pm-file" accept=".xlsx,.xls,.xlsm,.csv">
           <div class="form-row"><div class="field"><label>Data da base</label><input type="date" id="pm-data"></div><button class="btn btn-primary" id="btn-pm-ler" disabled>Importar base de prioridades</button><span class="muted" id="pm-ciclo" style="font-size:12.5px"></span></div>
           <div class="form-row" style="align-items:flex-end"><div class="field"><label>Fim deste ciclo (padrão: dia 4)</label><input type="date" id="pm-fim"></div><button class="btn btn-ghost btn-sm" id="btn-pm-fim">Salvar fim do ciclo</button><span class="muted" style="font-size:12px">O próximo ciclo começa no dia seguinte. Até a base do novo ciclo ser importada, a meta do Consumo fica zerada.</span></div></div>
+        <div class="vd-nota" id="pm-status" style="margin-top:12px;background:#EEF6FB;border-color:#CFE3F1"></div>
         <div class="log" id="pm-log"></div></div>
       <div class="card"><h2>Férias, atestados e ausências</h2><p class="sub">Os dias úteis dentro do período informado <b>não contam na meta</b> do executivo (Acionamentos, Pesquisa e Alteração Cadastral). Vale para todas as visões e para a apresentação.</p>
         <div class="form-row" style="align-items:flex-end;flex-wrap:wrap">
@@ -1020,7 +1021,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 05/10</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 05/10b</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -2723,6 +2724,18 @@ $('btn-cons-importar').onclick = async ()=>{
     }
     const r = await rpc('processar_consumo', { p_base_id:bid });
     prg(100); log(`✓ ${mesRefNome(mes)} importado: ${nf0.format(r.linhas)} registros${r.substituidas?` (substituiu ${nf0.format(r.substituidas)} do mesmo mês)`:''}. Os outros meses não foram alterados.`);
+    // a mesma planilha atualiza a meta progressiva da Produtividade (base de prioridades do ciclo em andamento)
+    try{
+      if(!PD.ciclos){ PD.ciclos = { ...CICLOS_PADRAO }; try{ (await api('/prod_ciclos?select=*')).forEach(c=>{ PD.ciclos[c.ciclo] = { ini:c.ini, fim:c.fim }; }); }catch(_){} }
+      const hoje = hojeISO(), cicloHoje = cicloDaData(hoje);
+      const pr = L.filter(o=>o.matricula && o.executivo && /\d/.test(String(o.prioridade_base||''))).map(o=>({ matricula:+o.matricula, prioridade:+String(o.prioridade_base).match(/(\d)/)[1],
+        executivo:o.executivo, carteira:o.carteira||null, data_leitura:o.data_leitura||null, ocorrencia:o.ocorrencia||null, condicional:o.condicional||null, delta:o.delta??null, variacao:o.variacao??null }));
+      if(pr.length && (mes === cicloHoje || mes === hoje.slice(0,7))){
+        const { res, cont } = await enviarBasePrioridades(pr, cicloHoje, hoje, f.name + ' (via Consumo Estratégico)');
+        log(`✓ Meta progressiva da Produtividade atualizada: ${nf0.format(res.linhas)} clientes (P1 ${nf0.format(cont[1])} · P2 ${nf0.format(cont[2])} · P3 ${nf0.format(cont[3])}) — meta do time = ${nf0.format(cont[1]+cont[2])} (P1+P2).`);
+        PROD_OK && carregarProd && setTimeout(()=>carregarProd().catch(()=>{}), 0);
+      } else if(pr.length) log(`(A base de prioridades da Produtividade não foi alterada: este arquivo é de ${mesRefNome(mes)} e o ciclo em andamento é ${dBRc(cicloJanela(cicloHoje).ini)} a ${dBRc(cicloJanela(cicloHoje).fim)}.)`);
+    }catch(e2){ log('⚠ Não consegui atualizar a meta da Produtividade: ' + e2.message + (/prod_prioridades/.test(e2.message)?' — rode o supabase_produtividade.sql':'')); }
     toast('Base de consumo importada');
     $('cons-file').value=''; $('cons-upload-box').classList.remove('has-file'); CONS_LIDO=null;
     await carregarConsumo(mes);
@@ -2883,7 +2896,10 @@ async function carregarProd(){
     montarIndice();
     const lista = execsLista();
     $('fp-visao').innerHTML = '<option value="">Geral (time)</option>' + lista.map(e=>`<option ${e===PD.visao?'selected':''}>${esc(e)}</option>`).join('');
-    heroProd(); renderProdTudo(); renderProdCfg(); renderProdHist(); renderAusencias(); renderHomeEditor(); $('pm-min').textContent = CONS_MIN();
+    heroProd(); renderProdTudo(); renderProdCfg(); renderProdHist(); renderAusencias(); renderHomeEditor(); { const cc = consCicloDoMes(PD.mes), j = cicloJanela(cc), r = PD.consRes[cc];
+      const t = r ? r.execs.reduce((a,x)=>({ p1:a.p1+(+x.p1||0), p2:a.p2+(+x.p2||0), p3:a.p3+(+x.p3||0) }), {p1:0,p2:0,p3:0}) : null;
+      $('pm-status').innerHTML = r ? `<b>Base em uso no ciclo ${dBRc(j.ini)} a ${dBRc(j.fim)}:</b> de ${r.data_base?dBR(r.data_base):'—'} · ${nf0.format(t.p1+t.p2+t.p3)} clientes (P1 ${nf0.format(t.p1)} · P2 ${nf0.format(t.p2)} · P3 ${nf0.format(t.p3)}) · <b>meta do time = ${nf0.format(t.p1+t.p2)}</b>. A cada base nova a meta é recalculada (progressiva).`
+        : `<b>Ciclo ${dBRc(j.ini)} a ${dBRc(j.fim)}:</b> nenhuma base de prioridades importada — a meta do Consumo está zerada.`; } $('pm-min').textContent = CONS_MIN();
     $('prod-loading').style.display='none';
   }catch(e){
     $('prod-loading').textContent = 'Erro ao carregar: ' + e.message;
@@ -3531,22 +3547,27 @@ async function lerBasePrioridades(file){
   }
   throw new Error('não encontrei as colunas Matrícula / Prioridade / Executivo na planilha');
 }
+async function enviarBasePrioridades(linhas, ciclo, dr, arquivo, log){
+  const lote = 'L' + Date.now() + Math.random().toString(36).slice(2,7);
+  const cont = { 1:0, 2:0, 3:0 }; linhas.forEach(l=>{ if(cont[l.prioridade]!=null) cont[l.prioridade]++; });
+  for(let i=0; i<linhas.length; i+=2000){
+    log && log(`Enviando ${Math.min(i+2000, linhas.length)} de ${linhas.length}…`);
+    await api('/prod_prioridades_stg', { method:'POST', body:linhas.slice(i,i+2000).map(l=>({ lote, ...l })), prefer:'return=minimal' });
+  }
+  log && log('Cruzando com o Forms…');
+  const res = await api('/rpc/prod_processar_prioridades', { method:'POST', body:{ p_lote:lote, p_ciclo:ciclo, p_data:dr } });
+  await logImportProd('prioridades', arquivo, res.linhas, { data:dBR(dr), ciclo:`${dBRc(cicloJanela(ciclo).ini)} a ${dBRc(cicloJanela(ciclo).fim)}`, P1:cont[1], P2:cont[2], P3:cont[3] });
+  return { res, cont };
+}
 $('btn-pm-ler').onclick = async ()=>{
   if(!PM_ARQ) return; const log=t=>$('pm-log').textContent=t; const dr = $('pm-data').value;
   if(!dr){ toast('Informe a data da base', true); return; }
-  const ciclo = cicloDe(dr), lote = 'L' + Date.now() + Math.random().toString(36).slice(2,7);
+  const ciclo = cicloDe(dr);
   $('btn-pm-ler').disabled = true;
   try{
     log('Lendo a planilha…');
     const r = await lerBasePrioridades(PM_ARQ);
-    const cont = { 1:0, 2:0, 3:0 }; r.linhas.forEach(l=>{ if(cont[l.prioridade]!=null) cont[l.prioridade]++; });
-    for(let i=0; i<r.linhas.length; i+=2000){
-      log(`Enviando ${Math.min(i+2000, r.linhas.length)} de ${r.linhas.length}…`);
-      await api('/prod_prioridades_stg', { method:'POST', body:r.linhas.slice(i,i+2000).map(l=>({ lote, ...l })), prefer:'return=minimal' });
-    }
-    log('Cruzando com o Forms…');
-    const res = await api('/rpc/prod_processar_prioridades', { method:'POST', body:{ p_lote:lote, p_ciclo:ciclo, p_data:dr } });
-    await logImportProd('prioridades', PM_ARQ.name, res.linhas, { data:dBR(dr), ciclo:`${dBRc(cicloJanela(ciclo).ini)} a ${dBRc(cicloJanela(ciclo).fim)}`, P1:cont[1], P2:cont[2], P3:cont[3] });
+    const { res, cont } = await enviarBasePrioridades(r.linhas, ciclo, dr, PM_ARQ.name, log);
     toast(`Base de prioridades de ${dBR(dr)} importada (${nf0.format(res.linhas)} clientes)`);
     PM_ARQ = null; $('pm-file').value=''; $('pm-box').classList.remove('has-file');
     await carregarProd();
