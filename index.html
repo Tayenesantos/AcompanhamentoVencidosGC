@@ -1021,7 +1021,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 05/10b</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 05/10c</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -3354,7 +3354,7 @@ function renderConsTab(){
       <td class="num">${x.comp ? `${nf0.format(x.c3)} <span class="faint">/ ${nf0.format(x.comp)}</span>` : '<span class="faint">—</span>'}</td>
       <td class="num">${cls ? '' : `${nf0.format(x.cred)} <span class="faint">/ ${nf0.format(x.metaInd)}</span>`}</td><td class="num">${sit(x, !!cls)}</td></tr>`
     : `<tr><td><b>${esc(nome)}</b></td><td colspan="8" class="faint">sem clientes na base de prioridades</td></tr>`;
-  el.innerHTML = `<div class="card-head"><div><h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)} · base de prioridades de ${d.r.data_base?dBR(d.r.data_base):'—'} cruzada com o Forms pela matrícula (analisado = cliente com análise no Forms dentro do ciclo). <b>Meta = P1+P2</b> (do time: soma de P1+P2). Meta individual: P1+P2; quem tem menos de ${CONS_MIN()} completa o restante com P3. Férias não reduzem esta meta.</p></div>
+  el.innerHTML = `<div class="card-head"><div><h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)} · base de prioridades de ${d.r.data_base?dBR(d.r.data_base):'—'} cruzada com o Forms pela matrícula (analisado = cliente com análise no Forms dentro do ciclo, feita pelo próprio executivo da base — mesma regra do BI). <b>Meta = P1+P2</b> (do time: soma de P1+P2). Meta individual: P1+P2; quem tem menos de ${CONS_MIN()} completa o restante com P3. Férias não reduzem esta meta.</p></div>
       <button class="btn btn-ghost btn-sm" id="btn-xls-cons">Exportar clientes (analisados e pendentes)</button></div>
     <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">P1 analisados / base</th><th class="num">P2 analisados / base</th><th class="num">Realizado / meta P1+P2</th><th class="num">Atingimento</th><th class="num">Pendentes P1+P2</th><th class="num">Complemento P3 feito / necessário</th><th class="num">Meta individual (com P3)</th><th class="num">Situação</th></tr></thead>
     <tbody>${d.L.map(l=>row(l.e + (l.fora?' (fora da lista do time)':''), l.c)).join('')}${d.L.length>1 ? row('Time', d.t, 'total') : ''}</tbody></table></div>`;
@@ -3520,9 +3520,14 @@ function semelhanca(a,b){ const A=bigramas(norm(a)), B=bigramas(norm(b)); let n=
 $('pm-file').onchange = ()=>{
   PM_ARQ = $('pm-file').files[0] || null; $('btn-pm-ler').disabled = !PM_ARQ; $('pm-box').classList.toggle('has-file', !!PM_ARQ);
   if(!PM_ARQ){ $('pm-log').textContent=''; return; }
-  const m = PM_ARQ.name.match(/(\d{1,2})[.\-_ ](\d{1,2})(?:[.\-_ ](\d{2,4}))?/); // "28.09" no nome → data
-  if(m){ const d=+m[1], mm=+m[2]; let y = m[3] ? +m[3] : +hojeISO().slice(0,4); if(y<100) y+=2000;
-    if(d>=1 && d<=31 && mm>=1 && mm<=12) $('pm-data').value = `${y}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+  // data no nome do arquivo: só "dd.mm" (ou dd-mm / dd_mm, opcionalmente .aaaa) — ex.: "Prioridades 1 e 2 05.10.xlsx" → 05/10
+  const dataNome = nomeArq => { const base = nomeArq.replace(/\.[a-z0-9]+$/i,''); const ms = [...base.matchAll(/(?:^|[^\d])(\d{1,2})[.\-_](\d{1,2})(?:[.\-_](\d{4}|\d{2}))?(?!\d)/g)];
+    for(const m of ms.reverse()){ const d=+m[1], mm=+m[2]; let y = m[3] ? +m[3] : +hojeISO().slice(0,4); if(y<100) y+=2000;
+      if(d<1 || d>31 || mm<1 || mm>12) continue; let iso = `${y}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      if(!m[3] && iso > addDias(hojeISO(), 31)) iso = `${y-1}${iso.slice(4)}`;   // dd.mm de dezembro lido em janeiro
+      if(Math.abs((new Date(iso) - new Date(hojeISO()))/864e5) <= 120) return iso; }
+    return null; };
+  const dn = dataNome(PM_ARQ.name); $('pm-data').value = dn || hojeISO();
   mostrarCicloPM(); $('pm-log').textContent = `Base: ${PM_ARQ.name}. Confira a data e clique em "Importar base de prioridades".`;
 };
 async function lerBasePrioridades(file){
@@ -3562,7 +3567,8 @@ async function enviarBasePrioridades(linhas, ciclo, dr, arquivo, log){
 $('btn-pm-ler').onclick = async ()=>{
   if(!PM_ARQ) return; const log=t=>$('pm-log').textContent=t; const dr = $('pm-data').value;
   if(!dr){ toast('Informe a data da base', true); return; }
-  const ciclo = cicloDe(dr);
+  const ciclo = cicloDe(dr), cicloHoje = cicloDaData(hojeISO());
+  if(ciclo !== cicloHoje && !confirm(`A data da base (${dBR(dr)}) cai no ciclo ${dBRc(cicloJanela(ciclo).ini)} a ${dBRc(cicloJanela(ciclo).fim)}, e o ciclo em andamento é ${dBRc(cicloJanela(cicloHoje).ini)} a ${dBRc(cicloJanela(cicloHoje).fim)}. Importar mesmo assim?`)) return;
   $('btn-pm-ler').disabled = true;
   try{
     log('Lendo a planilha…');
