@@ -863,7 +863,8 @@
       <div class="card"><h2>Base de prioridades do Consumo Estratégico (diária)</h2>
         <p class="sub">Suba a base do dia (Matrícula · Data de Leitura · … · Prioridade · Carteira · Executivo). Ela é a <b>fonte oficial da prioridade</b> de cada cliente e substitui a base anterior do ciclo (dia 5 ao dia 4). A plataforma cruza automaticamente com o Forms pela <b>matrícula</b> e calcula analisados, pendentes e atingimento. Meta = P1+P2 (do time: soma de P1+P2). Meta individual: P1+P2; se for menor que <span id="pm-min">150</span>, o executivo completa o restante com P3.</p>
         <div class="upload-box" id="pm-box"><input type="file" id="pm-file" accept=".xlsx,.xls,.xlsm,.csv">
-          <div class="form-row"><div class="field"><label>Data da base</label><input type="date" id="pm-data"></div><button class="btn btn-primary" id="btn-pm-ler" disabled>Importar base de prioridades</button><span class="muted" id="pm-ciclo" style="font-size:12.5px"></span></div></div>
+          <div class="form-row"><div class="field"><label>Data da base</label><input type="date" id="pm-data"></div><button class="btn btn-primary" id="btn-pm-ler" disabled>Importar base de prioridades</button><span class="muted" id="pm-ciclo" style="font-size:12.5px"></span></div>
+          <div class="form-row" style="align-items:flex-end"><div class="field"><label>Fim deste ciclo (padrão: dia 4)</label><input type="date" id="pm-fim"></div><button class="btn btn-ghost btn-sm" id="btn-pm-fim">Salvar fim do ciclo</button><span class="muted" style="font-size:12px">O próximo ciclo começa no dia seguinte. Até a base do novo ciclo ser importada, a meta do Consumo fica zerada.</span></div></div>
         <div class="log" id="pm-log"></div></div>
       <div class="card"><h2>Férias, atestados e ausências</h2><p class="sub">Os dias úteis dentro do período informado <b>não contam na meta</b> do executivo (Acionamentos, Pesquisa e Alteração Cadastral). Vale para todas as visões e para a apresentação.</p>
         <div class="form-row" style="align-items:flex-end;flex-wrap:wrap">
@@ -1019,7 +1020,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 30/09f</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 05/10</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -1860,7 +1861,7 @@ function renderAGeral(){
 
 /* ---------- meta individual (arrecadação) ---------- */
 let ARR_METAS = [];
-const ARR_META_MIN = 0.95; // o executivo bate a meta ao chegar em 95% do valor da meta
+const ARR_META_MIN = 1; // bate a meta quem chega ao valor da meta da planilha
 async function carregarArrMetas(){
   try{ ARR_METAS = await apiAll('/arrec_metas?select=*&order=mes_ref.desc,executivo'); }catch(e){ ARR_METAS = null; }
   renderArrMetasHist();
@@ -1886,20 +1887,20 @@ function renderAMeta(){
   const dus = dusEntre(ini, fim), dusAte = dus.filter(x=>x<=(hojeISO()<fim?hojeISO():fim)), prop = dusAte.length/Math.max(1,dus.length);
   const parcial = FA.de > ini ? ` <b style="color:var(--amber)">Atenção: o período carregado começa em ${dBR(FA.de)} — ajuste "Crédito de" para ${dBR(ini)} para comparar o mês inteiro.</b>` : '';
   const aN = mesNome(antYm).split('/')[0];
-  el.innerHTML = `<div class="card-head"><div><h2>Meta individual — ${mesNome(ym)}</h2><p class="sub">Arrecadado (valor autenticado, crédito de ${dBRc(ini)} a ${dBRc(fim)}) × meta do mês — <b>bate a meta quem chega a ${alvo}%</b>. ${dusAte.length} de ${dus.length} dias úteis corridos (${Math.round(prop*100)}% do mês).${parcial}</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-ameta">Exportar Excel</button></div>
+  el.innerHTML = `<div class="card-head"><div><h2>Meta individual — ${mesNome(ym)}</h2><p class="sub">Arrecadado (valor autenticado, crédito de ${dBRc(ini)} a ${dBRc(fim)}) × meta do mês da planilha. ${dusAte.length} de ${dus.length} dias úteis corridos (${Math.round(prop*100)}% do mês).${parcial}</p></div><button class="btn btn-ghost btn-sm" id="btn-xls-ameta">Exportar Excel</button></div>
     <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
-      <div class="kpi leaf"><div class="label">Bateram a meta (≥ ${alvo}%)</div><div class="value leaf">${nB} de ${L.length}</div><div class="hint">executivos com arrecadado ≥ ${alvo}% da meta</div></div>
+      <div class="kpi leaf"><div class="label">Bateram a meta</div><div class="value leaf">${nB} de ${L.length}</div><div class="hint">executivos com arrecadado ≥ meta</div></div>
       <div class="kpi navy"><div class="label">Meta do time</div><div class="value">${brlC(tM)}</div><div class="hint">soma das metas individuais</div></div>
       <div class="kpi"><div class="label">Arrecadado</div><div class="value water">${brlC(tV)}</div><div class="hint">${fmtPct(pctN(tV,tM))} da meta</div></div>
-      <div class="kpi amber"><div class="label">Falta para ${alvo}% da meta do time</div><div class="value amber">${brlC(Math.max(0,tM*ARR_META_MIN-tV))}</div><div class="hint">${alvo}% da meta = ${brlC(tM*ARR_META_MIN)} · esperado até hoje: ${brlC(tM*ARR_META_MIN*prop)}</div></div></div>
-    <div class="tablewrap"><table><thead><tr><th>Executivo</th><th>Carteira</th><th class="num">Meta</th><th class="num">Arrecadado</th><th style="min-width:170px">% da meta</th><th class="num">Falta p/ ${alvo}%</th><th>Situação</th></tr></thead><tbody>
+      <div class="kpi amber"><div class="label">Falta para a meta do time</div><div class="value amber">${brlC(Math.max(0,tM-tV))}</div><div class="hint">esperado até hoje (proporcional): ${brlC(tM*prop)}</div></div></div>
+    <div class="tablewrap"><table><thead><tr><th>Executivo</th><th>Carteira</th><th class="num">Meta</th><th class="num">Arrecadado</th><th style="min-width:170px">% da meta</th><th class="num">Falta</th><th>Situação</th></tr></thead><tbody>
     ${L.map(l=>{ const cor = l.pc>=alvo?'var(--leaf)':l.pc>=prop*alvo?'var(--amber)':'var(--rose)';
       return `<tr><td><b>${esc(l.e)}</b></td><td class="muted">${esc(l.cart||'')}</td><td class="num">${brl(l.meta)}</td><td class="num"><b>${brl(l.v)}</b></td>
         <td><div class="pbar"><div class="dist-track"><div class="dist-fill" style="width:${Math.min(100,l.pc)}%;background:${cor}"></div></div><b style="color:${cor};min-width:56px;text-align:right">${fmtPct(l.pc)}</b></div></td>
         <td class="num">${l.falta?brl(l.falta):'—'}</td>
         <td>${l.bateu?'<span class="badge b-leaf">✓ Bateu a meta</span>':l.pc>=prop*alvo?'<span class="badge b-amber">No ritmo</span>':'<span class="badge b-rose">Abaixo do ritmo</span>'}</td></tr>`; }).join('')}
     <tr class="total"><td>Time</td><td></td><td class="num">${brl(tM)}</td><td class="num">${brl(tV)}</td><td><b>${fmtPct(pctN(tV,tM))}</b></td><td class="num">${brl(Math.max(0,tM*ARR_META_MIN-tV))}</td><td>${nB} bateram</td></tr></tbody></table></div>`;
-  $('btn-xls-ameta').onclick = ()=>exportXLSX(L.map(l=>({ Executivo:l.e, Carteira:l.cart||'', Meta:+l.meta.toFixed(2), Arrecadado:+l.v.toFixed(2), '% da meta':+l.pc.toFixed(1), ['Falta p/ 95%']:+l.falta.toFixed(2), Situação:l.bateu?'Bateu (≥95%)':'Não bateu' })), `arrecadacao_meta_${ym}`);
+  $('btn-xls-ameta').onclick = ()=>exportXLSX(L.map(l=>({ Executivo:l.e, Carteira:l.cart||'', Meta:+l.meta.toFixed(2), Arrecadado:+l.v.toFixed(2), '% da meta':+l.pc.toFixed(1), Falta:+l.falta.toFixed(2), Situação:l.bateu?'Bateu':'Não bateu' })), `arrecadacao_meta_${ym}`);
 }
 $('am-mes').value = hojeISO().slice(0,7);
 $('am-file').onchange = ()=>{ $('btn-am').disabled = !$('am-file').files[0]; $('am-box').classList.toggle('has-file', !!$('am-file').files[0]); };
@@ -2762,8 +2763,17 @@ const fmtPct = v => (v==null||!isFinite(v)) ? '—' : v.toFixed(1).replace('.','
 const corPct = v => v>=100 ? 'var(--leaf)' : v>=80 ? 'var(--amber)' : 'var(--rose)';
 const mesmoNome = (a,b) => norm(a)===norm(b);
 
-function periodoDe(ind, ym){ // calendário; consumo = dia 5 até dia 4 do mês seguinte
-  if(ind==='cons') return { ini: ym+'-05', fim: addMes(ym,1)+'-04' };
+// ciclos do Consumo: padrão dia 5 ao dia 4; exceções ficam em prod_ciclos (ex.: setembro/2026 vai até 06/10)
+const CICLOS_PADRAO = { '2026-09': { ini:'2026-09-05', fim:'2026-10-06' } };
+function cicloJanela(c){
+  const cs = PD.ciclos || CICLOS_PADRAO, x = cs[c] || {}, ant = cs[addMes(c,-1)];
+  return { ini: x.ini || (ant && ant.fim ? addDias(ant.fim,1) : c+'-05'), fim: x.fim || addMes(c,1)+'-04' };
+}
+function cicloDaData(iso){ let c = iso.slice(0,7); for(let i=0;i<3;i++){ const j = cicloJanela(c); if(iso < j.ini) c = addMes(c,-1); else if(iso > j.fim) c = addMes(c,1); else return c; } return c; }
+// ciclo do Consumo mostrado para um macro mês: o ciclo em andamento no último dia do mês (ou hoje, se o mês ainda não acabou)
+function consCicloDoMes(ym){ const h = hojeISO(), f = ultimoDiaMes(ym); return cicloDaData(h < f ? h : f); }
+function periodoDe(ind, ym){ // calendário; consumo = ciclo (ym = chave do ciclo)
+  if(ind==='cons') return cicloJanela(ym);
   return { ini: ym+'-01', fim: ultimoDiaMes(ym) };
 }
 function execsMeta(){ return PD.visao ? [PD.visao] : (PCFG.executivos && PCFG.executivos.length ? PCFG.executivos : PD.execsTodos); }
@@ -2801,15 +2811,17 @@ async function carregarProd(){
     $('fp-mes').innerHTML = meses.map(m=>`<option value="${m}" ${m===PD.mes?'selected':''}>${mesNome(m)}</option>`).join('');
     const ym = PD.mes, ant = addMes(ym,-1);
     // janela: 6 meses (comparativo mensal da distribuição do esforço) até o dia 4 do mês seguinte
-    const ini = addMes(ym,-5)+'-01', fim = addMes(ym,1)+'-04', iniCons = addMes(ym,-6)+'-05';
+    PD.ciclos = { ...CICLOS_PADRAO }; try{ (await api('/prod_ciclos?select=*')).forEach(c=>{ PD.ciclos[c.ciclo] = { ini:c.ini, fim:c.fim }; }); }catch(e){}
+    const cc = consCicloDoMes(ym), ccAnt = addMes(cc,-1);
+    const ini = addMes(ym,-5)+'-01', fim = addMes(ym,1)+'-15', iniCons = addMes(ym,-6)+'-01';
     const excl = (PCFG.excluir_parecer||[]).map(norm);
     const [cont, cm, execsVenc, aus, crAt, crAnt, home] = await Promise.all([
       api('/rpc/prod_contagem', { method:'POST', body:{ p_ini:iniCons, p_fim:fim, p_excluir:excl } }).catch(e=>{ if(/prod_contagem|PGRST202|404/.test(e.message)) return null; throw e; }),
       api(`/prod_consumo_meta?select=*&data_ref=gte.${addMes(ym,-1)}-05&data_ref=lte.${addMes(ym,1)}-04&order=data_ref.desc`),
       apiAll('/vencidos_atual?select=executivo&status=eq.Vencido').catch(()=>[]),
       api('/prod_ausencias?select=*&order=ini.desc').catch(()=>null),
-      api('/rpc/prod_consumo_resumo', { method:'POST', body:{ p_ciclo:ym, p_ate:hojeISO() } }).catch(()=>null),
-      api('/rpc/prod_consumo_resumo', { method:'POST', body:{ p_ciclo:ant, p_ate:hojeISO() } }).catch(()=>null),
+      api('/rpc/prod_consumo_resumo', { method:'POST', body:{ p_ciclo:cc, p_ate:hojeISO() } }).catch(()=>null),
+      api('/rpc/prod_consumo_resumo', { method:'POST', body:{ p_ciclo:ccAnt, p_ate:hojeISO() } }).catch(()=>null),
       apiAll(`/prod_home?select=executivo,data&data=gte.${addMes(ym,-5)}-01&order=data`).catch(()=>null)
     ]);
     if(cont){ // contagem agregada no banco (rápido)
@@ -2826,7 +2838,7 @@ async function carregarProd(){
     PD.aus = aus || []; PD.ausOk = aus!==null; PD.contOk = !!cont;
     PD.home = home || []; PD.homeOk = home!==null; PD.homeSet = new Set(PD.home.map(h=>norm(h.executivo)+'|'+h.data));
     PD.consRes = {}; PD.consResOk = crAt!==null;
-    [[ym,crAt],[ant,crAnt]].forEach(([c,r])=>{ if(r && r.execs && r.execs.length) PD.consRes[c] = r; });
+    [[cc,crAt],[ccAnt,crAnt]].forEach(([c,r])=>{ if(r && r.execs && r.execs.length) PD.consRes[c] = r; });
     PD.consMeta = cm;
     PD.fontes = { acion:'ok', cons:'ok' };
     // Pesquisa de Satisfação (outra plataforma)
@@ -2892,7 +2904,7 @@ function contarMatsPesq(r){ return 1 + (r.matriculas_adicionais ? String(r.matri
 function execsLista(){ return (PCFG.executivos && PCFG.executivos.length ? PCFG.executivos : PD.execsTodos).slice().sort((a,b)=>a.localeCompare(b,'pt-BR')); }
 function heroProd(){
   $('hero-meta').innerHTML = `<span class="chip">Macro mês <b>${mesNome(PD.mes)}</b></span><span class="chip">Visão <b>${esc(PD.visao||'Geral (time)')}</b></span><span class="chip">Período <b>${PD.modo==='mes'?'Mensal':PD.modo==='sem'?'Semanal (semana de '+dBRc(segundaDe(PD.ref||hojeISO()))+')':'Diário ('+dBRc(PD.ref||hojeISO())+')'}</b></span><span class="chip">Atualizado <b>${new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</b></span><span class="chip">Usuário: <b>${esc(SESSION&&SESSION.email)}</b></span>`;
-  const c = periodoDe('cons', PD.mes);
+  const c = periodoDe('cons', consCicloDoMes(PD.mes));
   $('fp-nota').innerHTML = `Dias úteis RJ. Consumo: ciclo de ${dBRc(c.ini)} a ${dBRc(c.fim)}. Metas comparadas com o proporcional até agora.`;
   if(!PD.ref) PD.ref = ultimoDU(hojeISO()); $('fp-ref').value = PD.ref; $('fp-modo').value = PD.modo; $('fp-ref-box').style.display = PD.modo==='mes' ? 'none' : '';
 }
@@ -2968,7 +2980,8 @@ function consDiaPrio(execs, a, b){
 
 /* ---------- cálculo de um indicador ---------- */
 function statInd(k, execs, ym, modoForcado){
-  ym = ym || PD.mes; const modo = modoForcado || PD.modo || 'mes';
+  ym = ym || PD.mes; const modo = modoForcado || PD.modo || 'mes'; const ymCal = ym;
+  if(k==='cons') ym = consCicloDoMes(ym);   // Consumo trabalha por ciclo
   const p = periodoDe(k, ym), hoje = hojeISO(), corte = hoje < p.fim ? hoje : p.fim;
   const dus = dusEntre(p.ini, p.fim), dusAte = dus.filter(d=>d<=corte);
   const setE = new Set(execs.map(norm));
@@ -2984,8 +2997,8 @@ function statInd(k, execs, ym, modoForcado){
     consInfo = consMetaInfo(execs, ym);
     if(consInfo){ metaAte = metaMes = consInfo.p12; realM = consInfo.a12; credM = consInfo.a12; bi = consInfo;
       metaFonte = `base de prioridades de ${consInfo.ref?dBRc(consInfo.ref):'—'} × Forms`; rotMeta = 'Meta (P1+P2)'; }
-    else { const padrao = CONS_MIN(); metaMes = padrao*execs.length; metaAte = metaMes*dusAte.length/Math.max(1,dus.length);
-      metaFonte = `sem base de prioridades no ciclo — usando ${padrao}/executivo proporcional aos dias úteis e todas as análises do Forms`; rotMeta = 'Meta do ciclo'; }
+    else { metaMes = metaAte = 0; realM = 0; credM = 0;   // meta zerada até a base de prioridades do ciclo ser importada
+      metaFonte = `meta zerada — a base de prioridades do ciclo ${dBRc(p.ini)} a ${dBRc(p.fim)} ainda não foi importada`; rotMeta = 'Meta (P1+P2)'; }
     metaDia = null;
     const ca = consMetaInfo(execs, addMes(ym,-1));
     realA = ca ? ca.a12 : null; atingA = (ca && ca.p12) ? pctN(ca.a12, ca.p12) : null;
@@ -3010,33 +3023,38 @@ function statInd(k, execs, ym, modoForcado){
   const nota = notas.length ? notas.reduce((s,x)=>s+(+x.n),0)/notas.length : null;
   const ausM = execs.length>0 && dusAte.length>0 && execs.every(e=>diasMeta(e,dusAte)===0);
   const base = { k, execs, p, corte, dus, dusAte, real:realCard, realForms:real, cons:consInfo, metaDia, metaMes, metaAte, metaFonte, bi, ating, realA, atingA, semAt, semAnt, mediaSem, nota, nNotas:notas.length, ev, noPer, modo:'mes',
-    ausente: ausM, ...(k==='cons' ? { nSup:0 } : (()=>{ const sw = supSemanal(k, execs, ev, segundaDe(corte)), sp = supSemanal(k, execs, ev, addDias(segundaDe(corte),-7)); return { nSup:sw.n, nEleg:sw.eleg, semSup:sw.sem0, supTipo:'semanal', supAnt:{ n:sp.n, eleg:sp.eleg, sem0:sp.sem0 } }; })()),
+    ausente: ausM, ...(k==='cons' ? { nSup:0 } : (()=>{ const sw = supSemanal(k, execs, ev, corte), sp = supSemanal(k, execs, ev, addDias(sw.sem0,-1)); return { nSup:sw.n, nEleg:sw.eleg, semSup:sw.sem0, semW:sw.w, supTipo:'semanal', supAnt:{ n:sp.n, eleg:sp.eleg, sem0:sp.sem0, w:sp.w } }; })()),
     metaRed: k==='cons' ? 0 : metaDiaK(k)*execs.length*dus.length - (metaMes||0), rotMeta, rotComp,
     rotHint: `${dusAte.length} de ${dus.length} dias úteis${k==='cons'?' do ciclo':''}`,
-    janela:{ ini:(k==='cons'? ym+'-01' : p.ini), fim:(k==='cons'? ultimoDiaMes(ym) : p.fim) } };
+    janela:{ ini:(k==='cons'? ymCal+'-01' : p.ini), fim:(k==='cons'? ultimoDiaMes(ymCal) : p.fim) } };
   if(modo==='mes') return base;
   // ---- janela semanal ou diária (data de referência PD.ref) ----
   const ref = PD.ref || hoje;
-  const ini = modo==='sem' ? segundaDe(ref) : ref, fim = modo==='sem' ? addDias(ini,6) : ref, corteJ = fim < hoje ? fim : hoje;
+  const wRef = semanaDe(k, ref);
+  const ini = modo==='sem' ? wRef.ini : ref, fim = modo==='sem' ? wRef.fim : ref, corteJ = fim < hoje ? fim : hoje;
   const dJ = dusEntre(ini, fim), dJA = dusEntre(ini, corteJ);
   const realJ = soma(ini, corteJ);
-  let iniA, fimA; if(modo==='sem'){ iniA = addDias(ini,-7); fimA = addDias(corteJ,-7); } else { let d = addDias(ref,-1); while(!ehDU(d)) d = addDias(d,-1); iniA = fimA = d; }
+  let iniA, fimA, wAnt = null;
+  if(modo==='sem' && k==='acion'){ wAnt = semanaDe(k, addDias(ini,-1)); iniA = wAnt.ini; fimA = wAnt.fim; }   // semana anterior inteira (comparação pelo atingimento proporcional aos dias úteis)
+  else if(modo==='sem'){ iniA = addDias(ini,-7); fimA = addDias(corteJ,-7); }
+  else { let d = addDias(ref,-1); while(!ehDU(d)) d = addDias(d,-1); iniA = fimA = d; }
   const realJA = soma(iniA, fimA);
   const notasJ = k==='pesq' ? ev.filter(x=>x.d>=ini && x.d<=corteJ && x.n!=null) : [];
-  const s0 = segundaDe(ref), cS = addDias(s0,6) < hoje ? addDias(s0,6) : hoje;
+  const s0 = segundaDe(ref), cS = (wRef.fim < hoje ? wRef.fim : hoje), wA = semanaDe(k, addDias(wRef.ini,-1)), sA0 = segundaDe(wA.ini);
   const out = { ...base, modo, janela:{ ini, fim, corte:corteJ }, real:realJ, realA:realJA,
-    semAt: Array.from({length:7},(_,i)=>{ const d=addDias(s0,i); return d>cS ? null : soma(d,d); }),
-    semAnt: Array.from({length:7},(_,i)=>{ const d=addDias(s0,i-7); return soma(d,d); }),
+    semAt: Array.from({length:7},(_,i)=>{ const d=addDias(s0,i); return (d<wRef.ini || d>cS) ? null : soma(d,d); }),
+    semAnt: Array.from({length:7},(_,i)=>{ const d=addDias(sA0,i); return (d<wA.ini || d>wA.fim) ? null : soma(d,d); }),
     mediaSem: modo==='dia' ? realJ : realJ / Math.max(1, dJA.length),
     nota: notasJ.length ? notasJ.reduce((s,x)=>s+(+x.n),0)/notasJ.length : null, nNotas: notasJ.length,
-    rotMeta: modo==='sem' ? 'Meta da semana' : 'Meta do dia', rotComp: modo==='sem' ? 'vs. semana anterior' : `vs. ${dBRc(iniA)} (dia útil anterior)`,
-    rotHint: modo==='sem' ? `semana de ${dBRc(ini)} a ${dBRc(fim)} · ${dJA.length} de ${dJ.length} dias úteis` : `${dBR(ref)} · ${diaSem(ref)}${ehDU(ref)?'':' (não é dia útil)'}` };
+    rotMeta: modo==='sem' ? 'Meta da semana' : 'Meta do dia',
+    rotComp: modo==='sem' ? (wAnt ? `vs. ${rotSemana(wAnt)}, ${dusEntre(wAnt.ini,wAnt.fim).length} dias úteis` : 'vs. semana anterior') : `vs. ${dBRc(iniA)} (dia útil anterior)`,
+    rotHint: modo==='sem' ? `${rotSemana(wRef)} · ${dJA.length} de ${dJ.length} dias úteis` : `${dBR(ref)} · ${diaSem(ref)}${ehDU(ref)?'':' (não é dia útil)'}` };
   if(k==='cons') // Consumo no diário/semanal: só quantidade (a meta é comparada no mensal, ciclo fecha dia 4)
     return { ...out, soQtd:true, prioJ: consDiaPrio(execs, ini, corteJ), metaMes:null, metaAte:null, ating:null, atingA:null, rotMeta:'Meta', rotComp:'', ausente:false };
   const metaJ = metaJanela(k, execs, dJ), metaJA = metaJanela(k, execs, dJA), metaJAnt = metaJanela(k, execs, dusEntre(iniA,fimA));
   // quem bateu a meta SEMANAL (15/semana pesquisa e alteração; 15/dia útil × dias da semana nos acionamentos).
   // Na visão diária, quem já bateu a meta da semana conta como meta atingida no dia.
-  const sw = supSemanal(k, execs, ev, segundaDe(ref));
+  const sw = supSemanal(k, execs, ev, ref);
   let cred = 0, nAus = 0;
   execs.forEach(e=>{ const lst = sw.porE[norm(e)] || [];
     const rJ = soma(ini, corteJ, lst), mJA = metaDiaK(k) * diasMeta(e, dJA);
@@ -3045,17 +3063,27 @@ function statInd(k, execs, ym, modoForcado){
   return { ...out, metaMes:metaJ, metaAte:metaJA,
     ating: (metaJA && fonteOk) ? pctN(cred, metaJA) : null, atingReal: metaJA ? pctN(realJ, metaJA) : null,
     atingA: (metaJAnt && ev.some(x=>x.d>=iniA && x.d<=fimA)) ? pctN(realJA, metaJAnt) : null,
-    nSup: sw.n, nEleg: sw.eleg, semSup: sw.sem0, supTipo:'semanal', metaRed: metaDiaK(k)*execs.length*dJ.length - (metaJ||0),
+    nSup: sw.n, nEleg: sw.eleg, semSup: sw.sem0, semW: sw.w, supTipo:'semanal', metaRed: metaDiaK(k)*execs.length*dJ.length - (metaJ||0),
     ausente: execs.length>0 && nAus===execs.length };
 }
-function supSemanal(k, execs, ev, sem0){ // quantos bateram a meta da semana (segunda a domingo)
-  const hoje = hojeISO(), sem1 = addDias(sem0,6), dS = dusEntre(sem0, sem1), md = metaDiaK(k);
+// semana de referência: Acionamentos usam a semana DENTRO do mês (ex.: semana 5 de setembro = 28/09 a 30/09, 3 dias úteis;
+// semana 1 de outubro = 01/10 a 04/10, 2 dias úteis). Pesquisa e Alteração seguem segunda a domingo (régua das outras plataformas).
+function semanaDe(k, ref){
+  const s0 = segundaDe(ref), s1 = addDias(s0,6);
+  if(k!=='acion') return { ini:s0, fim:s1, n:null };
+  const m0 = ref.slice(0,7)+'-01', m1 = ultimoDiaMes(ref.slice(0,7)), ini = s0<m0?m0:s0, fim = s1>m1?m1:s1;
+  const off = (new Date(m0+'T12:00:00').getDay()+6)%7, n = Math.floor((+ref.slice(8,10)-1+off)/7)+1;
+  return { ini, fim, n, mes:ref.slice(0,7) };
+}
+function rotSemana(w){ return w.n ? `semana ${w.n} de ${MESES[+w.mes.slice(5,7)-1]} (${dBRc(w.ini)} a ${dBRc(w.fim)})` : `semana de ${dBRc(w.ini)} a ${dBRc(w.fim)}`; }
+function supSemanal(k, execs, ev, ref){ // quantos bateram a meta da semana
+  const w = semanaDe(k, ref), hoje = hojeISO(), sem0 = w.ini, sem1 = w.fim, dS = dusEntre(sem0, sem1), md = metaDiaK(k);
   const porE = {}; ev.forEach(x=>{ (porE[norm(x.e)] = porE[norm(x.e)] || []).push(x); });
   const set = new Set(); let eleg = 0;
   if(md) execs.forEach(e=>{ const m = md * diasMeta(e, dS); if(m<=0) return; eleg++;
     const r = (porE[norm(e)]||[]).reduce((s,x)=>(x.d>=sem0 && x.d<=sem1 && x.d<=hoje) ? s+x.q : s, 0);
     if(r >= m) set.add(norm(e)); });
-  return { n:set.size, eleg, set, sem0, porE };
+  return { n:set.size, eleg, set, sem0, sem1, w, porE };
 }
 
 /* ---------- distribuição do esforço (tempo) entre as 4 frentes ---------- */
@@ -3097,10 +3125,10 @@ function seloSup(st){
     if(st.execs.length===1) return c.bateu ? `<span class="selo ok">✓ Bateu a meta individual (${nf0.format(c.metaInd)})</span>` : `<span class="selo aus">Faltam ${nf0.format(c.falta)} para a meta individual (${nf0.format(c.metaInd)}${c.comp?' com P3':''})</span>`;
     return `<span class="selo ${c.nBateu?'ok':'aus'}">✓ ${c.nBateu} de ${c.n} bateram a meta individual</span>`; }
   if(st.soQtd || st.nEleg==null) return '';
-  const sem = `semana de ${dBRc(st.semSup)}`;
+  const sem = st.semW ? rotSemana(st.semW) : `semana de ${dBRc(st.semSup)}`;
   if(st.execs.length===1) return st.nSup ? `<span class="selo ok">✓ Bateu a meta semanal (${sem})</span>` : `<span class="selo aus">Meta semanal ainda não batida (${sem})</span>`;
-  const atual = `<span class="selo ${st.nSup?'ok':'aus'}">✓ ${st.nSup} de ${st.nEleg} bateram a meta semanal (${st.modo==='mes'?'semana atual de '+dBRc(st.semSup):sem})</span>`;
-  const ant = (st.modo==='mes' && st.supAnt) ? ` <span class="selo ${st.supAnt.n?'ok':'aus'}">✓ ${st.supAnt.n} de ${st.supAnt.eleg} na semana passada (${dBRc(st.supAnt.sem0)})</span>` : '';
+  const atual = `<span class="selo ${st.nSup?'ok':'aus'}">✓ ${st.nSup} de ${st.nEleg} bateram a meta semanal (${st.modo==='mes'?'semana atual: '+sem:sem})</span>`;
+  const ant = (st.modo==='mes' && st.supAnt) ? ` <span class="selo ${st.supAnt.n?'ok':'aus'}">✓ ${st.supAnt.n} de ${st.supAnt.eleg} na semana anterior (${st.supAnt.w ? rotSemana(st.supAnt.w) : dBRc(st.supAnt.sem0)})</span>` : '';
   return atual + ant;
 }
 function cardInd(st, opts={}){
@@ -3113,7 +3141,7 @@ function cardInd(st, opts={}){
   const kpiReal = st.k==='pesq' ? `<div>Validadas<b>${nf0.format(st.real)}</b></div>` : `<div>Realizado<b>${nf0.format(st.real)}</b></div>`;
   let kpis, hint;
   if(st.soQtd){
-    const cic = periodoDe('cons', PD.mes);
+    const cic = periodoDe('cons', consCicloDoMes(PD.mes));
     kpis = `<div class="pc-kpis">${kpiReal}<div>Meta<b style="font-size:13px;color:var(--text-mut)">só no mensal</b></div><div class="at">Por dia útil<b>${st.mediaSem.toFixed(st.mediaSem<10?1:0).replace('.',',')}</b></div></div>`;
     const pj = st.prioJ; hint = `${st.rotHint} · todas as análises do Forms.`
       + (pj && pj.tot ? `</div><div class="pc-hint" style="color:var(--c);font-weight:700">Tratados (cruzando com a base): P1 ${nf0.format(pj[1])} · P2 ${nf0.format(pj[2])} · P3 ${nf0.format(pj[3])}${pj.fora?` · fora da base ${nf0.format(pj.fora)}`:''}` : '')
@@ -3170,7 +3198,7 @@ function renderPGeral(){
 function renderPDia(){
   if(!$('pd-ind').options.length) $('pd-ind').innerHTML = PIND.map(I=>`<option value="${I.k}">${I.t}</option>`).join('');
   const k = $('pd-ind').value || 'acion', I = PIND_BY[k], lista = PD.visao ? [PD.visao] : execsLista();
-  const p = periodoDe(k, PD.mes), dias = []; for(let d=p.ini; d<=p.fim; d=addDias(d,1)) dias.push(d);
+  const p = periodoDe(k, k==='cons' ? consCicloDoMes(PD.mes) : PD.mes), dias = []; for(let d=p.ini; d<=p.fim; d=addDias(d,1)) dias.push(d);
   const hoje = hojeISO();
   const st0 = statInd(k, lista);
   const metaDiaExec = k==='cons' ? (st0.metaMes!=null ? st0.metaMes/Math.max(1,st0.dus.length)/Math.max(1,lista.length) : null) : st0.metaDia;
@@ -3291,16 +3319,16 @@ $('btn-au-add').onclick = async ()=>{
 
 /* ---------- Consumo: base de prioridades × Forms por executivo ---------- */
 function linhasConsTab(){
-  const r = PD.consRes[PD.mes]; if(!r) return null;
+  const cc = consCicloDoMes(PD.mes), r = PD.consRes[cc]; if(!r) return null;
   const lista = PD.visao ? [PD.visao] : execsLista();
   const L = lista.map(e=>{ const x = r.porE[norm(e)]; return { e, c: x ? consExec(x) : null }; });
   if(!PD.visao){ const setL = new Set(lista.map(norm)); Object.entries(r.porE).filter(([k])=>!setL.has(k)).forEach(([k,x])=>L.push({ e:x.e, fora:true, c:consExec(x) })); }
-  const t = consMetaInfo(lista, PD.mes);
+  const t = consMetaInfo(lista, cc);
   return { L, t, r };
 }
 function renderConsTab(){
   const el = $('pg-cons'); if(!el) return;
-  const d = linhasConsTab(), c = periodoDe('cons', PD.mes);
+  const cc = consCicloDoMes(PD.mes), d = linhasConsTab(), c = periodoDe('cons', cc);
   if(!d){ el.innerHTML = `<h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)}: ainda não há base de prioridades. Suba a base do dia em <b>Importar e configurar</b>.</p>`; return; }
   const sit = (x, tot) => tot ? `<b>${x.nBateu} de ${x.n}</b> bateram` : x.bateu ? '<span class="sup-ok" style="margin:0">✓ Bateu</span>' : `<span style="color:var(--rose);font-weight:700">Faltam ${nf0.format(x.falta)}</span>`;
   const row = (nome, x, cls='') => x ? `<tr class="${cls}"><td>${cls?nome:`<b>${esc(nome)}</b>`}</td><td class="num">${nf0.format(x.a1)} <span class="faint">/ ${nf0.format(x.p1)}</span></td><td class="num">${nf0.format(x.a2)} <span class="faint">/ ${nf0.format(x.p2)}</span></td>
@@ -3316,10 +3344,10 @@ function renderConsTab(){
     <tbody>${d.L.map(l=>row(l.e + (l.fora?' (fora da lista do time)':''), l.c)).join('')}${d.L.length>1 ? row('Time', d.t, 'total') : ''}</tbody></table></div>`;
   $('btn-xls-cons').onclick = async ()=>{
     try{ toast('Preparando a lista…');
-      const rows = await apiAll(`/vw_prod_prioridade_status?select=matricula,prioridade,executivo,carteira,data_leitura,ocorrencia,condicional,delta,variacao,status,qtd_analises,primeira_analise,ultima_analise,analisado_por&ciclo=eq.${PD.mes}&order=executivo,prioridade,matricula`);
+      const rows = await apiAll(`/vw_prod_prioridade_status?select=matricula,prioridade,executivo,carteira,data_leitura,ocorrencia,condicional,delta,variacao,status,qtd_analises,primeira_analise,ultima_analise,analisado_por&ciclo=eq.${cc}&order=executivo,prioridade,matricula`);
       const alvo = new Set((PD.visao ? [PD.visao] : execsLista()).map(norm)), lista = [...new Set([...execsLista(), ...PD.execsTodos])];
       exportXLSX(rows.filter(r=>alvo.has(norm(casarExec(r.executivo, lista)))).map(r=>({ Matrícula:r.matricula, Prioridade:'Prioridade '+r.prioridade, Executivo:r.executivo, Carteira:r.carteira, 'Data de leitura':r.data_leitura?dBR(r.data_leitura):'', Ocorrência:r.ocorrencia, Condicional:r.condicional, Delta:r.delta, '%':r.variacao,
-        Status:r.status, 'Qtd. análises':r.qtd_analises, 'Primeira análise':r.primeira_analise?dBR(r.primeira_analise):'', 'Última análise':r.ultima_analise?dBR(r.ultima_analise):'', 'Analisado por':r.analisado_por||'' })), `consumo_prioridades_status_${PD.mes}`);
+        Status:r.status, 'Qtd. análises':r.qtd_analises, 'Primeira análise':r.primeira_analise?dBR(r.primeira_analise):'', 'Última análise':r.ultima_analise?dBR(r.ultima_analise):'', 'Analisado por':r.analisado_por||'' })), `consumo_prioridades_status_${cc}`);
     }catch(e){ toast('Erro: '+e.message, true); } };
 }
 
@@ -3461,8 +3489,15 @@ $('btn-pf').onclick = async ()=>{
 
 /* ---------- base diária de prioridades (Consumo Estratégico) ---------- */
 let PM_ARQ = null;
-function cicloDe(iso){ return +iso.slice(8,10) >= 5 ? iso.slice(0,7) : addMes(iso.slice(0,7), -1); }
-function mostrarCicloPM(){ const d = $('pm-data').value; if(!d){ $('pm-ciclo').textContent=''; return; } const c = cicloDe(d); $('pm-ciclo').textContent = `Ciclo ${dBRc(c+'-05')} a ${dBRc(addMes(c,1)+'-04')}`; }
+function cicloDe(iso){ return cicloDaData(iso); }
+function mostrarCicloPM(){ const d = $('pm-data').value; if(!d){ $('pm-ciclo').textContent=''; return; } const c = cicloDe(d); const j = cicloJanela(c); $('pm-ciclo').textContent = `Ciclo ${dBRc(j.ini)} a ${dBRc(j.fim)}`; $('pm-fim').value = j.fim; }
+$('btn-pm-fim').onclick = async ()=>{
+  const d = $('pm-data').value || hojeISO(), c = cicloDe(d), j = cicloJanela(c), f = $('pm-fim').value;
+  if(!f || f < j.ini){ toast('Data final inválida', true); return; }
+  try{ await api('/prod_ciclos?on_conflict=ciclo', { method:'POST', body:[{ ciclo:c, ini:j.ini, fim:f }], prefer:'resolution=merge-duplicates,return=minimal' });
+    toast(`Ciclo ${dBRc(j.ini)} a ${dBRc(f)} salvo`); await carregarProd(); mostrarCicloPM(); }
+  catch(e){ toast('Erro: ' + e.message + (/prod_ciclos/.test(e.message)?' — rode de novo o supabase_produtividade.sql':''), true); }
+};
 $('pm-data').value = hojeISO(); mostrarCicloPM(); $('pm-data').onchange = mostrarCicloPM;
 function bigramas(t){ t=' '+t+' '; const o=[]; for(let i=0;i<t.length-1;i++) o.push(t.slice(i,i+2)); return o; }
 function semelhanca(a,b){ const A=bigramas(norm(a)), B=bigramas(norm(b)); let n=0; const bb=[...B]; A.forEach(x=>{ const i=bb.indexOf(x); if(i>=0){ n++; bb.splice(i,1); } }); return 2*n/(A.length+B.length); }
@@ -3511,12 +3546,11 @@ $('btn-pm-ler').onclick = async ()=>{
     }
     log('Cruzando com o Forms…');
     const res = await api('/rpc/prod_processar_prioridades', { method:'POST', body:{ p_lote:lote, p_ciclo:ciclo, p_data:dr } });
-    await logImportProd('prioridades', PM_ARQ.name, res.linhas, { data:dBR(dr), ciclo:`${dBRc(ciclo+'-05')} a ${dBRc(addMes(ciclo,1)+'-04')}`, P1:cont[1], P2:cont[2], P3:cont[3] });
+    await logImportProd('prioridades', PM_ARQ.name, res.linhas, { data:dBR(dr), ciclo:`${dBRc(cicloJanela(ciclo).ini)} a ${dBRc(cicloJanela(ciclo).fim)}`, P1:cont[1], P2:cont[2], P3:cont[3] });
     toast(`Base de prioridades de ${dBR(dr)} importada (${nf0.format(res.linhas)} clientes)`);
     PM_ARQ = null; $('pm-file').value=''; $('pm-box').classList.remove('has-file');
-    if(PD.mes !== ciclo) PD.mes = ciclo;
     await carregarProd();
-    log(`✓ ${nf0.format(res.linhas)} clientes gravados (P1 ${nf0.format(cont[1])} · P2 ${nf0.format(cont[2])} · P3 ${nf0.format(cont[3])}) para o ciclo ${dBRc(ciclo+'-05')} a ${dBRc(addMes(ciclo,1)+'-04')} — substituiu a base anterior do ciclo.`);
+    log(`✓ ${nf0.format(res.linhas)} clientes gravados (P1 ${nf0.format(cont[1])} · P2 ${nf0.format(cont[2])} · P3 ${nf0.format(cont[3])}) para o ciclo ${dBRc(cicloJanela(ciclo).ini)} a ${dBRc(cicloJanela(ciclo).fim)} — substituiu a base anterior do ciclo.`);
   }catch(e){ log('✗ ' + e.message + (/prod_prioridades/.test(e.message)?' — rode de novo o supabase_produtividade.sql':'')); }
   finally{ $('btn-pm-ler').disabled = !PM_ARQ; }
 };
