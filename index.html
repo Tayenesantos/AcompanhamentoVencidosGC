@@ -760,7 +760,7 @@
         <div class="kpi-row" id="sc-kpis" style="grid-template-columns:repeat(2,1fr)"></div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h2>Faixa de dias vencidos</h2><p class="sub">Aging = dias desde o vencimento mais antigo em aberto da matrícula (atualiza sozinho todo dia).</p></div></div>
+        <div class="card-head"><div><h2>Faixa de dias vencidos</h2><p class="sub">Saldo unificado por matrícula (soma de todas as linhas com SaldoVencidas &gt; 0; linhas em branco ou 0 ficam fora). Aging = dias entre hoje e a coluna de vencimento da base (o vencimento mais antigo da matrícula) — atualiza sozinho todo dia.</p></div></div>
         <div class="tablewrap" style="margin-top:6px"><table><thead><tr><th>Faixa</th><th class="num">Matrículas</th><th class="num">% qtd</th><th class="num">Saldo vencido</th><th class="num">% saldo</th><th style="width:34%"></th><th class="num">Pagaram no mês</th></tr></thead><tbody id="sc-faixa"></tbody></table></div>
       </div>
       <div class="card">
@@ -785,7 +785,7 @@
       </div>
       <div class="two-col">
         <div class="card"><h2>Por tipo de fatura</h2><p class="sub">COD_TRIBUTO: fatura mensal, NFA e parcela (saldo vencido de cada tipo).</p><div class="dist-bars" id="sc-trib"></div></div>
-        <div class="card"><h2>Por tipo de conta em aberto</h2><p class="sub">Combinação de tipos que a matrícula tem em aberto.</p><div class="dist-bars" id="sc-tipoconta"></div></div>
+        <div class="card"><h2>Por tipo de conta</h2><p class="sub">Combinação de tipos com saldo vencido na matrícula (ex.: Fatura mensal + Parcela).</p><div class="dist-bars" id="sc-tipoconta"></div></div>
       </div>
     </section>
 
@@ -1283,7 +1283,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 06/10d</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 06/10e</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -4609,7 +4609,7 @@ function scLinhaXLS(r){
   const a = ACOMP[r.matricula]||{};
   return { 'Matrícula':r.matricula, 'Cliente':r.cliente, 'Executivo':r.executivo, 'Carteira':r.carteira, 'Superintendência':r.superintendencia,
     'Segmento':r.segmento||'', 'Classificação':r.classificacao||'', 'Classificação MacroCluster':r.macrocluster, 'Perfil Cliente - 3 meses':r.perfil, 'Status da ligação':r.ligacao,
-    'Vencimento mais antigo':r.venc?dBR(r.venc):'', 'Aging (dias)':r.aging, 'Faixa de dias vencido':r.faixa, 'Tipo de conta (em aberto)':r.tipo_conta, 'Tipos vencidos':r.trib_v.join(' + '),
+    'Vencimento mais antigo':r.venc?dBR(r.venc):'', 'Aging (dias)':r.aging, 'Faixa de dias vencido':r.faixa, 'Tipo de conta':r.tipo_conta, 'Tipos vencidos':r.trib_v.join(' + '),
     'Notas vencidas':+r.notas||0, 'Saldo vencido (total)':+r.saldo_vencido.toFixed(2), 'Vencido do mês (visão Vencidos no mês)':+r.v_mes.toFixed(2), 'Saldo vencido sem o mês vigente':+Math.max(0,r.saldo_vencido-r.v_mes).toFixed(2), 'Vencido - Fatura mensal':+r.v_fatura.toFixed(2), 'Vencido - NFA':+r.v_nfa.toFixed(2), 'Vencido - Parcela':+r.v_parcela.toFixed(2),
     'TMP (dias)':r.tmp==null?'':+r.tmp, 'Data TMP':r.data_tmp_c?dBR(r.data_tmp_c):'', 'Status TMP':r.tmp_status||'', 'Fonte TMP':r.tmp_fonte||'',
     ['Pagou em '+scMesNome()+'?']: r.pagou==='Sim' ? +r.pago_mes.toFixed(2) : 'Não',
@@ -4682,8 +4682,11 @@ async function scImportar(tipo){
         rows.push({ matricula:m, cod_tributo: iC>=0 && l[iC]!=null ? Math.round(+l[iC]) : null, data_venc: iD>=0 ? scISO(l[iD]) : null,
           saldo_total: iT>=0 ? scNum(l[iT]) : null, saldo_vencido: scNum(l[iV]) || 0, notas_vencidas: iN>=0 && l[iN]!=null ? Math.round(+l[iN]||0) : 0 }); });
       dataBase = $('sc-d-saldo').value || scDataNome(f.name) || hojeISO();
-      const venc = rows.filter(r=>r.saldo_vencido>0);
-      L(`Aba "${a.nome}": ${nf0.format(rows.length)} linhas · ${nf0.format(new Set(rows.map(r=>r.matricula)).size)} matrículas · ${nf0.format(new Set(venc.map(r=>r.matricula)).size)} com saldo vencido (${brlC(venc.reduce((s,r)=>s+r.saldo_vencido,0))}) · base de ${dBR(dataBase)}`);
+      const total = rows.length, venc = rows.filter(r=>r.saldo_vencido>0), nMat = new Set(venc.map(r=>r.matricula)).size;
+      L(`Aba "${a.nome}": ${nf0.format(total)} linhas · base de ${dBR(dataBase)}`);
+      L(`  ${nf0.format(total-venc.length)} linhas retiradas (SaldoVencidas em branco ou 0 — sem saldo vencido)`);
+      L(`  ${nf0.format(venc.length)} linhas com saldo vencido → unificadas em ${nf0.format(nMat)} matrículas (soma por matrícula) · ${brlC(venc.reduce((s,r)=>s+r.saldo_vencido,0))}`);
+      rows = venc;
     } else if(tipo==='carteira'){
       const a = scLerAba(wb, c=>c.some(x=>x.startsWith('matricula')) && c.includes('executivo'), 'carteira');
       if(!a) throw new Error('Não encontrei a aba Carteira (colunas matriculas e Executivo).');
