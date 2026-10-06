@@ -260,6 +260,10 @@
   .sc-top-exec{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:22px 0 8px; padding-top:14px; border-top:1px solid var(--border); }
   .sc-top-exec:first-child{ border-top:none; margin-top:0; padding-top:0; }
   .sc-top-exec h3{ font-family:var(--font-display); font-size:16px; font-weight:800; color:var(--navy); margin:0; }
+  .b-navy{ background:#DCE7F1; color:var(--navy); }
+  #sc-area .kpi::before{ background:var(--water); } #sc-area .kpi.navy::before{ background:var(--navy); }
+  .sc-toggle{ display:flex; align-items:center; gap:10px; background:var(--water-soft); border:1px solid var(--water-line); border-radius:12px; padding:10px 14px; font-size:13px; color:var(--navy); flex-wrap:wrap; }
+  .sc-toggle .btn.on{ background:var(--navy); color:#fff; }
   .sc-top-tab{ font-size:12.5px; } .sc-top-tab .cell-input{ min-width:140px; }
   .sc-imp-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; } .sc-imp-grid > .card{ margin-top:20px; }
   @media (max-width:980px){ .sc-imp-grid, .sc-insights{ grid-template-columns:1fr; } .vis-switch button span{ display:none; } }
@@ -485,7 +489,7 @@
         <div class="mod-stats" id="home-prod-stats"><div>Carregando…</div></div>
         <div class="mod-go">Abrir →</div>
       </button>
-      <button class="mod-card tee" data-mod="tee">
+      <button class="mod-card tee" data-mod="tee" style="display:none">
         <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7s-6 6.3-6 11.3a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/><path d="M9.5 13.5h5M12 11v5"/></svg></div>
         <h2>Tarifa Especial de Esgoto</h2>
         <p>Projeto T.E.E.: ondas e segmentos, comunicados pendentes, matrículas aptas e prioridades de virada pelo ciclo de leitura, e retorno financeiro mês a mês.</p>
@@ -729,7 +733,7 @@
   <div id="sc-area" style="display:none;">
     <nav class="tabs" id="tabs-sc">
       <button class="active" data-sc="painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Painel gerencial</span></button>
-      <button data-sc="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Top 20 por executivo</span></button>
+      <button data-sc="top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Top 20</span></button>
       <button data-sc="imp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span class="lbl">Importar bases</span></button>
     </nav>
 
@@ -739,6 +743,7 @@
         <button class="btn btn-ghost btn-sm" id="sc-limpar">Limpar filtros</button>
         <button class="btn btn-primary btn-sm" id="sc-xls">Baixar base completa (Excel)</button>
       </div>
+      <div class="sc-toggle" style="flex-basis:100%"><span id="sc-mes-txt"></span><button class="btn btn-ghost btn-sm" id="sc-mes-btn"></button></div>
       <div class="filter-note" id="sc-fonte" style="max-width:none;flex-basis:100%"></div>
     </div>
 
@@ -750,13 +755,9 @@
       <div class="card">
         <h2>Saldo vencido · visão gerencial</h2>
         <p class="sub" id="sc-sub"></p>
-        <div class="kpi-row" id="sc-kpis"></div>
-        <div class="kpi-row" id="sc-kpis2" style="margin-top:14px"></div>
-      </div>
-      <div class="card">
-        <h2>Leituras para a decisão</h2>
-        <p class="sub">Calculadas com os filtros aplicados — onde está o dinheiro e por onde começar a cobrança.</p>
-        <div class="sc-insights" id="sc-insights"></div>
+        <div class="callout" style="margin:10px 0 14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+          <span>O <b>saldo de contas atualiza em D-2</b>: a base reflete a posição de dois dias antes da data de importação.</span></div>
+        <div class="kpi-row" id="sc-kpis" style="grid-template-columns:repeat(2,1fr)"></div>
       </div>
       <div class="card">
         <div class="card-head"><div><h2>Faixa de dias vencidos</h2><p class="sub">Aging = dias desde o vencimento mais antigo em aberto da matrícula (atualiza sozinho todo dia).</p></div></div>
@@ -794,12 +795,12 @@
         <div class="card-head">
           <div><h2>Maiores saldos vencidos</h2><p class="sub" id="sc-top-sub"></p></div>
           <div class="filters">
-            <div class="field"><label>Visão</label><select id="sc-top-modo"><option value="exec">Top por executivo</option><option value="geral">Top geral</option></select></div>
-            <div class="field"><label>Mostrar</label><select id="sc-top-n"><option value="20">Top 20</option><option value="10">Top 10</option><option value="50">Top 50</option><option value="0">Todos</option></select></div>
+            
+            <div class="field"><label>Mostrar</label><select id="sc-top-n"><option value="20">Top 20</option><option value="50">Top 50</option><option value="100">Top 100</option><option value="0">Todos</option></select></div>
           </div>
         </div>
         <div class="callout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
-          <span><b>Status cobrança</b>, <b>Pagamento agendado</b> e <b>Observação</b> são os mesmos da visão <b>Vencidos no mês</b>: preencher aqui aparece lá e vice-versa. O selo <span class="badge b-water">↔ Vencidos no mês</span> indica matrícula que também está na base de vencidos; <span class="badge b-leaf">preenchido</span> indica que já há acompanhamento registrado (lá ou aqui).</span></div>
+          <span><b>Status cobrança</b>, <b>Pagamento agendado</b> e <b>Observação</b> são os mesmos da visão <b>Vencidos no mês</b>: preencher aqui aparece lá e vice-versa. O selo <span class="badge b-water">↔ Vencidos no mês</span> indica matrícula que também está na base de vencidos; <span class="badge b-navy">preenchido</span> indica que já há acompanhamento registrado (lá ou aqui).</span></div>
         <div id="sc-top-lista" style="margin-top:14px"></div>
       </div>
     </section>
@@ -1282,7 +1283,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 06/10c</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 06/10d</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -4410,11 +4411,11 @@ $('btn-tc').onclick = async ()=>{
    SALDO DE CONTAS — 2ª visão do Acompanhamento de Vencidos
    ===================================================================== */
 const SC_FAIXAS = ['1 a 30 dias','31 a 60 dias','61 a 90 dias','91 a 120 dias','Acima de 120 dias'];
-const SC_FAIXA_COR = ['#2C9A66','#8DB33A','#E0A526','#D8722B','#C0492E'];
+const SC_FAIXA_COR = ['#BBD9EE','#86BCE0','#4F9BD0','#1C7EBE','#0A2A43'];
 const SC_TRIB = { 0:'Fatura mensal', 1:'Fatura mensal', 2:'NFA', 3:'Parcela' };
 const SC_TRIB_ORD = ['Fatura mensal','NFA','Parcela'];
 const SC_TRIB_COL = { 'Fatura mensal':'v_fatura', 'NFA':'v_nfa', 'Parcela':'v_parcela' };
-var SC = [], SC_IMPS = [], SC_OK = false, SC_VIS = 'venc', SC_TAB = 'painel';
+var SC_COM_MES = false, SC = [], SC_IMPS = [], SC_OK = false, SC_VIS = 'venc', SC_TAB = 'painel';
 const SCF = { exec:new Set(), pagou:new Set(), faixa:new Set(), perfil:new Set(), sup:new Set(), trib:new Set() };
 const SC_FILTROS = [
   ['exec','Executivo','Todos os executivos'], ['pagou','Pagamento no mês?','Todos'], ['faixa','Faixa de dias vencido','Todas as faixas'],
@@ -4467,7 +4468,7 @@ async function carregarSaldo(){
         carteira: scLimpo(r.carteira)||'Sem carteira', superintendencia: scLimpo(r.superintendencia)||'Não informada', macrocluster: scLimpo(r.macrocluster)||'Não informada',
         perfil: scLimpo(r.perfil)||'Não informado', ligacao: scLimpo(r.ligacao)||'Não informado',
         aging, faixa: scFaixa(aging), tipo_conta: trA.join(' + ') || '—', trib_v: trV, data_tmp_c: dTmp, tmp_status: tmpSt,
-        pagou: (+r.pago_mes||0) > 0 ? 'Sim' : 'Não', venceu_mes: venc ? venc.slice(0,7)===hoje.slice(0,7) : false };
+        pagou: (+r.pago_mes||0) > 0 ? 'Sim' : 'Não', v_mes: r.na_visao_vencidos ? Math.min(+r.v_mes_vencidos||0, +r.v_fatura||+r.saldo_vencido||0) : 0, venceu_mes: venc ? venc.slice(0,7)===hoje.slice(0,7) : false };
     });
     $('sc-loading').style.display='none';
     if(!scBaseSaldo()) $('sc-vazio').style.display='block';
@@ -4503,11 +4504,15 @@ function montarFiltrosSC(){
   });
 }
 document.addEventListener('click', ()=>document.querySelectorAll('.sc-multi').forEach(m=>m.classList.remove('open')));
+$('sc-mes-btn').onclick = ()=>{ SC_COM_MES = !SC_COM_MES; renderSC(); };
 $('sc-limpar').onclick = ()=>{ Object.values(SCF).forEach(s=>s.clear()); montarFiltrosSC(); renderSC(); };
 function scSet(k, vals){ SCF[k] = new Set(vals); montarFiltrosSC(); renderSC(); window.scrollTo({ top: $('sc-area').offsetTop - 10, behavior:'smooth' }); }
 
 // valor considerado: com filtro de tipo de fatura, soma só o vencido dos tipos escolhidos
-const scVal = r => SCF.trib.size ? [...SCF.trib].reduce((s,t)=>s+(r[SC_TRIB_COL[t]]||0),0) : r.saldo_vencido;
+// sem o mês vigente: desconta o vencido que já está na visão "Vencidos no mês" (sai da fatura mensal)
+const scVal = r => { const desc = SC_COM_MES ? 0 : r.v_mes;
+  if(!SCF.trib.size) return Math.max(0, r.saldo_vencido - desc);
+  return [...SCF.trib].reduce((s,t)=>s+(t==='Fatura mensal' ? Math.max(0,r.v_fatura-desc) : (r[SC_TRIB_COL[t]]||0)),0); };
 function scDados(){
   return SC.filter(r=>(!SCF.exec.size || SCF.exec.has(r.executivo)) && (!SCF.pagou.size || SCF.pagou.has(r.pagou)) && (!SCF.faixa.size || SCF.faixa.has(r.faixa))
     && (!SCF.perfil.size || SCF.perfil.has(r.perfil)) && (!SCF.sup.size || SCF.sup.has(r.superintendencia))
@@ -4523,6 +4528,12 @@ function renderSC(){
   $('sc-fonte').innerHTML = `Saldo: <b>${b?dBR(b.data_base)+' · '+esc(b.arquivo||''):'não importado'}</b> · Carteira: <b>${cart?esc(cart.arquivo||'')+' (importada '+quando(cart)+')':'não importada'}</b> · TMP: <b>${tmp?esc(tmp.arquivo||'')+' ('+quando(tmp)+')':'base de vencidos'}</b> · Pagamento no mês = arrecadação (valor autenticado) de ${scMesNome()}. Os filtros valem para o painel e o Top 20.`;
   if(SC_VIS==='saldo'){ $('hero-meta').innerHTML = b ? `<span class="chip">Saldo de <b>${dBR(b.data_base)}</b></span><span class="chip"><b>${nf0.format(SC.length)}</b> matrículas com saldo vencido</span><span class="chip">Saldo vencido <b>${brlC(SC.reduce((s,r)=>s+r.saldo_vencido,0))}</b></span><span class="chip">Usuário: <b>${esc(SESSION&&SESSION.email)}</b></span>` : '<span class="chip">Nenhuma base de saldo importada</span>';
     $('rodape').innerHTML = b ? `Fonte: saldo de contas · ${esc(b.arquivo||'')} · referência ${dBR(b.data_base)}` : ''; }
+  const vMes = SC.reduce((s,r)=>s+r.v_mes,0), nMes = SC.filter(r=>r.v_mes>0).length;
+  $('sc-mes-txt').innerHTML = SC_COM_MES
+    ? `Mostrando o <b>saldo total</b>, inclusive os vencidos do mês vigente (${brlC(vMes)} em ${nf0.format(nMes)} matrículas que já estão em <b>Vencidos no mês</b>).`
+    : `Mostrando o saldo <b>sem os vencidos do mês vigente</b> — ${brlC(vMes)} de ${nf0.format(nMes)} matrículas já acompanhados em <b>Vencidos no mês</b>.`;
+  $('sc-mes-btn').textContent = SC_COM_MES ? 'Voltar: sem os vencidos do mês' : 'Trazer visão com os vencidos do mês';
+  $('sc-mes-btn').classList.toggle('on', SC_COM_MES);
   if(SC_TAB==='painel') renderSCPainel(); else if(SC_TAB==='top') renderSCTop();
 }
 
@@ -4537,15 +4548,8 @@ function renderSCPainel(){
   $('sc-sub').textContent = `${nf0.format(n)} matrículas com saldo vencido${SCF.trib.size?' ('+[...SCF.trib].join(', ')+')':''} · referência ${b2(scBaseSaldo())} · aging calculado em ${dBR(hojeISO())}${sem?` · ${sem} matrículas da base de saldo não estão na carteira`:''}.`;
   function b2(x){ return x ? dBR(x.data_base) : '—'; }
   $('sc-kpis').innerHTML =
-    scKpi('navy','Saldo vencido', brlC(tot), `${nf0.format(n)} matrículas · ${nf0.format(notas)} notas vencidas`) +
-    scKpi('rose','Acima de 90 dias', brlC(scSoma(a90)), `${pct(scSoma(a90),tot)} do saldo · ${nf0.format(a90.length)} matrículas`) +
-    scKpi('amber','Sem pagamento em '+scMesNome(), brlC(scSoma(nPag)), `${nf0.format(nPag.length)} matrículas (${pct(nPag.length,n)}) não pagaram nada no mês`) +
-    scKpi('leaf','Pago em '+scMesNome(), brlC(vPago), `${nf0.format(pag.length)} devedores pagaram algo no mês (${pct(pag.length,n)})`);
-  $('sc-kpis2').innerHTML =
-    scKpi('','Concentração Top 20', pct(scSoma(top20),tot), `${brlC(scSoma(top20))} em 20 matrículas`) +
-    scKpi('water','Venceu neste mês', brlC(scSoma(novos)), `${nf0.format(novos.length)} matrículas com o 1º vencido em ${scMesNome()} (entrada nova)`) +
-    scKpi('rose','Ligações cortadas', brlC(scSoma(cort)), `${nf0.format(cort.length)} matrículas · recuperação de cortado`) +
-    scKpi('','Ticket médio', brlC(n?tot/n:0), `aging médio ${nf0.format(n?d.reduce((s,r)=>s+r.aging,0)/n:0)} dias`);
+    scKpi('navy','Saldo vencido', brlC(tot), `${nf0.format(n)} matrículas · ${nf0.format(notas)} notas vencidas${SC_COM_MES?'':' · sem os vencidos do mês vigente'}`) +
+    scKpi('water','Sem pagamento em '+scMesNome(), brlC(scSoma(nPag)), `${nf0.format(nPag.length)} matrículas (${pct(nPag.length,n)}) não pagaram nada em ${scMesNome()} · ${pct(scSoma(nPag),tot)} do saldo`);
 
   // faixas
   const gf = grupo(d,'faixa');
@@ -4557,7 +4561,7 @@ function renderSCPainel(){
   const perfis = Object.entries(grupo(d,'perfil')).sort((a,b)=>scSoma(b[1])-scSoma(a[1])).map(e=>e[0]);
   const cel = {}; let mx = 1; perfis.forEach(p=>SC_FAIXAS.forEach(f=>{ const v=scSoma(d.filter(r=>r.perfil===p&&r.faixa===f)); cel[p+'|'+f]=v; mx=Math.max(mx,v); }));
   $('sc-matriz').innerHTML = `<thead><tr><th>Perfil</th>${SC_FAIXAS.map(f=>`<th class="num">${f}</th>`).join('')}<th class="num">Total</th></tr></thead><tbody>`
-    + perfis.map(p=>`<tr><td><b>${esc(p)}</b></td>${SC_FAIXAS.map(f=>{ const v=cel[p+'|'+f], a=v/mx; return `<td class="num sc-cel" data-p="${esc(p)}" data-f="${f}" style="background:rgba(192,73,46,${(a*0.85).toFixed(2)});color:${a>0.45?'#fff':'var(--navy)'}">${v?brlC(v):'<span class="faint">—</span>'}</td>`; }).join('')}<td class="num"><b>${brlC(scSoma(d.filter(r=>r.perfil===p)))}</b></td></tr>`).join('')
+    + perfis.map(p=>`<tr><td><b>${esc(p)}</b></td>${SC_FAIXAS.map(f=>{ const v=cel[p+'|'+f], a=v/mx; return `<td class="num sc-cel" data-p="${esc(p)}" data-f="${f}" style="background:rgba(28,126,190,${(a*0.9).toFixed(2)});color:${a>0.45?'#fff':'var(--navy)'}">${v?brlC(v):'<span class="faint">—</span>'}</td>`; }).join('')}<td class="num"><b>${brlC(scSoma(d.filter(r=>r.perfil===p)))}</b></td></tr>`).join('')
     + `<tr class="total"><td>Total</td>${SC_FAIXAS.map(f=>`<td class="num">${brlC(scSoma(gf[f]||[]))}</td>`).join('')}<td class="num">${brlC(tot)}</td></tr></tbody>`;
   document.querySelectorAll('#sc-matriz .sc-cel').forEach(c=>c.onclick=()=>{ SCF.perfil=new Set([c.dataset.p]); scSet('faixa',[c.dataset.f]); });
 
@@ -4569,31 +4573,15 @@ function renderSCPainel(){
   document.querySelectorAll('.sc-exec-link').forEach(a=>a.onclick=e=>{ e.preventDefault(); scSet('exec',[a.dataset.e]); });
 
   const dist = (el, campo, cor) => distBars($(el), Object.entries(grupo(d,campo)).map(([k,g])=>({ nome:k, qtd:g.length, valor:scSoma(g) })).sort((a,b)=>b.valor-a.valor), tot, cor);
-  dist('sc-carteira','carteira'); dist('sc-sup','superintendencia','var(--navy-3)'); dist('sc-macro','macrocluster','#6A45B8'); dist('sc-lig','ligacao','var(--rose)'); dist('sc-tipoconta','tipo_conta','var(--amber)');
+  dist('sc-carteira','carteira','var(--water)'); dist('sc-sup','superintendencia','var(--navy-3)'); dist('sc-macro','macrocluster','var(--water)'); dist('sc-lig','ligacao','var(--navy-3)'); dist('sc-tipoconta','tipo_conta','var(--water)');
   const tribs = (SCF.trib.size ? SC_TRIB_ORD.filter(t=>SCF.trib.has(t)) : SC_TRIB_ORD).map(t=>({ nome:t, qtd:d.filter(r=>r[SC_TRIB_COL[t]]>0).length, valor:d.reduce((s,r)=>s+(r[SC_TRIB_COL[t]]||0),0) }));
   distBars($('sc-trib'), tribs, tot, 'var(--water)');
 
-  // leituras
-  const ins = [];
-  if(n){
-    const t3 = ge.slice(0,3), v3 = t3.reduce((s,x)=>s+x.v,0);
-    ins.push(['navy', `<b>${t3.map(x=>esc(x.e)).join(', ')}</b> concentram <b>${brlC(v3)}</b> (${pct(v3,tot)}) do saldo vencido.`]);
-    ins.push(['rose', `Os <b>20 maiores devedores</b> somam <b>${brlC(scSoma(top20))}</b> — ${pct(scSoma(top20),tot)} do saldo. Cobrar esses clientes tem o maior retorno por contato.`]);
-    const ativos60 = d.filter(r=>/ativa/i.test(r.ligacao) && r.aging>60 && r.pagou==='Não');
-    if(ativos60.length) ins.push(['amber', `<b>${nf0.format(ativos60.length)}</b> ligações <b>ativas</b> com mais de 60 dias de atraso e <b>sem nenhum pagamento em ${scMesNome()}</b>: <b>${brlC(scSoma(ativos60))}</b>. Candidatas a ação de corte / assessoria.`]);
-    if(cort.length) ins.push(['rose', `<b>${nf0.format(cort.length)}</b> ligações <b>cortadas</b> ainda devem <b>${brlC(scSoma(cort))}</b> — foco em negociação e recuperação.`]);
-    const nunca = d.filter(r=>/nunca/i.test(r.perfil)), corre = d.filter(r=>/correr/i.test(r.perfil));
-    if(nunca.length || corre.length) ins.push(['amber', `Perfis de risco: <b>Nunca pagou</b> ${brlC(scSoma(nunca))} (${nf0.format(nunca.length)}) e <b>Correr atrás</b> ${brlC(scSoma(corre))} (${nf0.format(corre.length)}).`]);
-    const pass = d.filter(r=>/passivo/i.test(r.perfil) && r.aging<=30);
-    if(pass.length) ins.push(['leaf', `<b>${nf0.format(pass.length)}</b> clientes <b>Passivo</b> com até 30 dias (${brlC(scSoma(pass))}): tendem a pagar com lembrete — comunicação preventiva (Infobip).`]);
-    if(novos.length) ins.push(['water', `<b>${brlC(scSoma(novos))}</b> entrou no vencido em ${scMesNome()} (${nf0.format(novos.length)} matrículas) — atuar antes de passar de 30 dias.`]);
-  }
-  $('sc-insights').innerHTML = ins.map(([c,t])=>`<div class="sc-ins ${c}">${t}</div>`).join('') || '<div class="faint">Sem dados.</div>';
 }
 
-function scTmpBadge(r){ if(!r.tmp_status) return '<span class="faint">—</span>'; return tmpBadge(r.tmp_status) + `<div class="faint" style="font-size:11px;margin-top:3px">TMP ${dBRc(r.data_tmp_c)}${r.tmp_fonte==='base vencidos'?' · base venc.':''}</div>`; }
+function scTmpBadge(r){ if(!r.tmp_status) return '<span class="faint">—</span>'; return `<span class="badge ${r.tmp_status==='Crítico'?'b-navy':r.tmp_status==='Alerta'?'b-water':'b-gray'}">${esc(r.tmp_status)}</span>` + `<div class="faint" style="font-size:11px;margin-top:3px">TMP ${dBRc(r.data_tmp_c)}${r.tmp_fonte==='base vencidos'?' · base venc.':''}</div>`; }
 function renderSCTop(){
-  const d = scDados().sort((a,b)=>scVal(b)-scVal(a)), tot = scSoma(d), N = +$('sc-top-n').value, modo = $('sc-top-modo').value;
+  const d = scDados().sort((a,b)=>scVal(b)-scVal(a)), tot = scSoma(d), N = +$('sc-top-n').value, modo = 'geral';
   const grupos = modo==='geral' ? [['', d]] : Object.entries(grupo(d,'executivo')).sort((a,b)=>scSoma(b[1])-scSoma(a[1]));
   let html = '', nTot = 0, vTot = 0;
   grupos.forEach(([e,g])=>{
@@ -4601,20 +4589,20 @@ function renderSCTop(){
     html += `${e?`<div class="sc-top-exec"><h3>${esc(e)}</h3><span class="muted">${top.length} de ${g.length} matrículas · ${brlC(vt)} (${pct(vt,scSoma(g))} do saldo do executivo)</span></div>`:''}
     <div class="tablewrap"><table class="sc-top-tab"><thead><tr><th>#</th><th>Matrícula / Cliente</th><th class="num">Saldo vencido</th>${e?'':'<th>Executivo</th>'}<th>Perfil</th><th>Aging</th><th>Tipo de conta</th><th>TMP</th><th>Pagou no mês</th><th>Ligação</th><th>Status cobrança</th><th>Pagamento agendado</th><th>Observação</th></tr></thead><tbody>`
     + top.map((r,i)=>{ const a = ACOMP[r.matricula]||{}, tem = a.status_cobranca||a.data_pagamento_agendado||a.observacao;
-      return `<tr><td>${i+1}</td><td><b>${r.matricula}</b>${r.na_visao_vencidos?' <span class="badge b-water" title="Também está na base de Vencidos no mês">↔ Vencidos no mês</span>':''}${tem?' <span class="badge b-leaf" title="Último registro: '+esc(a.atualizado_por||'')+'">preenchido</span>':''}<div class="cli muted" title="${esc(r.cliente)}" style="max-width:220px;font-size:12px">${esc(r.cliente)}</div></td>
+      return `<tr><td>${i+1}</td><td><b>${r.matricula}</b>${r.na_visao_vencidos?' <span class="badge b-water" title="Também está na base de Vencidos no mês">↔ Vencidos no mês</span>':''}${tem?' <span class="badge b-navy" title="Último registro: '+esc(a.atualizado_por||'')+'">preenchido</span>':''}<div class="cli muted" title="${esc(r.cliente)}" style="max-width:220px;font-size:12px">${esc(r.cliente)}</div></td>
         <td class="num"><b>${brl(scVal(r))}</b><div class="faint" style="font-size:11px">${nf0.format(r.notas||0)} notas</div></td>${e?'':`<td>${esc(r.executivo)}</td>`}<td>${esc(r.perfil)}</td>
         <td><b>${nf0.format(r.aging)} d</b><div class="faint" style="font-size:11px">desde ${dBRc(r.venc)}</div></td><td>${esc(r.tipo_conta)}</td><td>${scTmpBadge(r)}</td>
-        <td>${r.pagou==='Sim'?`<span class="badge b-leaf">${brlC(r.pago_mes)}</span>`:'<span class="badge b-rose">Não</span>'}</td><td>${esc(r.ligacao)}</td>
+        <td>${r.pagou==='Sim'?`<span class="badge b-water">${brlC(r.pago_mes)}</span>`:'<span class="badge b-gray">Não</span>'}</td><td>${esc(r.ligacao)}</td>
         <td><input class="cell-input" list="dl-status" data-m="${r.matricula}" data-f="status_cobranca" value="${esc(a.status_cobranca||'')}" placeholder="Digite ou escolha…"></td>
         <td><input class="cell-input" type="date" data-m="${r.matricula}" data-f="data_pagamento_agendado" value="${esc(a.data_pagamento_agendado||'')}"></td>
         <td><textarea class="cell-input obs-input" rows="2" data-m="${r.matricula}" data-f="observacao" placeholder="Observação…">${esc(a.observacao||'')}</textarea></td></tr>`; }).join('')
     + (top.length ? `<tr class="total"><td colspan="2">Total</td><td class="num">${brl(vt)}</td><td colspan="${e?10:11}"></td></tr>` : `<tr class="empty-row"><td colspan="13">Nenhuma matrícula.</td></tr>`) + '</tbody></table></div>';
   });
   $('sc-top-lista').innerHTML = html || '<div class="faint">Nenhuma matrícula com os filtros atuais.</div>';
-  $('sc-top-sub').textContent = `${modo==='geral'?'Top geral':'Top por executivo'} · ${nf0.format(nTot)} matrículas somam ${brlC(vTot)} — ${pct(vTot,tot)} do saldo vencido da seleção.`;
+  $('sc-top-sub').textContent = `Maiores saldos da carteira${SCF.exec.size?' · '+[...SCF.exec].join(', '):''} · ${nf0.format(nTot)} matrículas somam ${brlC(vTot)} — ${pct(vTot,tot)} do saldo vencido da seleção.`;
   document.querySelectorAll('#sc-top-lista .cell-input').forEach(inp=>inp.onchange=async()=>{ await salvarAcomp(inp); });
 }
-$('sc-top-n').onchange = renderSCTop; $('sc-top-modo').onchange = renderSCTop;
+$('sc-top-n').onchange = renderSCTop;
 
 /* ---------- Excel completo ---------- */
 function scLinhaXLS(r){
@@ -4622,7 +4610,7 @@ function scLinhaXLS(r){
   return { 'Matrícula':r.matricula, 'Cliente':r.cliente, 'Executivo':r.executivo, 'Carteira':r.carteira, 'Superintendência':r.superintendencia,
     'Segmento':r.segmento||'', 'Classificação':r.classificacao||'', 'Classificação MacroCluster':r.macrocluster, 'Perfil Cliente - 3 meses':r.perfil, 'Status da ligação':r.ligacao,
     'Vencimento mais antigo':r.venc?dBR(r.venc):'', 'Aging (dias)':r.aging, 'Faixa de dias vencido':r.faixa, 'Tipo de conta (em aberto)':r.tipo_conta, 'Tipos vencidos':r.trib_v.join(' + '),
-    'Notas vencidas':+r.notas||0, 'Saldo vencido':+r.saldo_vencido.toFixed(2), 'Vencido - Fatura mensal':+r.v_fatura.toFixed(2), 'Vencido - NFA':+r.v_nfa.toFixed(2), 'Vencido - Parcela':+r.v_parcela.toFixed(2),
+    'Notas vencidas':+r.notas||0, 'Saldo vencido (total)':+r.saldo_vencido.toFixed(2), 'Vencido do mês (visão Vencidos no mês)':+r.v_mes.toFixed(2), 'Saldo vencido sem o mês vigente':+Math.max(0,r.saldo_vencido-r.v_mes).toFixed(2), 'Vencido - Fatura mensal':+r.v_fatura.toFixed(2), 'Vencido - NFA':+r.v_nfa.toFixed(2), 'Vencido - Parcela':+r.v_parcela.toFixed(2),
     'TMP (dias)':r.tmp==null?'':+r.tmp, 'Data TMP':r.data_tmp_c?dBR(r.data_tmp_c):'', 'Status TMP':r.tmp_status||'', 'Fonte TMP':r.tmp_fonte||'',
     ['Pagou em '+scMesNome()+'?']: r.pagou==='Sim' ? +r.pago_mes.toFixed(2) : 'Não',
     'Na visão Vencidos no mês':r.na_visao_vencidos?'Sim':'Não', 'Na carteira GC Privado':r.na_carteira?'Sim':'Não',
