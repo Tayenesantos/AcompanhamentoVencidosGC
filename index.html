@@ -1021,7 +1021,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 05/10c</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 06/10</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -2950,7 +2950,8 @@ function celQtd(st, total){
   const meta = ` <span class="faint">/ ${st.metaAte!=null?nf0.format(Math.round(st.metaAte)):'—'}</span>`;
   if(st.ausente) return `<td class="num">${q}<span class="aus-tag">férias/atestado</span></td>`;
   if(st.k==='cons' && st.cons && st.cons.n){ const c = st.cons;
-    return `<td class="num">${q}${meta}${total ? `<span class="sup-ok" title="bateram a meta individual">✓ ${c.nBateu}/${c.n}</span>` : c.bateu ? `<span class="sup-ok" title="meta individual ${c.metaInd}">✓ meta</span>` : `<span class="aus-tag" title="meta individual ${c.metaInd}${c.comp?' (com P3)':''}">faltam ${nf0.format(c.falta)}</span>`}</td>`; }
+    const p3 = (!total && c.comp) ? ` <span class="aus-tag" title="P1+P2 abaixo de ${CONS_MIN()}: completar com P3">P3 ${nf0.format(c.c3)}/${nf0.format(c.comp)}</span>` : '';
+    return `<td class="num">${q}${meta}${total ? `<span class="sup-ok" title="analisaram todos os P1+P2 no mês">✓ ${c.nMes}/${c.n}</span>` : c.bateuMes ? `<span class="sup-ok" title="analisou todos os P1+P2 do mês">✓ mês</span>` : `<span class="aus-tag" title="P1+P2 pendentes">faltam ${nf0.format(c.pend12)}</span>`}${p3}</td>`; }
   const sup = st.nSup ? (total ? `<span class="sup-ok" title="Bateram a meta semanal (semana de ${dBRc(st.semSup)})">✓ ${st.nSup}/${st.nEleg}</span>` : `<span class="sup-ok" title="Bateu a meta semanal (semana de ${dBRc(st.semSup)})${st.modo==='dia'?' — conta como meta atingida no dia':''}">✓ semana</span>`) : '';
   return `<td class="num">${q}${meta}${sup}</td>`;
 }
@@ -2976,16 +2977,17 @@ const CONS_MIN = () => +PCFG.meta_cons_ciclo || 150;
 function consExec(r){
   const p12 = r.p1 + r.p2, a12 = r.a1 + r.a2, comp = p12 >= CONS_MIN() ? 0 : Math.min(CONS_MIN() - p12, r.p3);
   const c3 = Math.min(r.a3, comp), metaInd = p12 + comp, cred = a12 + c3;
-  return { ...r, p12, a12, comp, c3, metaInd, cred, bateu: metaInd>0 && cred>=metaInd, falta: Math.max(0, metaInd-cred), pend12: p12 - a12, pendComp: comp - c3 };
+  return { ...r, p12, a12, comp, c3, metaInd, cred, bateu: metaInd>0 && cred>=metaInd, falta: Math.max(0, metaInd-cred), pend12: p12 - a12, pendComp: comp - c3,
+    bateuMes: p12>0 && a12>=p12 };   // ✓ mês = analisou todos os P1+P2 (a meta mostrada)
 }
 function consMetaInfo(execs, ciclo){
   const r = PD.consRes[ciclo]; if(!r) return null;
-  const t = { p1:0,p2:0,p3:0,a1:0,a2:0,a3:0,p12:0,a12:0,comp:0,c3:0,metaInd:0,cred:0,falta:0,pend12:0,pendComp:0, n:0, nBateu:0 };
+  const t = { p1:0,p2:0,p3:0,a1:0,a2:0,a3:0,p12:0,a12:0,comp:0,c3:0,metaInd:0,cred:0,falta:0,pend12:0,pendComp:0, n:0, nBateu:0, nMes:0 };
   // visão do time: soma a base inteira (todos os executivos da base de prioridades, inclusive fora da lista)
   const chaves = execs.length > 1 ? Object.keys(r.porE) : execs.map(norm);
-  chaves.forEach(k0=>{ const x = r.porE[k0]; if(!x) return; const c = consExec(x); t.n++; if(c.bateu) t.nBateu++;
-    Object.keys(t).forEach(k=>{ if(k!=='n' && k!=='nBateu') t[k] += c[k]; }); });
-  return { ...t, ref:r.data_base };
+  chaves.forEach(k0=>{ const x = r.porE[k0]; if(!x) return; const c = consExec(x); t.n++; if(c.bateu) t.nBateu++; if(c.bateuMes) t.nMes++;
+    Object.keys(t).forEach(k=>{ if(!['n','nBateu','nMes'].includes(k)) t[k] += c[k]; }); });
+  return { ...t, ref:r.data_base, bateuMes: t.n>0 && t.nMes===t.n, bateu: t.n>0 && t.nBateu===t.n };
 }
 // análises do dia cruzadas com a prioridade da base (executivo do Forms)
 function consDiaPrio(execs, a, b){
@@ -3138,8 +3140,9 @@ function tempoInd(st){ // fatia desta frente no esforço total do(s) executivo(s
 function seloSup(st){
   if(st.ausente) return `<span class="selo aus">Férias/atestado no período</span>`;
   if(st.k==='cons'){ const c = st.cons; if(st.soQtd || !c || !c.n) return '';
-    if(st.execs.length===1) return c.bateu ? `<span class="selo ok">✓ Bateu a meta individual (${nf0.format(c.metaInd)})</span>` : `<span class="selo aus">Faltam ${nf0.format(c.falta)} para a meta individual (${nf0.format(c.metaInd)}${c.comp?' com P3':''})</span>`;
-    return `<span class="selo ${c.nBateu?'ok':'aus'}">✓ ${c.nBateu} de ${c.n} bateram a meta individual</span>`; }
+    if(st.execs.length===1) return (c.bateuMes ? `<span class="selo ok">✓ Meta do mês batida (P1+P2)</span>` : `<span class="selo aus">Faltam ${nf0.format(c.pend12)} de P1+P2 no mês</span>`)
+      + (c.comp ? ` <span class="selo ${c.pendComp?'aus':'ok'}">Complemento P3: ${nf0.format(c.c3)} de ${nf0.format(c.comp)}</span>` : '');
+    return `<span class="selo ${c.nMes?'ok':'aus'}">✓ ${c.nMes} de ${c.n} bateram a meta do mês (P1+P2)</span>`; }
   if(st.soQtd || st.nEleg==null) return '';
   const sem = st.semW ? rotSemana(st.semW) : `semana de ${dBRc(st.semSup)}`;
   if(st.execs.length===1) return st.nSup ? `<span class="selo ok">✓ Bateu a meta semanal (${sem})</span>` : `<span class="selo aus">Meta semanal ainda não batida (${sem})</span>`;
@@ -3346,7 +3349,7 @@ function renderConsTab(){
   const el = $('pg-cons'); if(!el) return;
   const cc = consCicloDoMes(PD.mes), d = linhasConsTab(), c = periodoDe('cons', cc);
   if(!d){ el.innerHTML = `<h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)}: ainda não há base de prioridades. Suba a base do dia em <b>Importar e configurar</b>.</p>`; return; }
-  const sit = (x, tot) => tot ? `<b>${x.nBateu} de ${x.n}</b> bateram` : x.bateu ? '<span class="sup-ok" style="margin:0">✓ Bateu</span>' : `<span style="color:var(--rose);font-weight:700">Faltam ${nf0.format(x.falta)}</span>`;
+  const sit = (x, tot) => tot ? `<b>${x.nMes} de ${x.n}</b> bateram (P1+P2)` : (x.bateuMes ? '<span class="sup-ok" style="margin:0">✓ Mês</span>' : `<span style="color:var(--rose);font-weight:700">Faltam ${nf0.format(x.pend12)}</span>`) + (x.comp ? (x.pendComp ? ` <span class="aus-tag">P3: faltam ${nf0.format(x.pendComp)}</span>` : ' <span class="sup-ok">P3 ✓</span>') : '');
   const row = (nome, x, cls='') => x ? `<tr class="${cls}"><td>${cls?nome:`<b>${esc(nome)}</b>`}</td><td class="num">${nf0.format(x.a1)} <span class="faint">/ ${nf0.format(x.p1)}</span></td><td class="num">${nf0.format(x.a2)} <span class="faint">/ ${nf0.format(x.p2)}</span></td>
       <td class="num"><b>${nf0.format(x.a12)}</b> <span class="faint">/ ${nf0.format(x.p12)}</span></td>
       <td class="num pct-cell" style="color:${x.p12?corPct(pctN(x.a12,x.p12)):'var(--text-faint)'}">${x.p12?fmtPct(pctN(x.a12,x.p12)):'—'}</td>
@@ -3354,7 +3357,7 @@ function renderConsTab(){
       <td class="num">${x.comp ? `${nf0.format(x.c3)} <span class="faint">/ ${nf0.format(x.comp)}</span>` : '<span class="faint">—</span>'}</td>
       <td class="num">${cls ? '' : `${nf0.format(x.cred)} <span class="faint">/ ${nf0.format(x.metaInd)}</span>`}</td><td class="num">${sit(x, !!cls)}</td></tr>`
     : `<tr><td><b>${esc(nome)}</b></td><td colspan="8" class="faint">sem clientes na base de prioridades</td></tr>`;
-  el.innerHTML = `<div class="card-head"><div><h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)} · base de prioridades de ${d.r.data_base?dBR(d.r.data_base):'—'} cruzada com o Forms pela matrícula (analisado = cliente com análise no Forms dentro do ciclo, feita pelo próprio executivo da base — mesma regra do BI). <b>Meta = P1+P2</b> (do time: soma de P1+P2). Meta individual: P1+P2; quem tem menos de ${CONS_MIN()} completa o restante com P3. Férias não reduzem esta meta.</p></div>
+  el.innerHTML = `<div class="card-head"><div><h2>Consumo Estratégico — prioridades × Forms</h2><p class="sub">Ciclo ${dBRc(c.ini)} a ${dBRc(c.fim)} · base de prioridades de ${d.r.data_base?dBR(d.r.data_base):'—'} cruzada com o Forms pela matrícula (analisado = cliente com análise no Forms dentro do ciclo, feita pelo executivo ou por quem cobriu a carteira dele; o crédito vai para o executivo da base). <b>Meta = P1+P2</b> (do time: soma de P1+P2). Meta individual: P1+P2; quem tem menos de ${CONS_MIN()} completa o restante com P3. Férias não reduzem esta meta.</p></div>
       <button class="btn btn-ghost btn-sm" id="btn-xls-cons">Exportar clientes (analisados e pendentes)</button></div>
     <div class="tablewrap"><table><thead><tr><th>Executivo</th><th class="num">P1 analisados / base</th><th class="num">P2 analisados / base</th><th class="num">Realizado / meta P1+P2</th><th class="num">Atingimento</th><th class="num">Pendentes P1+P2</th><th class="num">Complemento P3 feito / necessário</th><th class="num">Meta individual (com P3)</th><th class="num">Situação</th></tr></thead>
     <tbody>${d.L.map(l=>row(l.e + (l.fora?' (fora da lista do time)':''), l.c)).join('')}${d.L.length>1 ? row('Time', d.t, 'total') : ''}</tbody></table></div>`;
@@ -3494,7 +3497,7 @@ $('btn-pf').onclick = async ()=>{
       if(!d){ semData++; return; }
       L.push({ executivo:e, matricula:parseInt(String(g(r,'mat')??'').replace(/\D/g,''),10)||null, data:d }); });
     const ds = L.map(x=>x.data).sort();
-    log(`Aba "${t.aba}": ${nf0.format(L.length)} análises de ${dBR(ds[0])} a ${dBR(ds[ds.length-1])}${semData?` · ${semData} linhas sem data ignoradas`:''}.`);
+    log(`Aba "${t.aba}": ${nf0.format(L.length)} análises · primeira análise registrada em ${dBR(ds[0])} e última em ${dBR(ds[ds.length-1])} (datas do próprio arquivo, colunas Mês e Dia)${semData?` · ${semData} linhas sem data ignoradas`:''}. Para o Consumo valem todas as análises do ciclo.`);
     const r = await rpc('prod_importar_forms', { p_linhas:L });
     log(`✓ Importado: ${nf0.format(r.linhas)} análises (meses ${r.meses.map(mesNome).join(', ')} substituídos).`);
     await logImportProd('forms', f.name, r.linhas, { meses:r.meses.map(mesNome) });
