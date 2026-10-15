@@ -272,6 +272,20 @@
   .vd-tag.fds{ background:var(--amber-soft); color:var(--amber); } .vd-tag.fer{ background:#EFEAFA; color:#6A45B8; }
   .vd-barra{ height:8px; background:#EEF3F6; border-radius:8px; overflow:hidden; min-width:90px; } .vd-barra div{ height:100%; background:var(--water); border-radius:8px; }
   .vd-nota{ background:#FFF6E8; border:1px solid var(--amber-line); border-radius:12px; padding:12px 14px; font-size:13px; color:var(--navy); line-height:1.5; }
+  #acion-area td a{ color:var(--navy); text-decoration:none; } #acion-area td a:hover{ color:#1C7EBE; text-decoration:underline; }
+  .acview{ display:none; } .acview.active{ display:block; }
+  .mod-card.acion::before{ background:#1C7EBE; }
+  .mod-card.acion .mod-icon{ background:#E3F0FA; color:#1C7EBE; }
+  #acion-area .kpi::before{ background:var(--water); } #acion-area .kpi.navy::before{ background:var(--navy); }
+  .ac-bars .ac-row{ display:grid; grid-template-columns:minmax(120px,1.2fr) 2fr 200px; gap:10px; align-items:center; padding:6px 0; font-size:13px; border-bottom:1px dashed var(--border); }
+  .ac-bars .ac-row:last-child{ border-bottom:none; } .ac-bars .ac-track{ height:10px; background:#EEF3F6; border-radius:8px; overflow:hidden; }
+  .ac-bars .ac-fill{ height:100%; border-radius:8px; } .ac-bars .ac-val{ text-align:right; white-space:nowrap; font-weight:700; color:var(--navy); } .ac-bars small{ font-weight:400; color:var(--text-mut); }
+  .ac-chart{ position:relative; height:280px; margin-top:10px; }
+  .ac-mats{ font-size:11.5px; color:var(--text-mut); max-width:380px; line-height:1.5; white-space:normal; word-break:break-word; }
+  #acion-area td.ac-wrap{ white-space:normal; min-width:220px; }
+  .ac-up{ color:#1C7EBE; font-weight:700; } .ac-down{ color:#0B3B60; font-weight:700; }
+  .ac-tag{ display:inline-block; font-size:11px; padding:2px 8px; border-radius:100px; background:#E3F0FA; color:#0B3B60; margin:1px 2px; white-space:nowrap; }
+  .ac-busca{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin:10px 0; } .ac-busca input{ min-width:260px; }
   .mod-card.tee::before{ background:#6A45B8; }
   .mod-card.tee .mod-icon{ background:#EFEAFA; color:#6A45B8; }
   .tee-segs{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -487,6 +501,13 @@
         <h2>Produtividade do Setor</h2>
         <p>Consumo estratégico, acionamentos, pesquisa de satisfação e alteração cadastral — meta × realizado por dia, semana e mês, com modo apresentação.</p>
         <div class="mod-stats" id="home-prod-stats"><div>Carregando…</div></div>
+        <div class="mod-go">Abrir →</div>
+      </button>
+      <button class="mod-card acion" data-mod="acion">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></div>
+        <h2>Acionamentos</h2>
+        <p>OS e matrículas acionadas por mês: visão do executivo (performance), visão do cliente com perfil de pagamento e painel das visitas em campo.</p>
+        <div class="mod-stats" id="home-acion-stats"><div>Carregando…</div></div>
         <div class="mod-go">Abrir →</div>
       </button>
       <button class="mod-card tee" data-mod="tee" style="display:none">
@@ -1172,6 +1193,90 @@
     </section>
   </div>
 
+  <!-- ACIONAMENTOS -->
+  <div id="acion-area" style="display:none;">
+    <nav class="tabs" id="tabs-ac">
+      <button class="active" data-ac="exec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="lbl">Visão do executivo</span></button>
+      <button data-ac="cli"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg><span class="lbl">Visão do cliente</span></button>
+      <button data-ac="vis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="lbl">Visitas em campo</span></button>
+      <button data-ac="imp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg><span class="lbl">Importar bases</span></button>
+    </nav>
+    <div class="panel-top" id="ac-filtros">
+      <div class="filters" id="ac-filtros-box"></div>
+      <div class="filters"><button class="btn btn-ghost btn-sm" id="ac-limpar">Limpar filtros</button><button class="btn btn-primary btn-sm" id="ac-xls">Baixar Excel</button></div>
+      <div class="filter-note" id="ac-fonte" style="max-width:none;flex-basis:100%"></div>
+    </div>
+    <div id="ac-loading" class="loading" style="display:none">Carregando acionamentos…</div>
+    <div id="ac-vazio" class="card" style="display:none;"><h2>Nenhuma base de acionamentos importada ainda</h2><p class="sub">Vá em <b>Importar bases</b> e suba a base unificada de acionamentos (abril a setembro) e a <b>Carteira</b> (planilha GC Privado).</p></div>
+
+    <!-- EXECUTIVO -->
+    <section class="acview active" id="ac-exec">
+      <div class="card">
+        <h2>Performance dos acionamentos</h2>
+        <p class="sub" id="ac-ex-sub"></p>
+        <div class="kpi-row" id="ac-ex-kpis"></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><h2>Comparativo por mês</h2><p class="sub">Matrículas distintas e OS (solicitações) em cada mês. Sem "gc visita em campo" (ela tem painel próprio).</p>
+          <div class="tablewrap"><table><thead><tr><th>Mês</th><th class="num">Total de matrículas</th><th class="num">Total de OS</th><th class="num">OS/mat.</th><th class="num">× mês ant.</th></tr></thead><tbody id="ac-ex-mes"></tbody></table></div></div>
+        <div class="card"><h2>Evolução mensal</h2><p class="sub">OS e matrículas por mês.</p><div class="ac-chart"><canvas id="ac-ch-mes"></canvas></div></div>
+      </div>
+      <div class="card"><h2>Por executivo</h2><p class="sub">OS no período selecionado e, por mês, <b>OS</b> · <small>matrículas</small>. Clique no nome para filtrar o executivo.</p>
+        <div class="tablewrap"><table><thead id="ac-ex-th"></thead><tbody id="ac-ex-tab"></tbody></table></div></div>
+      <div class="card"><h2>Motivo do acionamento (Parecer normalizado)</h2><p class="sub">Quantidade de matrículas e de OS por motivo.</p>
+        <div class="tablewrap"><table><thead><tr><th>Motivo</th><th class="num">Matrículas</th><th class="num">OS</th><th class="num">% das OS</th><th style="width:34%"></th></tr></thead><tbody id="ac-ex-mot"></tbody></table></div></div>
+      <div class="card"><h2>Matrículas acionadas</h2><p class="sub" id="ac-ex-mat-sub">Matrículas usadas nos acionamentos — base para o acompanhamento de performance do executivo.</p>
+        <div class="ac-busca"><div class="field"><label>Buscar matrícula ou cliente</label><input id="ac-ex-busca" placeholder="Digite…"></div><button class="btn btn-ghost btn-sm" id="ac-ex-mat-xls">Baixar matrículas (Excel)</button></div>
+        <div class="tablewrap"><table><thead><tr><th>Matrícula</th><th>Cliente</th><th>Perfil</th><th>Executivo</th><th class="num">OS</th><th>Motivos</th><th>Meses</th><th>Último acionamento</th></tr></thead><tbody id="ac-ex-mat"></tbody></table></div></div>
+    </section>
+
+    <!-- CLIENTE -->
+    <section class="acview" id="ac-cli">
+      <div class="card"><h2>Visão do cliente</h2><p class="sub" id="ac-cl-sub"></p><div class="kpi-row" id="ac-cl-kpis"></div></div>
+      <div class="card"><h2>Top 10 clientes com mais OS</h2><p class="sub">Cliente pelo nome (cruzado com a carteira quando a base não traz) · matrículas · executivos · quantidade de OS. Sem visitas em campo.</p>
+        <div class="tablewrap"><table><thead><tr><th>#</th><th>Cliente</th><th>Perfil de pagamento</th><th class="num">Matrículas</th><th>Executivos</th><th class="num">OS</th><th class="num">% das OS</th></tr></thead><tbody id="ac-cl-top"></tbody></table></div></div>
+      <div class="two-col">
+        <div class="card"><h2>Por perfil de pagamento</h2><p class="sub">OS · matrículas · % das OS.</p><div class="ac-bars" id="ac-cl-perfil"></div></div>
+        <div class="card"><h2>Por carteira</h2><p class="sub">OS · matrículas · % das OS.</p><div class="ac-bars" id="ac-cl-cart"></div></div>
+      </div>
+      <div class="card"><h2>Histórico do cliente</h2><p class="sub">Busque um cliente ou matrícula para ver todos os acionamentos (inclusive visitas).</p>
+        <div class="ac-busca"><div class="field"><label>Cliente ou matrícula</label><input id="ac-cl-busca" placeholder="Ex.: condomínio, 101265528…"></div></div>
+        <div id="ac-cl-hist"></div></div>
+    </section>
+
+    <!-- VISITAS -->
+    <section class="acview" id="ac-vis">
+      <div class="card"><h2>Visitas em campo</h2><p class="sub" id="ac-vi-sub"></p><div class="kpi-row" id="ac-vi-kpis"></div></div>
+      <div class="two-col">
+        <div class="card"><h2>Comparativo por mês</h2><p class="sub">Matrículas visitadas e visitas (OS) por mês.</p>
+          <div class="tablewrap"><table><thead><tr><th>Mês</th><th class="num">Matrículas</th><th class="num">Visitas (OS)</th><th class="num">× mês anterior</th></tr></thead><tbody id="ac-vi-mes"></tbody></table></div>
+          <div class="ac-chart" style="height:220px"><canvas id="ac-ch-vis"></canvas></div></div>
+        <div class="card"><h2>Por executivo</h2><p class="sub">Visitas · matrículas visitadas · % das visitas.</p><div class="ac-bars" id="ac-vi-exec"></div></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><h2>Top 10 clientes visitados</h2><div class="tablewrap"><table><thead><tr><th>#</th><th>Cliente</th><th class="num">Matrículas</th><th>Executivos</th><th class="num">Visitas</th></tr></thead><tbody id="ac-vi-top"></tbody></table></div></div>
+        <div class="card"><h2>Perfil de pagamento dos visitados</h2><p class="sub">Visitas · matrículas · % das visitas.</p><div class="ac-bars" id="ac-vi-perfil"></div></div>
+      </div>
+      <div class="card"><h2>Lista de visitas</h2><p class="sub" id="ac-vi-lista-sub"></p>
+        <div class="tablewrap"><table><thead><tr><th>Data</th><th>OS</th><th>Matrícula</th><th>Cliente</th><th>Perfil</th><th>Executivo</th><th>Carteira</th><th class="num">Arrec. no mês</th></tr></thead><tbody id="ac-vi-lista"></tbody></table></div></div>
+    </section>
+
+    <!-- IMPORTAR -->
+    <section class="acview" id="ac-imp">
+      <div class="two-col">
+        <div class="card"><h2>1 · Base de acionamentos</h2>
+          <p class="sub">Base com <b>Nome Reduzido</b> (executivo), <b>Parecer_Normalizado</b>, <b>Nº da Solicitação</b>, <b>Nº Ligação</b> e <b>Data Pedido</b> (Carteira, Cliente, Perfil do cliente e Arrec Mês são opcionais). Pode subir só o mês novo ou a base unificada: OS que já existem são atualizadas, as novas são acrescentadas. O mês vem da Data Pedido.</p>
+          <div class="upload-box"><input type="file" id="ac-f-base" accept=".xlsx,.xls,.xlsm,.csv"><div class="form-row"><button class="btn btn-primary" data-ac-imp="base">Importar acionamentos</button></div></div>
+          <div class="log" id="ac-log-base"></div></div>
+        <div class="card"><h2>2 · Carteira (GC Privado)</h2>
+          <p class="sub">Aba <b>Carteira</b> da planilha GC Privado: a plataforma cruza a matrícula para trazer o <b>nome do cliente</b> e o <b>perfil de pagamento</b> (Perfil Cliente - 3 meses) quando a base de acionamentos não trouxer. Substitui a carteira anterior.</p>
+          <div class="upload-box"><input type="file" id="ac-f-carteira" accept=".xlsx,.xls,.xlsm"><div class="form-row"><button class="btn btn-primary" data-ac-imp="carteira">Importar carteira</button></div></div>
+          <div class="log" id="ac-log-carteira"></div></div>
+      </div>
+      <div class="card"><h2>Histórico de importações</h2><div class="tablewrap"><table><thead><tr><th>Base</th><th>Arquivo</th><th>Importado em</th><th>Por</th><th class="num">Linhas</th><th>Resumo</th></tr></thead><tbody id="ac-hist"></tbody></table></div></div>
+    </section>
+  </div>
+
   <!-- ARRECADAÇÃO -->
   <div id="arr-area" style="display:none;">
     <nav class="tabs" id="tabs-arr">
@@ -1283,7 +1388,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 06/10e</div>
+<div id="versao" style="position:fixed;left:12px;bottom:8px;font-size:11px;color:var(--text-faint);z-index:5">versão 15/10</div>
 <div id="apres" class="apres">
   <div class="ap-top">
     <div class="ap-brand"><span class="ap-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></svg></span><div><b>PRODUTIVIDADE DO SETOR</b><small id="ap-sub"></small></div></div>
@@ -1452,14 +1557,14 @@ async function entrar(){
   catch(e){ msg.style.color='var(--rose)'; msg.textContent=e.message; }
 }
 function sair(){
-  salvarSessao(null); MODULO=null; VENC_OK=false; SC_OK=false; SC=[]; ARR_OK=false; CONS_OK=false; PROD_OK=false; TEE_OK=false; $('apres').classList.remove('on');
-  ['main-area','arr-area','cons-area','prod-area','tee-area','home-area','hero-actions'].forEach(id=>$(id).style.display='none');
+  salvarSessao(null); MODULO=null; AC_OK=false; AC=[]; VENC_OK=false; SC_OK=false; SC=[]; ARR_OK=false; CONS_OK=false; PROD_OK=false; TEE_OK=false; $('apres').classList.remove('on');
+  ['main-area','arr-area','cons-area','prod-area','tee-area','acion-area','home-area','hero-actions'].forEach(id=>$(id).style.display='none');
   $('login-area').style.display='block'; $('hero-meta').innerHTML=''; setHero(null);
 }
 $('btn-login').onclick = entrar;
 $('login-senha').addEventListener('keydown', e=>{ if(e.key==='Enter') entrar(); });
 $('btn-sair').onclick = sair;
-$('btn-recarregar').onclick = ()=>{ if(MODULO==='venc'){ carregarTudo(); if(SC_VIS==='saldo') carregarSaldo(); } else if(MODULO==='arr') carregarArrec(true); else if(MODULO==='cons') carregarConsumo(FC.mes); else if(MODULO==='prod') carregarProd(); else if(MODULO==='tee') carregarTEE(); else carregarHome(); };
+$('btn-recarregar').onclick = ()=>{ if(MODULO==='venc'){ carregarTudo(); if(SC_VIS==='saldo') carregarSaldo(); } else if(MODULO==='arr') carregarArrec(true); else if(MODULO==='cons') carregarConsumo(FC.mes); else if(MODULO==='prod') carregarProd(); else if(MODULO==='tee') carregarTEE(); else if(MODULO==='acion') carregarAcion(); else carregarHome(); };
 $('btn-inicio').onclick = ()=>abrirHome();
 
 let MODULO = null, VENC_OK = false, ARR_OK = false;
@@ -1469,6 +1574,7 @@ const HERO = {
   prod:{ t:'Produtividade do Setor', p:'Visão geral do desempenho do time: consumo estratégico, acionamentos, pesquisa de satisfação e alteração cadastral — meta × realizado por dia, semana e mês.' },
   cons:{ t:'Consumo Estratégico · Time GC', p:'Variações de consumo e faturamento do mês: análise por executivo, motivos, prioridade e situação de pagamento das faturas (cruzada automaticamente com a arrecadação).' },
   tee:{ t:'Projeto Tarifa Especial de Esgoto', p:'T.E.E. por onda, segmento e público/privado: comunicados pendentes, prazo de defesa, matrículas aptas, prioridades de virada pelo ciclo de leitura e retorno financeiro mês a mês.' },
+  acion:{ t:'Acionamentos · Time GC', p:'OS e matrículas acionadas por mês: performance de cada executivo, visão do cliente com perfil de pagamento (cruzada com a carteira) e painel das visitas em campo.' },
   arr:{ t:'Arrecadação · Time GC', p:'Valor autenticado por carteira, por executivo, por dia de crédito e visão de qual vencimento foi pago em cada dia.' }
 };
 function setHero(m){ const h = HERO[m||'home']; $('hero-title').textContent = h.t; $('hero-desc').textContent = h.p; $('btn-inicio').style.display = (m && m!=='home') ? '' : 'none'; }
@@ -1480,7 +1586,7 @@ function abrirApp(){
 }
 function abrirHome(){
   MODULO='home'; setHero('home');
-  $('main-area').style.display='none'; $('arr-area').style.display='none'; $('cons-area').style.display='none'; $('prod-area').style.display='none'; $('tee-area').style.display='none'; $('home-area').style.display='block';
+  $('main-area').style.display='none'; $('arr-area').style.display='none'; $('cons-area').style.display='none'; $('prod-area').style.display='none'; $('tee-area').style.display='none'; $('acion-area').style.display='none'; $('home-area').style.display='block';
   $('hero-meta').innerHTML = `<span class="chip">Usuário: <b>${esc(SESSION&&SESSION.email)}</b></span>`;
   carregarHome();
 }
@@ -1511,6 +1617,10 @@ async function carregarHome(){
     $('home-prod-stats').innerHTML = `<div>Acionamentos<b>${ult('acionamentos')}</b></div><div>Forms<b>${ult('forms')}</b></div><div>Meta BI<b>${ult('meta_consumo')}</b></div>`;
   }catch(e){ $('home-prod-stats').innerHTML = '<div>Rode o supabase_produtividade.sql</div>'; }
   try{
+    const ai = await api('/acion_importacoes?select=tipo,resumo,importado_em&tipo=eq.base&order=id.desc&limit=1');
+    $('home-acion-stats').innerHTML = ai.length ? `<div>Base até<b>${esc((ai[0].resumo&&ai[0].resumo.ate)||'—')}</b></div><div>OS na base<b>${nf0.format((ai[0].resumo&&ai[0].resumo.total_os)||0)}</b></div><div>Importada<b>${new Date(ai[0].importado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</b></div>` : '<div>Nenhuma base importada ainda</div>';
+  }catch(e){ $('home-acion-stats').innerHTML = '<div>Rode o supabase_acionamentos.sql</div>'; }
+  try{
     const [tm, tc] = await Promise.all([apiAll('/tee_matriculas?select=matricula,tarifa_planilha,notificado,apto'), apiAll('/tee_controle?select=matricula,fase')]);
     const fz = Object.fromEntries(tc.map(c=>[c.matricula, c.fase]));
     const impl = tm.filter(m=>fz[m.matricula] ? fz[m.matricula]==='Finalizada' : m.tarifa_planilha==='SIM').length;
@@ -1526,6 +1636,8 @@ function abrirModulo(m){
   $('cons-area').style.display = m==='cons' ? 'block' : 'none';
   $('prod-area').style.display = m==='prod' ? 'block' : 'none';
   $('tee-area').style.display = m==='tee' ? 'block' : 'none';
+  $('acion-area').style.display = m==='acion' ? 'block' : 'none';
+  if(m==='acion'){ if(!AC_OK){ AC_OK=true; carregarAcion(); } else { heroAcion(); renderAcion(); } }
   if(m==='tee'){ if(!TEE_OK){ TEE_OK=true; carregarTEE(); } else heroTEE(); }
   if(m==='prod'){ if(!PROD_OK){ PROD_OK=true; carregarProd(); } else { heroProd(); renderProdTudo(); } }
   if(m==='cons'){ if(!CONS_OK){ CONS_OK=true; carregarConsumo(); } else heroCons(); }
@@ -4731,6 +4843,330 @@ function renderSCHist(){
   $('sc-hist').innerHTML = SC_IMPS.map(i=>`<tr><td><b>${nomes[i.tipo]||i.tipo}</b></td><td>${i.data_base?dBR(i.data_base):'—'}</td><td class="cli">${esc(i.arquivo)}</td><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(i.importado_por||'')}</td><td class="num">${nf0.format(i.linhas||0)}</td><td class="num">${i.resumo&&i.resumo.saldo_vencido!=null?brlC(+i.resumo.saldo_vencido):'—'}</td><td><span class="badge ${i.status==='ok'?'b-leaf':i.status==='erro'?'b-rose':'b-amber'}">${esc(i.status)}</span></td></tr>`).join('') || '<tr class="empty-row"><td colspan="8">Nenhuma importação.</td></tr>';
 }
 
+
+/* =====================================================================
+   ACIONAMENTOS · visão do executivo, visão do cliente e visitas em campo
+   ===================================================================== */
+var AC_OK = false, AC = [], AC_CART = {}, AC_IMPS = [], AC_TAB = 'exec';
+const ACF = { mes:new Set(), exec:new Set(), perfil:new Set(), cart:new Set() };
+const AC_FILTROS = [['mes','Mês','Todos os meses'],['exec','Executivo','Todos os executivos'],['perfil','Perfil de pagamento','Todos os perfis'],['cart','Carteira','Todas as carteiras']];
+const AC_VISITA = p => /visita em campo/.test(p||'');
+const AC_AZUIS = ['#0B3B60','#1C7EBE','#5BA7D9','#9CCBEB','#2F5F86','#7FB5DD'];
+const MES_CURTO = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const acMesNome = m => m ? MESES[+m.slice(5,7)-1].replace(/^./,c=>c.toUpperCase()) + '/' + m.slice(2,4) : '—';
+const acMesCurto = m => m ? MES_CURTO[+m.slice(5,7)-1] + '/' + m.slice(2,4) : '—';
+const acMotivo = p => { const s = String(p||'').replace(/^gc\s+/,''); return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Sem parecer'; };
+const acDist = (arr, k) => new Set(arr.map(r=>r[k])).size;
+const AC_FORA = v => norm(v).replace(/\s/g,'')==='foradacarteira';
+const acVal = v => { const s = String(v ?? '').replace(/\s+/g,' ').trim(); return (!s || s==='0' || s==='-' || /^#n\/?a$/i.test(s) || AC_FORA(s)) ? null : s; };   // vazio ou "Fora da carteira" -> procura na carteira
+const AC_SEM_CLI = ['(fora da carteira)','(cliente não identificado)'];
+
+/* ---------- abas ---------- */
+document.querySelectorAll('#tabs-ac button').forEach(b=>b.onclick=()=>{
+  AC_TAB = b.dataset.ac;
+  document.querySelectorAll('#tabs-ac button').forEach(x=>x.classList.toggle('active', x===b));
+  document.querySelectorAll('#acion-area .acview').forEach(s=>s.classList.toggle('active', s.id==='ac-'+AC_TAB));
+  $('ac-filtros').style.display = AC_TAB==='imp' ? 'none' : 'flex';
+  if(AC_TAB==='imp') renderAcHist(); else renderAcion();
+});
+
+/* ---------- carga ---------- */
+async function carregarAcion(){
+  $('ac-loading').style.display='block'; $('ac-vazio').style.display='none';
+  try{
+    const [imps, base, cart] = await Promise.all([
+      api('/acion_importacoes?select=*&order=id.desc&limit=60'),
+      apiAll('/acion_base?select=numero_solicitacao,mes_ref,executivo,parecer,matricula,data_pedido,carteira,cliente,perfil,arrec_mes&order=numero_solicitacao'),
+      apiAll('/acion_carteira?select=matricula,cliente,perfil,executivo,carteira&order=matricula')
+    ]);
+    AC_IMPS = imps || [];
+    AC_CART = Object.fromEntries(cart.map(c=>[c.matricula, c]));
+    AC = base.map(r=>{ const c = AC_CART[r.matricula] || {};
+      return { os:r.numero_solicitacao, mes:r.mes_ref, executivo:(r.executivo||'').trim() || 'Sem executivo', parecer:r.parecer||'', motivo:acMotivo(r.parecer),
+        matricula:r.matricula, data:r.data_pedido ? String(r.data_pedido).slice(0,16) : '', carteira:(r.carteira||c.carteira||'').trim() || 'Não informada',
+        cliente: acVal(r.cliente) || acVal(c.cliente) || (AC_FORA(r.cliente)||AC_FORA(r.perfil) ? '(fora da carteira)' : '(cliente não identificado)'),
+        perfil: (acVal(r.perfil) || acVal(c.perfil) || (AC_FORA(r.perfil)||AC_FORA(r.cliente) ? 'Fora da carteira' : 'Não informado')).toUpperCase(),
+        cli_fonte: acVal(r.cliente) ? 'base' : acVal(c.cliente) ? 'carteira' : '', arrec: r.arrec_mes==null ? null : +r.arrec_mes, visita:AC_VISITA(r.parecer) }; });
+    $('ac-loading').style.display='none';
+    if(!AC.length) $('ac-vazio').style.display='block';
+    montarFiltrosAc(); heroAcion(); renderAcion(); renderAcHist();
+  }catch(e){
+    $('ac-loading').textContent = 'Erro ao carregar: ' + e.message + (/acion_|schema cache/i.test(e.message) ? ' — rode o supabase_acionamentos.sql no Supabase.' : '');
+  }
+}
+function heroAcion(){
+  if(MODULO!=='acion') return;
+  const meses = [...new Set(AC.map(r=>r.mes))].sort();
+  $('hero-meta').innerHTML = AC.length
+    ? `<span class="chip">Período <b>${acMesNome(meses[0])} a ${acMesNome(meses[meses.length-1])}</b></span><span class="chip"><b>${nf0.format(AC.length)}</b> OS na base</span><span class="chip"><b>${nf0.format(acDist(AC,'matricula'))}</b> matrículas</span><span class="chip">Usuário: <b>${esc(SESSION&&SESSION.email)}</b></span>`
+    : '<span class="chip">Nenhuma base de acionamentos importada</span>';
+}
+
+/* ---------- filtros (seleção múltipla) ---------- */
+function acOpcoes(k){
+  if(k==='mes') return [...new Set(AC.map(r=>r.mes))].sort();
+  const campo = { exec:'executivo', perfil:'perfil', cart:'carteira' }[k];
+  return [...new Set(AC.map(r=>r[campo]))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+}
+const acRot = (k,v) => k==='mes' ? acMesNome(v) : v;
+function acTxt(k, todos){ const s=ACF[k], n=s.size; return !n ? todos : n===1 ? acRot(k,[...s][0]) : n + ' selecionados'; }
+function montarFiltrosAc(){
+  $('ac-filtros-box').innerHTML = AC_FILTROS.map(([k,l,t])=>`<div class="field"><label>${l}</label><div class="multi ac-multi" data-k="${k}"><button type="button" class="multi-btn"><span class="multi-txt">${esc(acTxt(k,t))}</span><span class="car">▼</span></button><div class="multi-pop" style="max-height:340px;overflow-y:auto"></div></div></div>`).join('');
+  document.querySelectorAll('.ac-multi').forEach(box=>{
+    const k = box.dataset.k, t = AC_FILTROS.find(f=>f[0]===k)[2], ops = acOpcoes(k), pop = box.querySelector('.multi-pop');
+    ACF[k] = new Set([...ACF[k]].filter(v=>ops.includes(v)));
+    pop.innerHTML = `<label class="todos"><input type="checkbox" data-todos="1" ${ACF[k].size?'':'checked'}>${esc(t)}</label>` + ops.map(o=>`<label><input type="checkbox" value="${esc(o)}" ${ACF[k].has(o)?'checked':''}>${esc(acRot(k,o))}</label>`).join('');
+    pop.querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
+      if(cb.dataset.todos) ACF[k].clear(); else { cb.checked ? ACF[k].add(cb.value) : ACF[k].delete(cb.value); if(ACF[k].size===ops.length) ACF[k].clear(); }
+      pop.querySelectorAll('input').forEach(x=>x.checked = x.dataset.todos ? !ACF[k].size : ACF[k].has(x.value));
+      box.querySelector('.multi-txt').textContent = acTxt(k,t); renderAcion();
+    });
+    box.querySelector('.multi-btn').onclick = e=>{ e.stopPropagation(); const ab=box.classList.contains('open'); document.querySelectorAll('.multi').forEach(m=>m.classList.remove('open')); if(!ab) box.classList.add('open'); };
+    pop.onclick = e=>e.stopPropagation();
+  });
+}
+document.addEventListener('click', ()=>document.querySelectorAll('.ac-multi').forEach(m=>m.classList.remove('open')));
+$('ac-limpar').onclick = ()=>{ Object.values(ACF).forEach(s=>s.clear()); montarFiltrosAc(); renderAcion(); };
+function acSet(k, vals){ ACF[k] = new Set(vals); montarFiltrosAc(); renderAcion(); window.scrollTo({ top: $('acion-area').offsetTop - 10, behavior:'smooth' }); }
+// todos os filtros; visitas: true = só visitas, false = sem visitas, null = tudo
+function acDados(visitas, ignorarMes){
+  return AC.filter(r=>(visitas==null || r.visita===visitas) && (ignorarMes || !ACF.mes.size || ACF.mes.has(r.mes)) && (!ACF.exec.size || ACF.exec.has(r.executivo))
+    && (!ACF.perfil.size || ACF.perfil.has(r.perfil)) && (!ACF.cart.size || ACF.cart.has(r.carteira)));
+}
+
+/* ---------- componentes ---------- */
+function acKpi(cls, l, v, h){ return `<div class="kpi ${cls}"><div class="label">${l}</div><div class="value">${v}</div><div class="hint">${h}</div></div>`; }
+function acBars(el, itens, total, rotulo){
+  const max = Math.max(...itens.map(i=>i.os), 1);
+  el.innerHTML = itens.map((i,n)=>`<div class="ac-row"><div title="${esc(i.nome)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.nome)}</div><div class="ac-track"><div class="ac-fill" style="width:${i.os/max*100}%;background:${n%2?'#5BA7D9':'#1C7EBE'}"></div></div><div class="ac-val">${nf0.format(i.os)} ${rotulo||'OS'} <small>· ${nf0.format(i.mat)} mat. · ${pct(i.os,total)}</small></div></div>`).join('') || '<div class="faint">Sem dados.</div>';
+}
+const acAgrupa = (d, campo) => Object.entries(grupo(d, campo)).map(([k,g])=>({ nome:k, g, os:g.length, mat:acDist(g,'matricula') })).sort((a,b)=>b.os-a.os);
+function acVar(a, b){ if(b==null || !b) return '<span class="faint">—</span>'; const v = (a-b)/b*100; return `<span class="${v>=0?'ac-up':'ac-down'}">${v>=0?'▲':'▼'} ${Math.abs(v).toFixed(1).replace('.',',')}%</span>`; }
+function acMesTabela(d, el, comOSmat){
+  const meses = acAgrupa(d,'mes').sort((a,b)=>a.nome.localeCompare(b.nome));
+  let ant = null;
+  $(el).innerHTML = meses.map(m=>{ const tr = `<tr><td><b>${acMesNome(m.nome)}</b></td><td class="num">${nf0.format(m.mat)}</td><td class="num"><b>${nf0.format(m.os)}</b></td>${comOSmat?`<td class="num">${(m.os/(m.mat||1)).toFixed(2).replace('.',',')}</td>`:''}<td class="num">${acVar(m.os, ant)}</td></tr>`; ant = m.os; return tr; }).join('')
+    + (meses.length ? `<tr class="total"><td>Total do período</td><td class="num">${nf0.format(acDist(d,'matricula'))}</td><td class="num">${nf0.format(d.length)}</td>${comOSmat?`<td class="num">${(d.length/(acDist(d,'matricula')||1)).toFixed(2).replace('.',',')}</td>`:''}<td></td></tr>` : `<tr class="empty-row"><td colspan="5">Nenhum acionamento.</td></tr>`);
+  return meses;
+}
+function acGrafico(id, meses, rotOS){
+  if(!window.Chart) return;
+  CHARTS[id] && CHARTS[id].destroy();
+  CHARTS[id] = new Chart($(id), { type:'bar', data:{ labels:meses.map(m=>acMesCurto(m.nome)), datasets:[
+      { label:rotOS||'OS', data:meses.map(m=>m.os), backgroundColor:'#0B3B60', borderRadius:6 },
+      { label:'Matrículas', data:meses.map(m=>m.mat), backgroundColor:'#5BA7D9', borderRadius:6 } ] },
+    options:{ maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' }, datalabels:{ display:true, anchor:'end', align:'end', color:'#0B3B60', font:{ weight:'bold', size:11 }, formatter:v=>nf0.format(v) } },
+      scales:{ y:{ beginAtZero:true, grace:'12%', grid:{ color:'#EEF3F6' } }, x:{ grid:{ display:false } } } } });
+}
+function acFonte(){
+  const b = AC_IMPS.find(i=>i.tipo==='base'), c = AC_IMPS.find(i=>i.tipo==='carteira');
+  const q = i => new Date(i.importado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const semCli = AC.filter(r=>!r.cli_fonte).length, fora = AC.filter(r=>r.cliente==='(fora da carteira)').length;
+  $('ac-fonte').innerHTML = `Base: <b>${b?esc(b.arquivo||'')+' ('+q(b)+')':'não importada'}</b> · Carteira: <b>${c?esc(c.arquivo||'')+' ('+q(c)+')':'não importada'}</b> · Cliente e perfil: da base quando ela traz, senão da carteira${fora?` · ${nf0.format(fora)} OS de matrículas fora da carteira (não entram no Top 10)`:''}${semCli-fora>0?` · ${nf0.format(semCli-fora)} OS sem cliente identificado`:''}. <b>"gc visita em campo" fica fora</b> das visões do executivo e do cliente — está no painel <b>Visitas em campo</b>.`;
+}
+
+/* ---------- render ---------- */
+function renderAcion(){
+  if(!AC_OK) return;
+  acFonte();
+  if(AC_TAB==='exec') renderAcExec(); else if(AC_TAB==='cli') renderAcCli(); else if(AC_TAB==='vis') renderAcVis();
+}
+function acFiltroTxt(){ const p=[]; if(ACF.mes.size) p.push([...ACF.mes].sort().map(acMesNome).join(', ')); if(ACF.exec.size) p.push([...ACF.exec].join(', ')); if(ACF.perfil.size) p.push([...ACF.perfil].join(', ')); if(ACF.cart.size) p.push([...ACF.cart].join(', ')); return p.length ? p.join(' · ') : 'todos os meses e executivos'; }
+
+function renderAcExec(){
+  const d = acDados(false), dm = acDados(false, true), nMat = acDist(d,'matricula'), nEx = acDist(d,'executivo');
+  const meses = [...new Set(d.map(r=>r.mes))].sort(), nMes = meses.length || 1;
+  $('ac-ex-sub').textContent = `${acFiltroTxt()} · sem visitas em campo.`;
+  $('ac-ex-kpis').innerHTML = acKpi('navy','Total de OS', nf0.format(d.length), `${nf0.format(Math.round(d.length/nMes))} OS por mês em média (${nMes} ${nMes>1?'meses':'mês'})`)
+    + acKpi('water','Total de matrículas', nf0.format(nMat), `matrículas distintas acionadas no período`)
+    + acKpi('navy','OS por matrícula', (d.length/(nMat||1)).toFixed(2).replace('.',','), 'média de acionamentos por matrícula')
+    + acKpi('water', ACF.exec.size===1 ? 'Executivo' : 'Executivos', ACF.exec.size===1 ? esc([...ACF.exec][0]) : nf0.format(nEx), ACF.exec.size===1 ? `${nf0.format(d.length)} OS · ${nf0.format(nMat)} matrículas` : `${nf0.format(Math.round(d.length/(nEx||1)))} OS por executivo em média`);
+  // comparativo: respeita o filtro de mês (se houver), senão todos
+  const ms = acMesTabela(d, 'ac-ex-mes', true); acGrafico('ac-ch-mes', ms);
+  // executivos x mês
+  const mesesCols = meses.slice(-8);
+  $('ac-ex-th').innerHTML = `<tr><th>Executivo</th><th class="num">Matrículas</th><th class="num">OS</th><th class="num">% das OS</th>${mesesCols.map(m=>`<th class="num">${acMesCurto(m)}</th>`).join('')}</tr>`;
+  const ge = acAgrupa(d,'executivo');
+  $('ac-ex-tab').innerHTML = ge.map(x=>{ const gm = grupo(x.g,'mes');
+    return `<tr><td><a href="#" class="ac-ex-link" data-e="${esc(x.nome)}"><b>${esc(x.nome)}</b></a></td><td class="num">${nf0.format(x.mat)}</td><td class="num"><b>${nf0.format(x.os)}</b></td><td class="num">${pct(x.os,d.length)}</td>${mesesCols.map(m=>{ const g=gm[m]||[]; return `<td class="num">${g.length?`<b>${nf0.format(g.length)}</b> <small class="muted">· ${nf0.format(acDist(g,'matricula'))}</small>`:'<span class="faint">—</span>'}</td>`; }).join('')}</tr>`; }).join('')
+    + (ge.length ? `<tr class="total"><td>Total</td><td class="num">${nf0.format(nMat)}</td><td class="num">${nf0.format(d.length)}</td><td class="num">100%</td>${mesesCols.map(m=>{ const g=d.filter(r=>r.mes===m); return `<td class="num">${nf0.format(g.length)} <small>· ${nf0.format(acDist(g,'matricula'))}</small></td>`; }).join('')}</tr>` : `<tr class="empty-row"><td colspan="${4+mesesCols.length}">Nenhum acionamento.</td></tr>`);
+  document.querySelectorAll('.ac-ex-link').forEach(a=>a.onclick=e=>{ e.preventDefault(); acSet('exec',[a.dataset.e]); });
+  // motivos
+  const gmv = acAgrupa(d,'motivo'), mx = Math.max(1, ...gmv.map(x=>x.os));
+  $('ac-ex-mot').innerHTML = gmv.map((x,i)=>`<tr><td><b>${esc(x.nome)}</b></td><td class="num">${nf0.format(x.mat)}</td><td class="num"><b>${nf0.format(x.os)}</b></td><td class="num">${pct(x.os,d.length)}</td><td><div class="vd-barra" style="height:10px"><div style="width:${x.os/mx*100}%;background:${i%2?'#5BA7D9':'#1C7EBE'}"></div></div></td></tr>`).join('')
+    + (gmv.length ? `<tr class="total"><td>Total</td><td class="num">${nf0.format(nMat)}</td><td class="num">${nf0.format(d.length)}</td><td class="num">100%</td><td></td></tr>` : '<tr class="empty-row"><td colspan="5">Nenhum acionamento.</td></tr>');
+  renderAcMats();
+}
+function acMatriculas(d){
+  return Object.entries(grupo(d,'matricula')).map(([m,g])=>{ g.sort((a,b)=>b.data.localeCompare(a.data));
+    const mot = acAgrupa(g,'motivo'), ex = acAgrupa(g,'executivo');
+    return { matricula:+m, cliente:g[0].cliente, perfil:g[0].perfil, carteira:g[0].carteira, executivos:ex.map(e=>e.nome), os:g.length, motivos:mot.map(x=>x.nome+(x.os>1?' ('+x.os+')':'')), meses:[...new Set(g.map(r=>r.mes))].sort(), ultimo:g[0].data, ultimoMot:g[0].motivo }; })
+    .sort((a,b)=>b.os-a.os || b.ultimo.localeCompare(a.ultimo));
+}
+function renderAcMats(){
+  const q = norm($('ac-ex-busca').value), todas = acMatriculas(acDados(false));
+  const l = q ? todas.filter(x=>String(x.matricula).includes(q) || norm(x.cliente).includes(q)) : todas, N = 200;
+  $('ac-ex-mat-sub').innerHTML = `Matrículas usadas nos acionamentos (${acFiltroTxt()}) — base para o acompanhamento de performance. <b>${nf0.format(l.length)}</b> matrículas${l.length>N?` · mostrando as ${N} com mais OS (o Excel traz todas)`:''}.`;
+  $('ac-ex-mat').innerHTML = l.slice(0,N).map(x=>`<tr><td><b>${x.matricula}</b></td><td class="cli" title="${esc(x.cliente)}">${esc(x.cliente)}</td><td>${esc(x.perfil)}</td><td class="ac-wrap" style="min-width:140px">${x.executivos.map(esc).join(', ')}</td><td class="num"><b>${x.os}</b></td><td class="ac-mats">${x.motivos.map(esc).join(' · ')}</td><td>${x.meses.map(m=>`<span class="ac-tag">${acMesCurto(m)}</span>`).join('')}</td><td>${dBRc(x.ultimo.slice(0,10))} <small class="muted">${esc(x.ultimoMot)}</small></td></tr>`).join('') || '<tr class="empty-row"><td colspan="8">Nenhuma matrícula.</td></tr>';
+}
+$('ac-ex-busca').oninput = ()=>{ clearTimeout(renderAcMats._t); renderAcMats._t = setTimeout(renderAcMats, 200); };
+
+function renderAcCli(){
+  const d = acDados(false), nMat = acDist(d,'matricula'), nCli = acDist(d,'cliente');
+  $('ac-cl-sub').textContent = `${acFiltroTxt()} · sem visitas em campo.`;
+  const gc = acAgrupa(d,'cliente').filter(x=>!AC_SEM_CLI.includes(x.nome));
+  const top10 = gc.slice(0,10), v10 = top10.reduce((s,x)=>s+x.os,0);
+  $('ac-cl-kpis').innerHTML = acKpi('navy','Clientes acionados', nf0.format(gc.length), `${nf0.format(nMat)} matrículas${nCli>gc.length?` · ${nf0.format(d.filter(r=>AC_SEM_CLI.includes(r.cliente)).length)} OS sem cliente na carteira`:''}`)
+    + acKpi('water','Total de OS', nf0.format(d.length), `${(d.length/(gc.length||1)).toFixed(1).replace('.',',')} OS por cliente em média`)
+    + acKpi('navy','Top 10 clientes', pct(v10,d.length), `${nf0.format(v10)} OS concentradas nos 10 clientes mais acionados`)
+    + acKpi('water','Clientes com 1 só OS', nf0.format(gc.filter(x=>x.os===1).length), 'acionados uma única vez no período');
+  $('ac-cl-top').innerHTML = top10.map((x,i)=>{ const mats = [...new Set(x.g.map(r=>r.matricula))], ex = acAgrupa(x.g,'executivo'), pf = acAgrupa(x.g,'perfil');
+    return `<tr><td>${i+1}</td><td class="ac-wrap"><a href="#" class="ac-cli-link" data-c="${esc(x.nome)}"><b>${esc(x.nome)}</b></a><div class="ac-mats">${mats.slice(0,8).join(', ')}${mats.length>8?` +${mats.length-8}`:''}</div></td><td class="ac-wrap" style="min-width:140px">${pf.map(p=>esc(p.nome)).join(', ')}</td><td class="num">${nf0.format(mats.length)}</td><td class="ac-wrap">${ex.map(e=>`<span class="ac-tag">${esc(e.nome)} · ${e.os}</span>`).join('')}</td><td class="num"><b>${nf0.format(x.os)}</b></td><td class="num">${pct(x.os,d.length)}</td></tr>`; }).join('') || '<tr class="empty-row"><td colspan="7">Nenhum cliente.</td></tr>';
+  document.querySelectorAll('.ac-cli-link').forEach(a=>a.onclick=e=>{ e.preventDefault(); $('ac-cl-busca').value = a.dataset.c; renderAcHistCli(); $('ac-cl-hist').scrollIntoView({ behavior:'smooth', block:'start' }); });
+  acBars($('ac-cl-perfil'), acAgrupa(d,'perfil'), d.length);
+  acBars($('ac-cl-cart'), acAgrupa(d,'carteira'), d.length);
+  renderAcHistCli();
+}
+function renderAcHistCli(){
+  const q = norm($('ac-cl-busca').value);
+  if(q.length < 3){ $('ac-cl-hist').innerHTML = '<div class="faint">Digite ao menos 3 caracteres.</div>'; return; }
+  const d = acDados(null).filter(r=>String(r.matricula).includes(q) || norm(r.cliente).includes(q)).sort((a,b)=>b.data.localeCompare(a.data));
+  const N = 300;
+  $('ac-cl-hist').innerHTML = `<p class="sub"><b>${nf0.format(d.length)}</b> acionamentos · ${nf0.format(acDist(d,'matricula'))} matrículas · ${nf0.format(acDist(d,'cliente'))} clientes${d.length>N?` · mostrando os ${N} mais recentes`:''}.</p>`
+    + `<div class="tablewrap"><table><thead><tr><th>Data</th><th>OS</th><th>Matrícula</th><th>Cliente</th><th>Perfil</th><th>Executivo</th><th>Motivo</th></tr></thead><tbody>`
+    + d.slice(0,N).map(r=>`<tr><td>${dBR(r.data.slice(0,10))}</td><td>${r.os}</td><td><b>${r.matricula}</b></td><td class="cli">${esc(r.cliente)}</td><td>${esc(r.perfil)}</td><td>${esc(r.executivo)}</td><td>${r.visita?'<span class="badge b-navy">Visita em campo</span>':esc(r.motivo)}</td></tr>`).join('')
+    + (d.length ? '' : '<tr class="empty-row"><td colspan="7">Nada encontrado.</td></tr>') + '</tbody></table></div>';
+}
+$('ac-cl-busca').oninput = ()=>{ clearTimeout(renderAcHistCli._t); renderAcHistCli._t = setTimeout(renderAcHistCli, 250); };
+
+function renderAcVis(){
+  const d = acDados(true), nMat = acDist(d,'matricula'), nCli = acDist(d,'cliente');
+  const meses = [...new Set(d.map(r=>r.mes))].sort(), nMes = meses.length || 1;
+  const total = acDados(null).length;
+  $('ac-vi-sub').textContent = `Somente o parecer "gc visita em campo" · ${acFiltroTxt()}.`;
+  $('ac-vi-kpis').innerHTML = acKpi('navy','Visitas (OS)', nf0.format(d.length), `${nf0.format(Math.round(d.length/nMes))} por mês em média · ${pct(d.length,total)} de todos os acionamentos`)
+    + acKpi('water','Matrículas visitadas', nf0.format(nMat), `${(d.length/(nMat||1)).toFixed(2).replace('.',',')} visitas por matrícula`)
+    + acKpi('navy','Clientes visitados', nf0.format(new Set(d.map(r=>r.cliente).filter(c=>!AC_SEM_CLI.includes(c))).size), `${nf0.format(acDist(d,'executivo'))} executivos fizeram visitas`)
+    + acKpi('water','Visitados com arrecadação', nf0.format(new Set(d.filter(r=>r.arrec>0).map(r=>r.matricula)).size), `matrículas com "Arrec Mês" na base · ${brlC(Object.values(grupo(d.filter(r=>r.arrec>0), r=>r.matricula+'|'+r.mes)).reduce((s,g)=>s+g[0].arrec,0))}`);
+  const ms = acMesTabela(d, 'ac-vi-mes', false); acGrafico('ac-ch-vis', ms, 'Visitas');
+  acBars($('ac-vi-exec'), acAgrupa(d,'executivo'), d.length, 'visitas');
+  const gc = acAgrupa(d,'cliente').filter(x=>!AC_SEM_CLI.includes(x.nome)).slice(0,10);
+  $('ac-vi-top').innerHTML = gc.map((x,i)=>`<tr><td>${i+1}</td><td class="ac-wrap"><b>${esc(x.nome)}</b><div class="ac-mats">${[...new Set(x.g.map(r=>r.matricula))].slice(0,6).join(', ')}</div></td><td class="num">${nf0.format(x.mat)}</td><td class="ac-wrap">${acAgrupa(x.g,'executivo').map(e=>`<span class="ac-tag">${esc(e.nome)}</span>`).join('')}</td><td class="num"><b>${nf0.format(x.os)}</b></td></tr>`).join('') || '<tr class="empty-row"><td colspan="5">Nenhuma visita.</td></tr>';
+  acBars($('ac-vi-perfil'), acAgrupa(d,'perfil'), d.length, 'visitas');
+  const l = d.slice().sort((a,b)=>b.data.localeCompare(a.data)), N = 300;
+  $('ac-vi-lista-sub').textContent = `${nf0.format(l.length)} visitas${l.length>N?` · mostrando as ${N} mais recentes (o Excel traz todas)`:''}.`;
+  $('ac-vi-lista').innerHTML = l.slice(0,N).map(r=>`<tr><td>${dBR(r.data.slice(0,10))}</td><td>${r.os}</td><td><b>${r.matricula}</b></td><td class="cli">${esc(r.cliente)}</td><td>${esc(r.perfil)}</td><td>${esc(r.executivo)}</td><td>${esc(r.carteira)}</td><td class="num">${r.arrec>0?brl(r.arrec):'<span class="faint">—</span>'}</td></tr>`).join('') || '<tr class="empty-row"><td colspan="8">Nenhuma visita.</td></tr>';
+}
+
+/* ---------- Excel ---------- */
+function acXlsLinha(r){ return { 'Mês':acMesNome(r.mes), 'Data pedido':r.data?dBR(r.data.slice(0,10)):'', 'Nº da Solicitação':r.os, 'Matrícula':r.matricula, 'Cliente':r.cliente, 'Perfil de pagamento':r.perfil, 'Carteira':r.carteira, 'Executivo':r.executivo, 'Motivo (Parecer normalizado)':r.parecer, 'Visita em campo':r.visita?'Sim':'Não', 'Arrec Mês':r.arrec==null?'':r.arrec }; }
+function acAddAba(wb, nome, linhas){ if(!linhas.length) linhas=[{ 'Sem dados':'' }]; const ws = XLSX.utils.json_to_sheet(linhas); ws['!cols'] = Object.keys(linhas[0]).map(k=>({ wch:Math.min(46,Math.max(10,k.length+2)) })); XLSX.utils.book_append_sheet(wb, ws, nome); }
+const acMatXls = x => ({ 'Matrícula':x.matricula, 'Cliente':x.cliente, 'Perfil de pagamento':x.perfil, 'Carteira':x.carteira, 'Executivo(s)':x.executivos.join(', '), 'OS':x.os, 'Motivos':x.motivos.join(' · '), 'Meses':x.meses.map(acMesNome).join(', '), 'Último acionamento':x.ultimo?dBR(x.ultimo.slice(0,10)):'', 'Último motivo':x.ultimoMot });
+$('ac-xls').onclick = ()=>{
+  if(!AC.length) return toast('Nenhuma base de acionamentos carregada.', true);
+  const wb = XLSX.utils.book_new(), sv = acDados(false), vi = acDados(true);
+  const resumoMes = d => acAgrupa(d,'mes').sort((a,b)=>a.nome.localeCompare(b.nome)).map(m=>({ 'Mês':acMesNome(m.nome), 'Total de matrículas':m.mat, 'Total de OS':m.os }));
+  acAddAba(wb, 'Comparativo mês', resumoMes(sv));
+  acAddAba(wb, 'Por executivo', acAgrupa(sv,'executivo').map(x=>({ 'Executivo':x.nome, 'Matrículas':x.mat, 'OS':x.os })));
+  acAddAba(wb, 'Motivos', acAgrupa(sv,'motivo').map(x=>({ 'Motivo':x.nome, 'Matrículas':x.mat, 'OS':x.os })));
+  acAddAba(wb, 'Top 10 clientes', acAgrupa(sv,'cliente').filter(x=>!AC_SEM_CLI.includes(x.nome)).slice(0,10).map(x=>({ 'Cliente':x.nome, 'Matrículas':[...new Set(x.g.map(r=>r.matricula))].join(', '), 'Qtde matrículas':x.mat, 'Executivos':acAgrupa(x.g,'executivo').map(e=>e.nome+' ('+e.os+')').join(', '), 'OS':x.os })));
+  acAddAba(wb, 'Matrículas acionadas', acMatriculas(sv).map(acMatXls));
+  acAddAba(wb, 'Visitas - mês', resumoMes(vi));
+  acAddAba(wb, 'Visitas', vi.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(acXlsLinha));
+  acAddAba(wb, 'Acionamentos (filtro)', acDados(null).map(acXlsLinha));
+  XLSX.writeFile(wb, `Acionamentos_GC_${hojeISO()}.xlsx`);
+};
+$('ac-ex-mat-xls').onclick = ()=>{
+  const wb = XLSX.utils.book_new(); acAddAba(wb, 'Matrículas acionadas', acMatriculas(acDados(false)).map(acMatXls));
+  XLSX.writeFile(wb, `Matriculas_acionadas${ACF.exec.size===1?'_'+[...ACF.exec][0].replace(/\s+/g,'_'):''}_${hojeISO()}.xlsx`);
+};
+
+/* ---------- importação ---------- */
+function acDataHora(v){
+  if(v==null || v==='') return null;
+  if(typeof v==='number' && v>20000 && v<80000){ const d = new Date(Math.round((v-25569)*864e5)); return d.toISOString().slice(0,19); }
+  if(v instanceof Date) return new Date(v.getTime()-v.getTimezoneOffset()*60000).toISOString().slice(0,19);
+  const s = String(v).trim(); let m;
+  if((m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/))) return `${m[1]}-${m[2]}-${m[3]}T${(m[4]||'0').padStart(2,'0')}:${m[5]||'00'}:${m[6]||'00'}`;
+  if((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/))){ const y = m[3].length===2 ? '20'+m[3] : m[3]; return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}T${(m[4]||'0').padStart(2,'0')}:${m[5]||'00'}:${m[6]||'00'}`; }
+  return null;
+}
+const AC_MES_NOME = { janeiro:1, fevereiro:2, marco:3, abril:4, maio:5, junho:6, julho:7, agosto:8, setembro:9, outubro:10, novembro:11, dezembro:12 };
+async function acImportar(tipo){
+  const f = $('ac-f-'+tipo).files[0], log = $('ac-log-'+tipo), btn = document.querySelector(`[data-ac-imp="${tipo}"]`);
+  if(!f) return toast('Escolha o arquivo.', true);
+  const L = t => { log.textContent += (log.textContent?'\n':'') + t; };
+  log.textContent = ''; btn.disabled = true;
+  try{
+    L('Lendo ' + f.name + '…');
+    const wb = XLSX.read(await f.arrayBuffer(), { type:'array', sheetRows:300000, ...(tipo==='carteira' ? { sheets:['Carteira','CARTEIRA','carteira'] } : {}) });
+    let rows = [], resumo = {};
+    if(tipo==='base'){
+      const a = scLerAba(wb, c=>(c.includes('parecer normalizado') || c.some(x=>x.startsWith('parecer'))) && c.some(x=>x.includes('solicitacao')));
+      if(!a) throw new Error('Não encontrei as colunas Parecer_Normalizado e Nº da Solicitação.');
+      const ix = (...n) => scIdx(a.cab, ...n);
+      const I = { os:ix('n da solicitacao','numero da solicitacao','solicitacao'), ex:ix('nome reduzido','executivo'), par:ix('parecer normalizado','parecer'), mat:ix('n ligacao','numero ligacao','matricula','ligacao'),
+        dt:ix('data pedido','data do pedido','data'), mes:ix('mes'), car:ix('carteira'), cli:ix('cliente','nome cliente'), per:ix('perfil do cliente','perfil cliente 3 meses','perfil cliente','perfil'), arr:ix('arrec mes','arrecadacao mes','arrec') };
+      ['os','ex','par','mat'].forEach(k=>{ if(I[k]<0) throw new Error('Coluna obrigatória não encontrada: ' + { os:'Nº da Solicitação', ex:'Nome Reduzido', par:'Parecer_Normalizado', mat:'Nº Ligação' }[k]); });
+      if(I.dt<0 && I.mes<0) throw new Error('Coluna Data Pedido não encontrada.');
+      const ano = new Date().getFullYear(), vistos = new Set(); let semData = 0, dup = 0;
+      a.linhas.forEach(l=>{
+        const os = scMat(l[I.os]) || (/^\d+$/.test(String(l[I.os]??'').trim()) ? +String(l[I.os]).trim() : null); if(!os) return;
+        if(vistos.has(os)){ dup++; return; } vistos.add(os);
+        const dt = I.dt>=0 ? acDataHora(l[I.dt]) : null;
+        let mes = dt ? dt.slice(0,7) : null;
+        if(!mes && I.mes>=0){ const n = AC_MES_NOME[norm(l[I.mes])]; if(n) mes = `${ano}-${String(n).padStart(2,'0')}`; }
+        if(!mes){ semData++; return; }
+        const r = { numero_solicitacao:os, mes_ref:mes, executivo:scLimpo(l[I.ex]), parecer:norm(l[I.par]) || null, matricula:scMat(l[I.mat]), data_pedido:dt };
+        if(I.car>=0) r.carteira = scLimpo(l[I.car]);
+        if(I.cli>=0) r.cliente = scLimpo(l[I.cli]);
+        if(I.per>=0) r.perfil = scLimpo(l[I.per]);
+        if(I.arr>=0) r.arrec_mes = scNum(l[I.arr]);
+        rows.push(r);
+      });
+      const vis = rows.filter(r=>AC_VISITA(r.parecer)).length, meses = [...new Set(rows.map(r=>r.mes_ref))].sort();
+      L(`Aba "${a.nome}": ${nf0.format(rows.length)} OS · ${nf0.format(new Set(rows.map(r=>r.matricula)).size)} matrículas · ${new Set(rows.map(r=>r.executivo).filter(Boolean)).size} executivos`);
+      L(`  Meses: ${meses.map(acMesNome).join(', ')} · ${nf0.format(vis)} visitas em campo`);
+      if(dup) L(`  ${nf0.format(dup)} OS repetidas no arquivo foram ignoradas`);
+      if(semData) L(`  ${nf0.format(semData)} linhas sem data/mês foram ignoradas`);
+      const falt = [['cli','Cliente'],['per','Perfil do cliente']].filter(([k])=>I[k]<0).map(x=>x[1]);
+      if(falt.length) L('  Sem ' + falt.join(' e ') + ' na base — a plataforma cruza com a carteira importada.');
+      resumo = { os:rows.length, matriculas:new Set(rows.map(r=>r.matricula)).size, meses:meses.map(acMesNome), visitas:vis };
+    } else {
+      const a = scLerAba(wb, c=>c.some(x=>x.startsWith('matricula')) && c.some(x=>x.startsWith('cliente') || x.startsWith('perfil')), 'carteira');
+      if(!a) throw new Error('Não encontrei a aba Carteira (colunas matrícula, cliente e perfil).');
+      const ix = (...n) => scIdx(a.cab, ...n);
+      const I = { m:ix('matriculas','matricula'), cli:ix('cliente','nome cliente','nome'), per:ix('perfil cliente 3 meses','perfil cliente','perfil de pagamento','perfil'), ex:ix('executivo'), car:ix('carteira') };
+      const vistos = new Set();
+      a.linhas.forEach(l=>{ const m = scMat(l[I.m]); if(!m || vistos.has(m)) return; vistos.add(m);
+        rows.push({ matricula:m, cliente:I.cli>=0?scLimpo(l[I.cli]):null, perfil:I.per>=0?scLimpo(l[I.per]):null, executivo:I.ex>=0?scLimpo(l[I.ex]):null, carteira:I.car>=0?scLimpo(l[I.car]):null }); });
+      L(`Aba "${a.nome}": ${nf0.format(rows.length)} matrículas · ${nf0.format(rows.filter(r=>r.perfil).length)} com perfil de pagamento`);
+      if(I.per<0) L('Atenção — coluna "Perfil Cliente - 3 meses" não encontrada.');
+      resumo = { matriculas:rows.length, com_perfil:rows.filter(r=>r.perfil).length };
+    }
+    if(!rows.length) throw new Error('Nenhuma linha válida encontrada.');
+    if(tipo==='carteira') await rpc('acion_limpar_carteira', {});
+    const TAM = 1000;
+    for(let i=0;i<rows.length;i+=TAM){
+      await api(tipo==='base' ? '/acion_base?on_conflict=numero_solicitacao' : '/acion_carteira?on_conflict=matricula',
+        { method:'POST', body:rows.slice(i,i+TAM), prefer:'resolution=merge-duplicates,return=minimal' });
+      L(`  enviadas ${nf0.format(Math.min(i+TAM,rows.length))}/${nf0.format(rows.length)}`);
+    }
+    L('✔ Concluído. Atualizando…'); toast('Base importada');
+    $('ac-f-'+tipo).value = '';
+    await carregarAcion();
+    if(tipo==='base'){ const ms = [...new Set(AC.map(r=>r.mes))].sort(); resumo.total_os = AC.length; resumo.ate = acMesNome(ms[ms.length-1]); }
+    await api('/acion_importacoes', { method:'POST', body:{ tipo, arquivo:f.name, linhas:rows.length, resumo, importado_por:SESSION&&SESSION.email }, prefer:'return=minimal' });
+    AC_IMPS = await api('/acion_importacoes?select=*&order=id.desc&limit=60'); renderAcHist(); acFonte();
+  }catch(e){ L('✖ Erro: ' + e.message + (/acion_|schema cache/i.test(e.message) ? ' — rode o supabase_acionamentos.sql no Supabase.' : '')); toast('Erro na importação: ' + e.message, true); }
+  btn.disabled = false;
+}
+document.querySelectorAll('[data-ac-imp]').forEach(b=>b.onclick=()=>acImportar(b.dataset.acImp));
+function renderAcHist(){
+  $('ac-hist').innerHTML = AC_IMPS.map(i=>{ const r = i.resumo||{};
+    const txt = i.tipo==='base' ? `${nf0.format(r.os||0)} OS · ${(r.meses||[]).join(', ')}${r.visitas?` · ${nf0.format(r.visitas)} visitas`:''}` : `${nf0.format(r.matriculas||0)} matrículas · ${nf0.format(r.com_perfil||0)} com perfil`;
+    return `<tr><td><b>${i.tipo==='base'?'Acionamentos':'Carteira'}</b></td><td class="cli">${esc(i.arquivo)}</td><td>${new Date(i.importado_em).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(i.importado_por||'')}</td><td class="num">${nf0.format(i.linhas||0)}</td><td>${esc(txt)}</td></tr>`; }).join('') || '<tr class="empty-row"><td colspan="6">Nenhuma importação.</td></tr>';
+}
 </script>
 </body>
 </html>
