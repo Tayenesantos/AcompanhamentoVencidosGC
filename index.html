@@ -284,6 +284,8 @@
   .ac-top .ac-det > span:nth-child(odd){ color:var(--text-mut); font-weight:700; text-transform:uppercase; font-size:10.5px; letter-spacing:.04em; padding-top:3px; }
   .ac-bars .ac-lab{ overflow:hidden; } .ac-bars .ac-lab a{ color:var(--navy); text-decoration:none; } .ac-bars .ac-lab a:hover{ color:#1C7EBE; }
   .ac-bars .ac-lab small{ display:block; max-width:100%; font-size:11px; color:var(--text-mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ac-bars .ac-lab{ white-space:nowrap; text-overflow:ellipsis; } .ac-bars .ac-lab .ac-cli{ font-size:12px; font-weight:600; color:var(--navy); }
+  #ac-cl-top .ac-row{ grid-template-columns:minmax(200px,1.6fr) 1.6fr 200px; }
   .ac-tag.mot{ background:#F1F5F8; color:var(--navy); }
   @media (max-width:760px){ .ac-top .ac-trow{ grid-template-columns:24px 1fr 110px; } .ac-top .ac-track{ grid-column:2 / -1; } }
   .acview{ display:none; } .acview.active{ display:block; }
@@ -1245,9 +1247,9 @@
 
     <!-- CLIENTE -->
     <section class="acview" id="ac-cli">
-      <div class="card"><h2>Visão do cliente · por matrícula</h2><p class="sub" id="ac-cl-sub"></p><div class="kpi-row" id="ac-cl-kpis"></div></div>
+      <div class="card"><h2>Visão do cliente · por matrícula</h2><p class="sub" id="ac-cl-sub"></p><div class="kpi-row" id="ac-cl-kpis" style="grid-template-columns:repeat(2,1fr)"></div></div>
       <div>
-        <div class="card"><h2>Top 10 matrículas com mais OS</h2><p class="sub">Por matrícula: OS · executivos · % das OS. Embaixo da matrícula, quem acionou. Clique para ver o histórico.</p><div class="ac-bars" id="ac-cl-top"></div></div>
+        <div class="card"><h2>Top 10 matrículas com mais OS</h2><p class="sub">Matrícula e cliente · OS · executivos · % das OS. Embaixo, quem acionou. Clique na matrícula para ver o histórico.</p><div class="ac-bars" id="ac-cl-top"></div></div>
         <div class="card"><h2>Motivos</h2><p class="sub">Parecer normalizado: OS · matrículas · % das OS. Sem "gc visita em campo".</p><div class="ac-bars" id="ac-cl-mot"></div></div>
       </div>
       <div class="two-col">
@@ -5036,11 +5038,10 @@ function renderAcCli(){
   const gm = acAgrupa(d,'matricula'), top = acTopMats(d,10), v10 = top.reduce((s,x)=>s+x.os,0);
   $('ac-cl-kpis').innerHTML = acKpi('navy','Matrículas acionadas', nf0.format(nMat), `${nf0.format(acDist(d.filter(r=>!AC_SEM_CLI.includes(r.cliente)),'cliente'))} clientes (pelo nome)`)
     + acKpi('water','Total de OS', nf0.format(d.length), `${(d.length/(nMat||1)).toFixed(2).replace('.',',')} OS por matrícula em média`)
-    + acKpi('navy','Top 10 matrículas', pct(v10,d.length), `${nf0.format(v10)} OS concentradas nas 10 matrículas mais acionadas`)
-    + acKpi('water','Matrículas com 1 só OS', nf0.format(gm.filter(x=>x.os===1).length), `${pct(gm.filter(x=>x.os===1).length,nMat)} das matrículas acionadas`);
+;
   const mx = Math.max(1, ...top.map(x=>x.os));
   $('ac-cl-top').innerHTML = top.map((x,i)=>{ const exs = x.ex.map(e=>e.nome+' ('+e.os+')');
-    return `<div class="ac-row"><div class="ac-lab" title="${esc(x.cliente)} · ${esc(x.perfil)}&#10;Executivos: ${esc(exs.join(', '))}"><a href="#" class="ac-mat-link" data-m="${x.matricula}"><b>${i+1}. ${x.matricula}</b></a><small>${esc(x.ex.slice(0,4).map(e=>e.nome).join(', '))}${x.ex.length>4?' +'+(x.ex.length-4):''}</small></div><div class="ac-track"><div class="ac-fill" style="width:${x.os/mx*100}%;background:${i%2?'#5BA7D9':'#1C7EBE'}"></div></div><div class="ac-val">${nf0.format(x.os)} OS <small>· ${x.ex.length} exec. · ${pct(x.os,d.length)}</small></div></div>`; }).join('') || '<div class="faint">Nenhuma matrícula.</div>';
+    return `<div class="ac-row"><div class="ac-lab" title="${esc(x.cliente)} · ${esc(x.perfil)}&#10;Executivos: ${esc(exs.join(', '))}"><a href="#" class="ac-mat-link" data-m="${x.matricula}"><b>${i+1}. ${x.matricula}</b></a> <span class="ac-cli">· ${esc(x.cliente)}</span><small>${esc(x.ex.slice(0,4).map(e=>e.nome).join(', '))}${x.ex.length>4?' +'+(x.ex.length-4):''}</small></div><div class="ac-track"><div class="ac-fill" style="width:${x.os/mx*100}%;background:${i%2?'#5BA7D9':'#1C7EBE'}"></div></div><div class="ac-val">${nf0.format(x.os)} OS <small>· ${x.ex.length} exec. · ${pct(x.os,d.length)}</small></div></div>`; }).join('') || '<div class="faint">Nenhuma matrícula.</div>';
   acBars($('ac-cl-mot'), acAgrupa(d,'motivo'), d.length);
   document.querySelectorAll('.ac-mat-link').forEach(a=>a.onclick=e=>{ e.preventDefault(); $('ac-cl-busca').value = a.dataset.m; renderAcHistCli(); $('ac-cl-hist').scrollIntoView({ behavior:'smooth', block:'start' }); });
   acBars($('ac-cl-perfil'), acAgrupa(d,'perfil'), d.length);
