@@ -273,6 +273,17 @@
   .vd-barra{ height:8px; background:#EEF3F6; border-radius:8px; overflow:hidden; min-width:90px; } .vd-barra div{ height:100%; background:var(--water); border-radius:8px; }
   .vd-nota{ background:#FFF6E8; border:1px solid var(--amber-line); border-radius:12px; padding:12px 14px; font-size:13px; color:var(--navy); line-height:1.5; }
   #acion-area td a{ color:var(--navy); text-decoration:none; } #acion-area td a:hover{ color:#1C7EBE; text-decoration:underline; }
+  .ac-top .ac-trow{ display:grid; grid-template-columns:28px minmax(170px,1.1fr) 2fr 170px; gap:6px 12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+  .ac-top .ac-trow:last-child{ border-bottom:none; }
+  .ac-top .ac-rk{ font-weight:800; color:var(--text-mut); font-size:13px; text-align:center; }
+  .ac-top .ac-mat a{ font-weight:800; font-size:14px; color:var(--navy); text-decoration:none; } .ac-top .ac-mat a:hover{ color:#1C7EBE; text-decoration:underline; }
+  .ac-top .ac-mat div{ font-size:11.5px; color:var(--text-mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ac-top .ac-track{ height:12px; background:#EEF3F6; border-radius:8px; overflow:hidden; } .ac-top .ac-fill{ height:100%; border-radius:8px; }
+  .ac-top .ac-val{ text-align:right; white-space:nowrap; font-weight:800; color:var(--navy); font-size:14px; } .ac-top .ac-val small{ font-weight:400; color:var(--text-mut); font-size:11.5px; }
+  .ac-top .ac-det{ grid-column:2 / -1; display:grid; grid-template-columns:auto 1fr; gap:4px 10px; font-size:12px; align-items:start; }
+  .ac-top .ac-det > span:nth-child(odd){ color:var(--text-mut); font-weight:700; text-transform:uppercase; font-size:10.5px; letter-spacing:.04em; padding-top:3px; }
+  .ac-tag.mot{ background:#F1F5F8; color:var(--navy); }
+  @media (max-width:760px){ .ac-top .ac-trow{ grid-template-columns:24px 1fr 110px; } .ac-top .ac-track{ grid-column:2 / -1; } }
   .acview{ display:none; } .acview.active{ display:block; }
   .mod-card.acion::before{ background:#1C7EBE; }
   .mod-card.acion .mod-icon{ background:#E3F0FA; color:#1C7EBE; }
@@ -1232,9 +1243,9 @@
 
     <!-- CLIENTE -->
     <section class="acview" id="ac-cli">
-      <div class="card"><h2>Visão do cliente</h2><p class="sub" id="ac-cl-sub"></p><div class="kpi-row" id="ac-cl-kpis"></div></div>
-      <div class="card"><h2>Top 10 clientes com mais OS</h2><p class="sub">Cliente pelo nome (cruzado com a carteira quando a base não traz) · matrículas · executivos · quantidade de OS. Sem visitas em campo.</p>
-        <div class="tablewrap"><table><thead><tr><th>#</th><th>Cliente</th><th>Perfil de pagamento</th><th class="num">Matrículas</th><th>Executivos</th><th class="num">OS</th><th class="num">% das OS</th></tr></thead><tbody id="ac-cl-top"></tbody></table></div></div>
+      <div class="card"><h2>Visão do cliente · por matrícula</h2><p class="sub" id="ac-cl-sub"></p><div class="kpi-row" id="ac-cl-kpis"></div></div>
+      <div class="card"><h2>Top 10 matrículas com mais OS</h2><p class="sub">Contado por <b>matrícula</b> (não por nome de cliente, que junta várias ligações): quantidade de OS, executivos que acionaram e motivos (Parecer normalizado). Sem "gc visita em campo" — ela tem aba própria. Clique na matrícula para ver o histórico.</p>
+        <div class="ac-top" id="ac-cl-top"></div></div>
       <div class="two-col">
         <div class="card"><h2>Por perfil de pagamento</h2><p class="sub">OS · matrículas · % das OS.</p><div class="ac-bars" id="ac-cl-perfil"></div></div>
         <div class="card"><h2>Por carteira</h2><p class="sub">OS · matrículas · % das OS.</p><div class="ac-bars" id="ac-cl-cart"></div></div>
@@ -5011,18 +5022,26 @@ function renderAcMats(){
 }
 $('ac-ex-busca').oninput = ()=>{ clearTimeout(renderAcMats._t); renderAcMats._t = setTimeout(renderAcMats, 200); };
 
+function acTopMats(d, n){
+  return acAgrupa(d,'matricula').slice(0,n).map(x=>({ ...x, matricula:x.nome, cliente:x.g[0].cliente, perfil:x.g[0].perfil, carteira:x.g[0].carteira,
+    ex:acAgrupa(x.g,'executivo'), mot:acAgrupa(x.g,'motivo'), meses:[...new Set(x.g.map(r=>r.mes))].sort() }));
+}
 function renderAcCli(){
-  const d = acDados(false), nMat = acDist(d,'matricula'), nCli = acDist(d,'cliente');
-  $('ac-cl-sub').textContent = `${acFiltroTxt()} · sem visitas em campo.`;
-  const gc = acAgrupa(d,'cliente').filter(x=>!AC_SEM_CLI.includes(x.nome));
-  const top10 = gc.slice(0,10), v10 = top10.reduce((s,x)=>s+x.os,0);
-  $('ac-cl-kpis').innerHTML = acKpi('navy','Clientes acionados', nf0.format(gc.length), `${nf0.format(nMat)} matrículas${nCli>gc.length?` · ${nf0.format(d.filter(r=>AC_SEM_CLI.includes(r.cliente)).length)} OS sem cliente na carteira`:''}`)
-    + acKpi('water','Total de OS', nf0.format(d.length), `${(d.length/(gc.length||1)).toFixed(1).replace('.',',')} OS por cliente em média`)
-    + acKpi('navy','Top 10 clientes', pct(v10,d.length), `${nf0.format(v10)} OS concentradas nos 10 clientes mais acionados`)
-    + acKpi('water','Clientes com 1 só OS', nf0.format(gc.filter(x=>x.os===1).length), 'acionados uma única vez no período');
-  $('ac-cl-top').innerHTML = top10.map((x,i)=>{ const mats = [...new Set(x.g.map(r=>r.matricula))], ex = acAgrupa(x.g,'executivo'), pf = acAgrupa(x.g,'perfil');
-    return `<tr><td>${i+1}</td><td class="ac-wrap"><a href="#" class="ac-cli-link" data-c="${esc(x.nome)}"><b>${esc(x.nome)}</b></a><div class="ac-mats">${mats.slice(0,8).join(', ')}${mats.length>8?` +${mats.length-8}`:''}</div></td><td class="ac-wrap" style="min-width:140px">${pf.map(p=>esc(p.nome)).join(', ')}</td><td class="num">${nf0.format(mats.length)}</td><td class="ac-wrap">${ex.map(e=>`<span class="ac-tag">${esc(e.nome)} · ${e.os}</span>`).join('')}</td><td class="num"><b>${nf0.format(x.os)}</b></td><td class="num">${pct(x.os,d.length)}</td></tr>`; }).join('') || '<tr class="empty-row"><td colspan="7">Nenhum cliente.</td></tr>';
-  document.querySelectorAll('.ac-cli-link').forEach(a=>a.onclick=e=>{ e.preventDefault(); $('ac-cl-busca').value = a.dataset.c; renderAcHistCli(); $('ac-cl-hist').scrollIntoView({ behavior:'smooth', block:'start' }); });
+  const d = acDados(false), nMat = acDist(d,'matricula');
+  $('ac-cl-sub').textContent = `Por matrícula · ${acFiltroTxt()} · sem visitas em campo.`;
+  const gm = acAgrupa(d,'matricula'), top = acTopMats(d,10), v10 = top.reduce((s,x)=>s+x.os,0);
+  $('ac-cl-kpis').innerHTML = acKpi('navy','Matrículas acionadas', nf0.format(nMat), `${nf0.format(acDist(d.filter(r=>!AC_SEM_CLI.includes(r.cliente)),'cliente'))} clientes (pelo nome)`)
+    + acKpi('water','Total de OS', nf0.format(d.length), `${(d.length/(nMat||1)).toFixed(2).replace('.',',')} OS por matrícula em média`)
+    + acKpi('navy','Top 10 matrículas', pct(v10,d.length), `${nf0.format(v10)} OS concentradas nas 10 matrículas mais acionadas`)
+    + acKpi('water','Matrículas com 1 só OS', nf0.format(gm.filter(x=>x.os===1).length), `${pct(gm.filter(x=>x.os===1).length,nMat)} das matrículas acionadas`);
+  const mx = Math.max(1, ...top.map(x=>x.os));
+  $('ac-cl-top').innerHTML = top.map((x,i)=>`<div class="ac-trow"><div class="ac-rk">${i+1}</div>
+      <div class="ac-mat"><a href="#" class="ac-mat-link" data-m="${x.matricula}">${x.matricula}</a><div title="${esc(x.cliente)}">${esc(x.cliente)} · ${esc(x.perfil)}</div></div>
+      <div class="ac-track"><div class="ac-fill" style="width:${x.os/mx*100}%;background:${i%2?'#5BA7D9':'#1C7EBE'}"></div></div>
+      <div class="ac-val">${nf0.format(x.os)} OS <small>· ${x.ex.length} exec. · ${pct(x.os,d.length)}</small></div>
+      <div class="ac-det"><span>Executivos</span><div>${x.ex.map(e=>`<span class="ac-tag">${esc(e.nome)} · ${e.os}</span>`).join('')}</div>
+        <span>Motivos</span><div>${x.mot.map(m=>`<span class="ac-tag mot">${esc(m.nome)} · ${m.os}</span>`).join('')}</div></div></div>`).join('') || '<div class="faint">Nenhuma matrícula.</div>';
+  document.querySelectorAll('.ac-mat-link').forEach(a=>a.onclick=e=>{ e.preventDefault(); $('ac-cl-busca').value = a.dataset.m; renderAcHistCli(); $('ac-cl-hist').scrollIntoView({ behavior:'smooth', block:'start' }); });
   acBars($('ac-cl-perfil'), acAgrupa(d,'perfil'), d.length);
   acBars($('ac-cl-cart'), acAgrupa(d,'carteira'), d.length);
   renderAcHistCli();
@@ -5069,7 +5088,7 @@ $('ac-xls').onclick = ()=>{
   acAddAba(wb, 'Comparativo mês', resumoMes(sv));
   acAddAba(wb, 'Por executivo', acAgrupa(sv,'executivo').map(x=>({ 'Executivo':x.nome, 'Matrículas':x.mat, 'OS':x.os })));
   acAddAba(wb, 'Motivos', acAgrupa(sv,'motivo').map(x=>({ 'Motivo':x.nome, 'Matrículas':x.mat, 'OS':x.os })));
-  acAddAba(wb, 'Top 10 clientes', acAgrupa(sv,'cliente').filter(x=>!AC_SEM_CLI.includes(x.nome)).slice(0,10).map(x=>({ 'Cliente':x.nome, 'Matrículas':[...new Set(x.g.map(r=>r.matricula))].join(', '), 'Qtde matrículas':x.mat, 'Executivos':acAgrupa(x.g,'executivo').map(e=>e.nome+' ('+e.os+')').join(', '), 'OS':x.os })));
+  acAddAba(wb, 'Top 10 matrículas', acTopMats(sv,10).map((x,i)=>({ '#':i+1, 'Matrícula':+x.matricula, 'Cliente':x.cliente, 'Perfil de pagamento':x.perfil, 'OS':x.os, 'Executivos':x.ex.map(e=>e.nome+' ('+e.os+')').join(', '), 'Motivos':x.mot.map(m=>m.nome+' ('+m.os+')').join(', '), 'Meses':x.meses.map(acMesNome).join(', ') })));
   acAddAba(wb, 'Matrículas acionadas', acMatriculas(sv).map(acMatXls));
   acAddAba(wb, 'Visitas - mês', resumoMes(vi));
   acAddAba(wb, 'Visitas', vi.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(acXlsLinha));
