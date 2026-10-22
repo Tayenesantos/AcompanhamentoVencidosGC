@@ -1031,6 +1031,7 @@
     <div id="prod-loading" class="loading" style="display:none">Carregando produtividade…</div>
 
     <section class="view active" id="view-pgeral">
+      <div id="pg-fora"></div>
       <div class="prod-grid" id="pg-cards"></div>
       <div class="card"><h2>Resumo por executivo</h2><p class="sub">Realizado / meta até agora no período selecionado (quantidade). Consumo Estratégico: no mensal, analisados P1+P2 / meta do ciclo; no diário e semanal, todas as análises do dia. <span class="sup-ok" style="margin:0">✓ semana</span> = bateu a meta da semana (na visão diária conta como meta atingida no dia). Clique para abrir a visão do executivo.</p>
         <div class="tablewrap"><table><thead id="pg-res-head"></thead><tbody id="pg-res"></tbody></table></div>
@@ -3605,7 +3606,25 @@ function chartSemana(id, st){
 }
 
 function renderProdTudo(){ renderPGeral(); renderPDia(); renderPDist(); renderPHome(); }
+// executivos com acionamentos/Forms no mês que NÃO estão marcados no time (não entram no realizado)
+function renderForaDoTime(){
+  const box = $('pg-fora'); if(!box) return;
+  if(PD.visao || !(PCFG.executivos && PCFG.executivos.length)){ box.innerHTML=''; return; }
+  const setT = new Set(PCFG.executivos.map(norm)), fora = {};
+  [['acion','acionamentos'],['cons','análises do Consumo']].forEach(([k,nome])=>{ const p = periodoDe(k, k==='cons' ? consCicloDoMes(PD.mes) : PD.mes);
+    (PD.ev[k]||[]).forEach(x=>{ if(!x.e || setT.has(norm(x.e)) || x.d<p.ini || x.d>p.fim) return; const o = fora[x.e] = fora[x.e] || {}; o[nome] = (o[nome]||0) + x.q; }); });
+  const nomes = Object.keys(fora).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  box.innerHTML = nomes.length ? `<div class="callout" style="margin-bottom:14px;background:#FFF6E8;border-color:var(--amber-line)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+    <span><b>${nomes.length===1?'Executivo fora do time':'Executivos fora do time'}:</b> ${nomes.map(n=>`<b>${esc(n)}</b> (${Object.entries(fora[n]).map(([k,v])=>nf0.format(v)+' '+k).join(' · ')} em ${mesNome(PD.mes)})`).join('; ')} — não ${nomes.length===1?'está marcado':'estão marcados'} em <b>Importar e configurar › Executivos do time</b>, então não ${nomes.length===1?'entra':'entram'} no realizado nem na meta.
+    <button class="btn btn-primary btn-sm" id="pg-fora-add" style="margin-left:8px">Incluir no time</button></span></div>` : '';
+  const bt = $('pg-fora-add'); if(bt) bt.onclick = async ()=>{
+    const v = { ...PCFG, executivos:[...PCFG.executivos, ...nomes] };
+    try{ bt.disabled = true; await api('/prod_config?on_conflict=chave', { method:'POST', body:[{ chave:'geral', valor:v }], prefer:'resolution=merge-duplicates,return=minimal' });
+      toast('Incluído no time: ' + nomes.join(', ')); await carregarProd(); }
+    catch(e){ bt.disabled = false; toast('Erro ao salvar: ' + e.message, true); } };
+}
 function renderPGeral(){
+  renderForaDoTime();
   const ex = execsMeta();
   const sts = PIND.map(I=>statInd(I.k, ex));
   $('pg-cards').innerHTML = sts.map(st=>cardInd(st)).join('');
